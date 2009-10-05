@@ -1,0 +1,82 @@
+Exodriver (liblabjackusb) Library Installation Instructions
+============================================================
+
+Linux Requirements
+------------------
+
+1. GNU C compiler (gcc).
+
+2. The libusb-1.0 library.  Download it here:
+    http://sourceforge.net/projects/libusb/
+
+3. Linux kernel 2.6.28 or higher.  To use older 2.6.x kernels, you must upgrade
+your firmware.  These are the required firmware versions when using older
+2.6 kernels:
+
+   * U3 with hardware version 1.30 or higher - Firmware 1.18 and higher
+   * U3 with hardware version less than 1.30 - Only kernel 2.6.28 and higher 
+     supported.  Unsupported on older kernels.
+   * U6 - Firmware 0.81 and greater
+   * UE9 - Comm Firmware 1.49 and greater
+
+4. Uninstall any old U3 and UE9 kernel-module based drivers. The old driver
+and custom kernel modules conflict with the current liblabjackusb library. 
+See the "Uninstalling the Old U3 and UE9 Driver" section for more
+information.
+
+liblabjackusb Library Installation
+----------------------------------
+
+In the liblabjackusb/ directory, run the following commands to compile and
+install the library.
+
+    $ cd liblabjackusb/
+    $ make -f Makefile.Linux
+    $ sudo make install
+
+Programs that use the liblabjackusb will need to access the USB device bus
+at /dev/bus/usb/, typically with root permission.  On Debian based
+distributions, we provide udev rules that allow members of the "admin" group
+to access the LabJack.  To install the udev rules, run the following commands
+in the root directory of this package.
+
+    $ sudo cp 10-labjack.rules /etc/udev/rules.d
+    $ sudo udevadm control --reload-rules
+
+
+Compiling and Running the Example Programs
+------------------------------------------
+
+The example code/programs use the liblabjackusb library and the labjackusb.h
+header files in the liblabjackusb/ directory.
+
+The examples are located in the U3, U6, and UE9 subdirectories in the examples/
+directory.  To compile the programs go to your device's directory and run 
+
+    $ cd examples/U6/
+    $ make
+
+Run one of example programs like this:
+
+    $ ./u6ConfigU6
+
+Uninstalling the Old U3 and UE9 Driver
+--------------------------------------
+
+The old U3 and UE9 driver used custom kernel modules, and will conflict with
+with the current liblabjackusb library.  To uninstall the old driver please
+unload and delete the U3 and/or UE9 kernel modules, delete the liblabjackusb.so
+library and remove any scripts or udev rules you may have been using to load
+the kernel module's device nodes.  The following commands, or similar depending
+on the directories you copied files to, should help prepare your system for the
+new liblabjackusb 2.0 library:
+
+    $ rmmod labjacku3
+    $ rm labjacku3.ko /lib/modules/`uname -r`/kernel/drivers/usb/misc/labjacku3.ko
+    $ depmod -a
+    $ rm /usr/lib/liblabjackusb.so
+
+These commands remove the udev rules we provided on the forums:
+
+    $ rm /etc/udev/rules.d/10-labjack.rules
+    $ sudo udevadm control --reload-rules

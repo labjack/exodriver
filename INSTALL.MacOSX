@@ -1,0 +1,54 @@
+Exodriver (liblabjackusb) Library Installation Instructions
+============================================================
+
+Mac OS X Requirements
+---------------------
+
+1. XCode developer tools
+
+2. The libusb-1.0 library.  Download it here:
+    http://sourceforge.net/projects/libusb/
+
+3. Mac OS X 10.5 Leopard or 10.6 Snow Leopard. We haven't tested the library 
+on Tiger or Panther.
+
+4. Uninstall any MacOSX_C_NativeUSB based drivers. The old driver conflicts
+with the current liblabjackusb library. See the "Uninstalling the Old U3 and
+UE9 Driver" section for more information.
+
+liblabjackusb Library Installation
+----------------------------------
+
+In the liblabjackusb/ directory, run the following commands to compile and
+install the library.
+
+    $ cd liblabjackusb/
+    $ make -f Makefile.MacOSX
+    $ sudo make install
+
+
+Compiling and Running the Example Programs
+------------------------------------------
+
+The example code/programs use the liblabjackusb library and the labjackusb.h
+header files in the liblabjackusb/ directory.
+
+The examples are located in the U3, U6, and UE9 subdirectories in the examples/
+directory.  To compile the programs go to your device's directory and run 
+
+    $ cd examples/U6/
+    $ make
+
+Run one of example programs like this:
+
+    $ ./u6ConfigU6
+
+Uninstalling the Old U3 and UE9 Driver
+--------------------------------------
+
+The old U3 and UE9 driver used custom kernel modules, and will conflict with
+with the current liblabjackusb library.  To uninstall the old driver, delete the
+liblabjackusb.dylib:
+
+    $ sudo rm -f /usr/lib/liblabjackusb.dylib
+

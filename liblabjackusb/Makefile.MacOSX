@@ -1,0 +1,26 @@
+#
+# Makefile for liblabjackusb
+#
+#
+
+TARGET = liblabjackusb.dylib
+DESTINATION = /usr/local/lib
+# Build for multiple architectures
+#CFLAGS = -fPIC -g -Wall -arch i386 -arch x86_64 -arch ppc7400 -arch ppc64
+CFLAGS = -fPIC -g -Wall
+LIBFLAGS = -lusb-1.0 -lc
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $<
+
+all: $(TARGET)
+
+$(TARGET): labjackusb.o
+#	$(CC) -shared -Wl,-dylib_install_name,liblabjackusb.dylib -o $(TARGET) labjackusb.o $(LIBFLAGS) 
+	libtool -dynamic -o $(TARGET) labjackusb.o $(LIBFLAGS)
+
+install: $(TARGET) 
+	install $(TARGET) $(DESTINATION)
+
+clean:
+	rm -f $(TARGET) *.o *~

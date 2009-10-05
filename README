@@ -1,0 +1,65 @@
+Exodriver: Linux (kernel 2.6) and Mac OS X low-level LabJack U3, U6 and UE9 
+USB library 2.0 and C examples
+10/06/2009
+support@labjack.com
+
+This package contains the liblabjackusb 2.0 USB library for low-level U3, U6
+and UE9 USB communications and examples written in C.  The examples demonstrate
+basic open/write/read/close operations using the liblabjackusb library, and also
+demonstates the use of U3, U6 and UE9 low-level functions command/responses, 
+which are fully documented in Section 5 of the LabJack U3, U6 and UE9 User
+Guides.
+
+Refer to the INSTALL file for library requirements, and installation
+instructions. Note that the exodriver requires libusb-1.0.
+
+Command/response times for USB were tested with the Feedback function (noted
+in Section 3.1 of the LabJack U3, U6 and UE9 User Guides), and match the
+measured Windows execution times.
+
+Contents of this package:
+
+The liblabjackusb directory contains the following:
+   * The liblabjackusb library source and header files, labjackusb.c and
+     labjackusb.h, and Makefiles for Linux and Mac OS X.
+
+The examples directory contains the following:
+   * This directory contains U3, U6 and UE9 examples source files written in C
+     in their respective directory.  The examples use the labjackusb header file
+     in the liblabjackusb directory and the liblabjackusb library in the
+     /usr/local/lib directory.  The applications created from the code run in a
+     terminal.  The files u3.h/u6.h/ue9.h, and u3.c/u6.h/ue9.c contain functions
+     that open and close a USB connection, calculate checksums, get analog
+     calibration information, and more.  In addition, there are 5 "easy" 
+     functions (eAIN, eDAC, eDI, eDO, eTCConfig and eTCValues), which are
+     similar to the same named "easy" functions in the LabJackUD driver for
+     Windows.  All other files are examples that demonstrate device specific
+     low-level functions and "easy" function usage.
+
+The INSTALL file provides requirements and installation instructions for the
+liblabjackusb library, along with instructions on building the examples.
+
+
+LICENSE
+
+All exodriver library and example source code are licensed under MIT X11.
+
+   Copyright (c) 2009 LabJack Corporation <support@labjack.com>
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy
+   of this software and associated documentation files (the "Software"), to deal
+   in the Software without restriction, including without limitation the rights
+   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   copies of the Software, and to permit persons to whom the Software is
+   furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in
+   all copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+   THE SOFTWARE.
