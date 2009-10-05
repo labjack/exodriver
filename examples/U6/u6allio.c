@@ -1,8 +1,8 @@
 //Author : LabJack
 //July 8, 2009
-//This example demonstates how to write and read some or all analog I/O.
+//This example demonstrates how to write and read some or all analog I/O.
 //By default, it records the time for 1000 iterations and divides by 1000,
-//to allow measurment of the basic command/response communication times.  These
+//to allow measurement of the basic command/response communication times.  These
 //times should be comparable to the Window's command/response communication
 //times documented in Section 3.1 of the U6 User's Guide.
 
