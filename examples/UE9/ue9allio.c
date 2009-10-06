@@ -3,7 +3,7 @@
 //This example demonstrates how to write and read some or all analog and digital
 //I/O.  It records the time for 1000 iterations and divides by 1000, to allow
 //measurement of the basic command/response communication times.  These times
-//should be comparable to the Window's command/response communication times
+//should be comparable to the Windows command/response communication times
 //documented in Section 3.1 of the UE9 User's Guide.
 
 #include "ue9.h"
