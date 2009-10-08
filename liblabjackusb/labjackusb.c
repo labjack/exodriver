@@ -402,7 +402,7 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, DWORD dwReserved, ULONG ProductID)
     if(!isLibUSBInitialized) {
         r = libusb_init(NULL);
         if (r < 0) {
-            fprintf(stderr, "failed to initialise libusb\n");
+            fprintf(stderr, "failed to initialize libusb\n");
             exit(1);
         }
         isLibUSBInitialized = 1;
@@ -700,7 +700,7 @@ ULONG LJUSB_GetDevCount(ULONG ProductID)
     if(!isLibUSBInitialized) {
         r = libusb_init(NULL);
         if (r < 0) {
-            fprintf(stderr, "failed to initialise libusb\n");
+            fprintf(stderr, "failed to initialize libusb\n");
             exit(1);
         }
         isLibUSBInitialized = 1;
