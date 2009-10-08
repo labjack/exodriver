@@ -444,7 +444,7 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, DWORD dwReserved, ULONG ProductID)
                     
                     // Check the return value
                     if( r != 0 ){
-                        fprintf(stderr, "failed to detach from kernal driver. Error Number: %i", r);
+                        fprintf(stderr, "failed to detach from kernel driver. Error Number: %i", r);
                         return NULL;
                     }
                 }
