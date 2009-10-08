@@ -23,7 +23,6 @@ SRCS=$(wildcard *.c)
 HDRS=$(wildcard *.h)
 
 CFLAGS=-Wall -g
-CC=gcc $(CFLAGS)
 LDFLAGS=
 LIBS=-lm -llabjackusb
 
