@@ -50,6 +50,7 @@ typedef unsigned int DWORD;
 #define U3_PRODUCT_ID     3
 #define U6_PRODUCT_ID     6
 #define U12_PRODUCT_ID    1
+#define BRIDGE_PRODUCT_ID 0x0501
 #define UNUSED_PRODUCT_ID -1
 
 //UE9 pipes to read/write through
@@ -70,6 +71,10 @@ typedef unsigned int DWORD;
 //U12 pipes to read/write through
 #define U12_PIPE_EP1_IN    0x81
 #define U12_PIPE_EP2_OUT   2
+
+//Wireless bridge pipes to read/write through
+#define BRIDGE_PIPE_EP1_IN    0x81
+#define BRIDGE_PIPE_EP1_OUT   1
 
 #ifdef __cplusplus
 extern "C"{
