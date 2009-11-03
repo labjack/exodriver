@@ -101,7 +101,6 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, DWORD dwReserved, ULONG ProductID);
 //ProductID = The product ID of the LabJack USB device.  Currently the U3, U6,
 //            and UE9 are supported.
 
-
 ULONG LJUSB_IntRead(HANDLE hDevice, ULONG Pipe, BYTE *pBuff, ULONG Count);
 //Reads from an interrupt endpoint.  Returns the count of the number of bytes read,
 //or 0 on error (and sets errno).  If there is no response within a certain
