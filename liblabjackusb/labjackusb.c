@@ -315,6 +315,17 @@ BOOL LJUSB_isRecentKernel() {
         fprintf(stderr, "Error calling uname(2).");
         return 0;
     }
+
+    // There are no known kernel-compatibility problems with Mac OS X.
+    if (DEBUG) {
+        fprintf(stderr, "LJUSB_recentKernel: sysname: %s.\n", u.sysname);
+    }
+
+    if (strncmp("Darwin", u.sysname, strlen()) == 0) {
+        fprintf(stderr, "LJUSB_recentKernel: returning true on Darwin machine");
+        return 1;
+    }
+
     if (DEBUG) {
         fprintf(stderr, "LJUSB_recentKernel: Kernel release: %s.\n", u.release);
     }
