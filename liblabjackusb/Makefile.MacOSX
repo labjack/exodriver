@@ -6,6 +6,8 @@
 TARGET = liblabjackusb.dylib
 VERSION = 2.0.1
 DESTINATION = /usr/local/lib
+HEADER = labjackusb.h
+HEADER_DESTINATION = /usr/local/include
 # Build for multiple architectures
 #CFLAGS = -fPIC -g -Wall -arch i386 -arch x86_64 -arch ppc7400 -arch ppc64
 CFLAGS = -fPIC -g -Wall
@@ -22,6 +24,7 @@ $(TARGET): labjackusb.o
 
 install: $(TARGET) 
 	install $(TARGET) $(DESTINATION)
+	install $(HEADER) $(HEADER_DESTINATION)
 
 clean:
 	rm -f $(TARGET) *.o *~
