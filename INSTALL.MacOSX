@@ -24,7 +24,7 @@ install the library.
 
     $ cd liblabjackusb/
     $ make -f Makefile.MacOSX
-    $ sudo make install
+    $ sudo make -f Makefile.MacOSX install
 
 
 Compiling and Running the Example Programs

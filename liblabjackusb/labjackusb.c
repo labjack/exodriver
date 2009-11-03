@@ -372,8 +372,6 @@ BOOL LJUSB_isMinFirmware(HANDLE hDevice, ULONG ProductID)
             break;
         case U12_PRODUCT_ID: //Add U12 stuff Mike F.
             return 1;
-        case BRIDGE_PRODUCT_ID: //Add U12 stuff Mike F.
-            return 1;
         default:
             fprintf(stderr, "Firmware check not supported for product ID %ld\n", ProductID);
             return 0;
@@ -493,7 +491,7 @@ unsigned char LJUSB_endpoint(UINT productId, ULONG Pipe) {
         fprintf(stderr, "LJUSB_endpoint: productId = %d, Pipe = %ld\n", productId, Pipe);
     }
     // Set write endpoint address
-    if (Pipe == UE9_PIPE_EP1_OUT || Pipe == U3_PIPE_EP1_OUT || Pipe == U6_PIPE_EP1_OUT || Pipe == BRIDGE_PIPE_EP1_OUT) {
+    if (Pipe == UE9_PIPE_EP1_OUT || Pipe == U3_PIPE_EP1_OUT || Pipe == U6_PIPE_EP1_OUT ) {
         return 1;
     }
 
@@ -541,14 +539,6 @@ unsigned char LJUSB_endpoint(UINT productId, ULONG Pipe) {
             //Endpoint stuf for U12
             if(Pipe == U12_PIPE_EP1_IN){
                 return U12_PIPE_EP1_IN;
-            } else {
-                errno = EINVAL;
-                return 0;
-            }
-        case BRIDGE_PRODUCT_ID:
-            //Endpoint stuf for U12
-            if(Pipe == BRIDGE_PIPE_EP1_IN){
-                return BRIDGE_PIPE_EP1_IN;
             } else {
                 errno = EINVAL;
                 return 0;
