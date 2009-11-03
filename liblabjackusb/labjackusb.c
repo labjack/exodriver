@@ -42,7 +42,7 @@
 #define MIN_U6_FIRMWARE_MAJOR   0
 #define MIN_U6_FIRMWARE_MINOR   81
 
-#define DEBUG 1
+#define DEBUG 0
 
 BOOL isLibUSBInitialized = 0;
 
