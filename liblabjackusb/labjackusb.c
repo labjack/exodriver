@@ -322,7 +322,9 @@ BOOL LJUSB_isRecentKernel() {
     }
 
     if (strncmp("Darwin", u.sysname, strlen("Darwin")) == 0) {
-        fprintf(stderr, "LJUSB_recentKernel: returning true on Darwin machine");
+        if (DEBUG) {
+            fprintf(stderr, "LJUSB_recentKernel: returning true on Darwin.");
+        }
         return 1;
     }
 
