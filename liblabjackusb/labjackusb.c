@@ -754,6 +754,13 @@ BOOL LJUSB_IsHandleValid(HANDLE hDevice) {
     int config = 0;
     int r = 1;
 
+    if (hDevice == NULL) {
+        if (DEBUG) {
+            fprintf(stderr, "LJUSB_IsHandleValid: returning 0. hDevice is NULL.\n");
+        }
+        return 0;
+    }
+
     // If we can call get configuration without getting an error,
     // the handle is still valid.
     r = libusb_get_configuration(hDevice, &config);
