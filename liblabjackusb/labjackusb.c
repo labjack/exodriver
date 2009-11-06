@@ -323,7 +323,7 @@ BOOL LJUSB_isRecentKernel() {
 
     if (strncmp("Darwin", u.sysname, strlen("Darwin")) == 0) {
         if (DEBUG) {
-            fprintf(stderr, "LJUSB_recentKernel: returning true on Darwin.");
+            fprintf(stderr, "LJUSB_recentKernel: returning true on Darwin.\n");
         }
         return 1;
     }
@@ -421,7 +421,9 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, DWORD dwReserved, ULONG ProductID)
 
     cnt = libusb_get_device_list(NULL, &devs);
     if (cnt < 0) {
-        fprintf(stderr, "failed to get device list\n");
+        if (DEBUG) {
+            fprintf(stderr, "LJUSB_OpenDevice: failed to get device list\n");
+        }
         exit(1);
         libusb_exit(NULL);
         return NULL;
@@ -450,7 +452,7 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, DWORD dwReserved, ULONG ProductID)
                         fprintf(stderr, "Kernel Driver was active, detaching...\n");
                     }
                     
-                    // Detaches U12's and Bridges from kernel driver.
+                    // Detaches U12s from kernel driver.
                     r = libusb_detach_kernel_driver(devh, 0);
                     
                     // Check the return value
@@ -738,6 +740,25 @@ ULONG LJUSB_GetDevCount(ULONG ProductID)
     return ljFoundCount;
 }
 
+BOOL LJUSB_IsHandleValid(HANDLE hDevice) {
+    int config = 0;
+    int r = 1;
+
+    // If we can call get configuration without getting an error,
+    // the handle is still valid.
+    r = libusb_get_configuration(hDevice, &config);
+    if (r < 0) {
+        if (DEBUG) {
+            fprintf(stderr, "LJUSB_IsHandleValid: returning 0. Return value from libusb_get_configuration was: %d\n", r);
+        }
+        return 0;
+    } else {
+        if (DEBUG) {
+            fprintf(stderr, "LJUSB_IsHandleValid: returning 1.\n");
+        }
+        return 1;
+    }
+}
 
 //not supported
 BOOL LJUSB_AbortPipe(HANDLE hDevice, ULONG Pipe)

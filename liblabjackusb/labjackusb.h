@@ -137,6 +137,9 @@ ULONG LJUSB_BulkWrite(HANDLE hDevice, ULONG Pipe, BYTE *pBuff, ULONG Count);
 void LJUSB_CloseDevice(HANDLE hDevice);
 //Closes the handle of a LabJack USB device.
 
+BOOL LJUSB_IsHandleValid(HANDLE hDevice);
+//Returns true if the handle is valid; this is, it is still connected to a
+//device on the system.
 
 BOOL LJUSB_AbortPipe(HANDLE hDevice, ULONG Pipe);
 //Not supported under Linux and will return false (0).
