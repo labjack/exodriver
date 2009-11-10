@@ -1,10 +1,10 @@
 SUBSYSTEM!="usb_device", ACTION!="add", GOTO="labjack_rules_end"
 
 # U3
-SYSFS{idVendor}=="0cd5", SYSFS{idProduct}=="0003", GROUP="admin"
+SYSFS{idVendor}=="0cd5", SYSFS{idProduct}=="0003", GROUP="adm"
 # U6
-SYSFS{idVendor}=="0cd5", SYSFS{idProduct}=="0006", GROUP="admin"
+SYSFS{idVendor}=="0cd5", SYSFS{idProduct}=="0006", GROUP="adm"
 # UE9
-SYSFS{idVendor}=="0cd5", SYSFS{idProduct}=="0009", GROUP="admin"
+SYSFS{idVendor}=="0cd5", SYSFS{idProduct}=="0009", GROUP="adm"
 
 LABEL="labjack_rules_end"

@@ -35,14 +35,31 @@ install the library.
     $ sudo make install
 
 Programs that use the liblabjackusb will need to access the USB device bus
-at /dev/bus/usb/, typically with root permission.  On Debian based
-distributions, we provide udev rules that allow members of the "admin" group
+at /dev/bus/usb/, typically with root permission.  On Debian-based
+distributions, we provide udev rules that allow members of the "adm" group
 to access the LabJack.  To install the udev rules, run the following commands
 in the root directory of this package.
 
     $ sudo cp 10-labjack.rules /etc/udev/rules.d
     $ sudo udevadm control --reload-rules
 
+On Debian-based distributions, the above two commands are sufficient. If
+your distribution does not have udevadm, restart udev or restart your
+computer. On a Fedora machine run:
+
+    $ sudo /etc/init.d/udev-post reload
+
+Also be sure to add yourself to the "adm" group. Type:
+
+    $ groups
+
+to list what groups you are a member of. Add yourself to the adm group by
+running:
+
+    $ sudo usermod -a -G amd USERNAME
+
+Log out and log back in for the new group to take effect. Re-run "groups" to
+double check.
 
 Compiling and Running the Example Programs
 ------------------------------------------
