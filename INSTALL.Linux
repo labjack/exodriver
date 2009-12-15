@@ -56,7 +56,7 @@ Also be sure to add yourself to the "adm" group. Type:
 to list what groups you are a member of. Add yourself to the adm group by
 running:
 
-    $ sudo usermod -a -G amd USERNAME
+    $ sudo usermod -a -G adm USERNAME
 
 Log out and log back in for the new group to take effect. Re-run "groups" to
 double check.
