@@ -216,35 +216,36 @@ int LJUSB_libusbError(int r) {
         return 0;
         break;
     case LIBUSB_ERROR_TIMEOUT:
-        fprintf(stderr, "Timed out\n");
+        fprintf(stderr, "libusb error: LIBUSB_ERROR_TIMEOUT\n");
         break;
     case LIBUSB_ERROR_PIPE:
-        fprintf(stderr, "Endpoint halted\n");
+        fprintf(stderr, "libusb error: LIBUSB_ERROR_PIPE\n");
         break;
     case LIBUSB_ERROR_OVERFLOW:
-        fprintf(stderr, "The device offered more data\n");
+        fprintf(stderr, "libusb error: LIBUSB_ERROR_OVERFLOW\n");
         break;
     case LIBUSB_ERROR_NO_DEVICE:
-        fprintf(stderr, "The device has been disconnected\n");
+        fprintf(stderr, "libusb error: LIBUSB_ERROR_NO_DEVICE\n");
         break;
     case LIBUSB_ERROR_IO:
-        fprintf(stderr, "Input/output error\n");
+        fprintf(stderr, "libusb error: LIBUSB_ERROR_IO\n");
         break;
     case LIBUSB_ERROR_INVALID_PARAM:
-        fprintf(stderr, "Invalid parameter\n");
+        fprintf(stderr, "libusb error: LIBUSB_ERROR_INVALID_PARAM\n");
         break;
     case LIBUSB_ERROR_ACCESS:
-        fprintf(stderr, "Access Denied\n");
+        fprintf(stderr, "libusb error: LIBUSB_ERROR_ACCESS\n");
         break;
     case LIBUSB_ERROR_BUSY:
-        fprintf(stderr, "Resource busy\n");
+        fprintf(stderr, "libusb error: LIBUSB_ERROR_BUSY\n");
         errno = EBUSY;
         break;
     case LIBUSB_ERROR_INTERRUPTED:
-        fprintf(stderr, "System call interupted\n");
+        fprintf(stderr, "libusb error: LIBUSB_ERROR_INTERRUPTED\n");
         break;
     case LIBUSB_ERROR_OTHER:
-        fprintf(stderr, "Other error\n");
+        fprintf(stderr, "libusb error: LIBUSB_ERROR_OTHER\n");
+        printf("errno: %d.\n", errno);
         break;
     default:
         fprintf(stderr, "Unexpected error code: %d.\n", r);
