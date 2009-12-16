@@ -432,6 +432,9 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, DWORD dwReserved, ULONG ProductID)
     }
 
     while ((dev = devs[i++]) != NULL) {
+        if (DEBUG) {
+            fprintf(stderr, "LJUSB_OpenDevice: calling libusb_get_device_descriptor\n");
+        }
         r = libusb_get_device_descriptor(dev, &desc);
         if (r < 0) {
             libusb_exit(NULL);
@@ -673,6 +676,7 @@ ULONG LJUSB_BulkWrite(HANDLE hDevice, ULONG Pipe, BYTE *pBuff, ULONG Count)
     int r = -1;
     int transferred = 0;
     unsigned char endpoint;
+    int i = 0;
 
     if(LJUSB_isNullHandle(hDevice))
         return 0;
@@ -680,6 +684,10 @@ ULONG LJUSB_BulkWrite(HANDLE hDevice, ULONG Pipe, BYTE *pBuff, ULONG Count)
     endpoint = LJUSB_endpoint(UNUSED_PRODUCT_ID, Pipe);
     if (DEBUG) {
         fprintf(stderr, "LJUSB_BulkWrite: endpoint = 0x%x\n", endpoint);
+        fprintf(stderr, "LJUSB_BulkWrite: Count = %lu\n", Count);
+        for (i = 0; i < Count; i++) {
+            fprintf(stderr, "LJUSB_BulkWrite: pBuff[%d] = 0x%x\n", i, pBuff[i]);
+        }
     }
     if (0 == endpoint) {
         errno = EINVAL;
@@ -690,11 +698,18 @@ ULONG LJUSB_BulkWrite(HANDLE hDevice, ULONG Pipe, BYTE *pBuff, ULONG Count)
     if (r != 0) {
         return LJUSB_handleBulkTranferError(r);
     }
+    if (DEBUG) {
+        fprintf(stderr, "LJUSB_BulkWrite: returning transferred = %d\n", transferred);
+    }
     return transferred;
 }
 
 void LJUSB_CloseDevice(HANDLE hDevice)
 {
+    if (DEBUG) {
+        fprintf(stderr, "LJUSB_CloseDevice\n");
+    }
+
     if(LJUSB_isNullHandle(hDevice))
         return;
 
@@ -703,6 +718,9 @@ void LJUSB_CloseDevice(HANDLE hDevice)
 
     //Close
     libusb_close(hDevice);
+    if (DEBUG) {
+        fprintf(stderr, "LJUSB_CloseDevice: closed\n");
+    }
 }
 
 
