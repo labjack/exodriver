@@ -12,6 +12,7 @@
 #include "labjackusb.h"
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -42,9 +43,11 @@
 #define MIN_U6_FIRMWARE_MAJOR   0
 #define MIN_U6_FIRMWARE_MINOR   81
 
-#define DEBUG 0
+#define DEBUG true
 
-BOOL isLibUSBInitialized = 0;
+bool isLibUSBInitialized = false;
+
+enum LJUSB_TRANSFER_OPERATION { LJUSB_WRITE, LJUSB_READ, LJUSB_STREAM };
 
 struct LJUSB_FirmwareHardwareVersion {
     unsigned char firmwareMajor;
@@ -386,7 +389,7 @@ BOOL LJUSB_isMinFirmware(HANDLE hDevice, ULONG ProductID)
             break;
         case U12_PRODUCT_ID: //Add U12 stuff Mike F.
             return 1;
-        case BRIDGE_PRODUCT_ID: //Add U12 stuff Mike F.
+        case BRIDGE_PRODUCT_ID: //Add Wireless bridge stuff Mike F.
             return 1;
         default:
             fprintf(stderr, "Firmware check not supported for product ID %ld\n", ProductID);
@@ -419,7 +422,7 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, DWORD dwReserved, ULONG ProductID)
             fprintf(stderr, "failed to initialize libusb\n");
             exit(1);
         }
-        isLibUSBInitialized = 1;
+        isLibUSBInitialized = true;
     }
 
     cnt = libusb_get_device_list(NULL, &devs);
@@ -507,202 +510,180 @@ int LJUSB_handleBulkTranferError(int r)
     return err;
 }
 
-unsigned char LJUSB_endpoint(UINT productId, ULONG Pipe) {
+ULONG LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, ULONG count, bool isBulk) {
+    int r;
+    int transferred;
+
     if (DEBUG) {
-        fprintf(stderr, "LJUSB_endpoint: productId = %d, Pipe = %ld\n", productId, Pipe);
-    }
-    // Set write endpoint address
-    if (Pipe == UE9_PIPE_EP1_OUT || Pipe == U3_PIPE_EP1_OUT || Pipe == U6_PIPE_EP1_OUT || Pipe == BRIDGE_PIPE_EP1_OUT) {
-        return 1;
+        fprintf(stderr, "Calling LJUSB_DoTransfer with endpoint = 0x%x, count = %lu, and isBulk = %d.\n", endpoint, count, isBulk);
     }
 
-    //Check for U12 endpoint
-    if (Pipe == U12_PIPE_EP2_OUT && productId == 12) {
-        return U12_PIPE_EP2_OUT;
+    if(LJUSB_isNullHandle(hDevice))
+        return -1;
+
+    if(isBulk){
+        r = libusb_interrupt_transfer(hDevice, endpoint, pBuff, count, &transferred, LJ_LIBUSB_TIMEOUT);
+    }
+    else {
+        r = libusb_interrupt_transfer(hDevice, endpoint, pBuff, count, &transferred, LJ_LIBUSB_TIMEOUT);
     }
 
-    // The input endpoint address is product-specific
-    switch(productId) {
-        case UE9_PRODUCT_ID:
-            //Checking endpoint pipe and setting the appropriate endpoint address for the UE9
-            if(Pipe == UE9_PIPE_EP1_IN) {
-                return 0x81;
-            } else if(Pipe == UE9_PIPE_EP2_IN) {
-                return 0x82;
-            } else {
-                errno = EINVAL; 
-                return 0;
-            }
-            break;
-        case U3_PRODUCT_ID:
-            //Checking endpoint pipe and setting the appropriate endpoint address for the U3
-            if(Pipe == U3_PIPE_EP2_IN) {
-                return 0x82;
-            } else if(Pipe == U3_PIPE_EP3_IN) {
-                return 0x83;
-            } else {
-                errno = EINVAL;
-                return 0;
-            }
-            break;
-        case U6_PRODUCT_ID:
-            //Checking endpoint pipe and setting the appropriate endpoint address for the U6
-            if(Pipe == U6_PIPE_EP2_IN) {
-                return 0x82;
-            } else if(Pipe == U6_PIPE_EP3_IN) {
-                return 0x83;
-            } else {
-                errno = EINVAL;
-                return 0;
-            }
-            break;
-        case U12_PRODUCT_ID:
-            //Endpoint stuf for U12
-            if(Pipe == U12_PIPE_EP1_IN){
-                return U12_PIPE_EP1_IN;
-            } else {
-                errno = EINVAL;
-                return 0;
-            }
-        case BRIDGE_PRODUCT_ID:
-            //Endpoint stuf for U12
-            if(Pipe == BRIDGE_PIPE_EP1_IN){
-                return BRIDGE_PIPE_EP1_IN;
-            } else {
-                errno = EINVAL;
-                return 0;
-            }
-        default:
-            if (DEBUG) {
-                fprintf(stderr, "LJUSB_endpoint: in default branch.\n");
-            }
-            errno = EINVAL;
-            return 0;
-            break;
+    if (r != 0) {
+        return LJUSB_handleBulkTranferError(r);
     }
+
+    if (DEBUG) {
+        fprintf(stderr, "LJUSB_DoTransfer: returning transferred = %d.\n", transferred);
+    }
+
+    return transferred;
 }
 
-ULONG LJUSB_IntRead(HANDLE hDevice, ULONG Pipe, BYTE *pBuff, ULONG Count)
-{
-    int r = 1;
+// Automatically uses the correct endpoint and transfer method (bulk or interrupt)
+ULONG LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, ULONG count, enum LJUSB_TRANSFER_OPERATION operation) {
     unsigned char endpoint;
-    int transferred;
+    bool isBulk;
+    int r;
+    
+    if (DEBUG) {
+        fprintf(stderr, "Calling LJUSB_SetupTransfer with count = %lu and operation = %d.\n", count, operation);
+    }
+    
     libusb_device *dev;
     struct libusb_device_descriptor desc;
 
-    if(LJUSB_isNullHandle(hDevice))
-        return 0;
-
-    //First determining the device from handle.
+    //First determine the device from handle.
     dev = libusb_get_device(hDevice);
     r = libusb_get_device_descriptor(dev, &desc);
-
-    endpoint = LJUSB_endpoint(desc.idProduct, Pipe);
-    if (DEBUG) {
-        fprintf(stderr, "LJUSB_IntRead: endpoint = 0x%x\n", endpoint);
+    
+    if (r < 0){
+        LJUSB_libusbError(r);
+        return r;
     }
-    if (0 == endpoint) {
-        errno = EINVAL;
-        return 0;
-    }
-
-    r = libusb_interrupt_transfer(hDevice, endpoint, pBuff, Count, &transferred, LJ_LIBUSB_TIMEOUT);
-    if (r != 0) {
-        return LJUSB_handleBulkTranferError(r);
-    }
-
-    return transferred;
-}
-
-ULONG LJUSB_IntWrite(HANDLE hDevice, ULONG Pipe, BYTE *pBuff, ULONG Count)
-{
-    int r = -1;
-    int transferred = 0;
-    unsigned char endpoint;
-
-    if(LJUSB_isNullHandle(hDevice))
-        return 0;
-
-    endpoint = LJUSB_endpoint(UNUSED_PRODUCT_ID, Pipe);
-    if (DEBUG) {
-        fprintf(stderr, "LJUSB_IntWrite: endpoint = 0x%x\n", endpoint);
-    }
-    if (0 == endpoint) {
-        errno = EINVAL;
-        return 0;
-    }
-
-    r = libusb_interrupt_transfer(hDevice, endpoint, pBuff, Count, &transferred, LJ_LIBUSB_TIMEOUT);
-    if (r != 0) {
-        return LJUSB_handleBulkTranferError(r);
-    }
-    return transferred;
-}
-
-ULONG LJUSB_BulkRead(HANDLE hDevice, ULONG Pipe, BYTE *pBuff, ULONG Count)
-{
-    int r = 1;
-    unsigned char endpoint;
-    int transferred;
-    libusb_device *dev;
-    struct libusb_device_descriptor desc;
-
-    if(LJUSB_isNullHandle(hDevice))
-        return 0;
-
-    //First determining the device from handle.
-    dev = libusb_get_device(hDevice);
-    r = libusb_get_device_descriptor(dev, &desc);
-
-    endpoint = LJUSB_endpoint(desc.idProduct, Pipe);
-    if (DEBUG) {
-        fprintf(stderr, "LJUSB_BulkRead: endpoint = 0x%x\n", endpoint);
-    }
-    if (0 == endpoint) {
-        errno = EINVAL;
-        return 0;
-    }
-
-    r = libusb_bulk_transfer(hDevice, endpoint, pBuff, Count, &transferred, LJ_LIBUSB_TIMEOUT);
-    if (r != 0) {
-        return LJUSB_handleBulkTranferError(r);
-    }
-
-    return transferred;
-}
-
-
-ULONG LJUSB_BulkWrite(HANDLE hDevice, ULONG Pipe, BYTE *pBuff, ULONG Count)
-{
-    int r = -1;
-    int transferred = 0;
-    unsigned char endpoint;
-    int i = 0;
-
-    if(LJUSB_isNullHandle(hDevice))
-        return 0;
-
-    endpoint = LJUSB_endpoint(UNUSED_PRODUCT_ID, Pipe);
-    if (DEBUG) {
-        fprintf(stderr, "LJUSB_BulkWrite: endpoint = 0x%x\n", endpoint);
-        fprintf(stderr, "LJUSB_BulkWrite: Count = %lu\n", Count);
-        for (i = 0; i < Count; i++) {
-            fprintf(stderr, "LJUSB_BulkWrite: pBuff[%d] = 0x%x\n", i, pBuff[i]);
+    
+    
+    switch(desc.idProduct) {
+    
+      /* These devices use bulk transfers */
+      case UE9_PRODUCT_ID:
+        isBulk = true;
+        switch(operation) {
+          case LJUSB_WRITE:
+            endpoint = UE9_PIPE_EP1_OUT;
+            break;
+          case LJUSB_READ:
+            endpoint = UE9_PIPE_EP1_IN;
+            break;
+          case LJUSB_STREAM:
+            endpoint = UE9_PIPE_EP2_IN;
+            break;
         }
-    }
-    if (0 == endpoint) {
-        errno = EINVAL;
-        return 0;
-    }
+        break;
+      case U3_PRODUCT_ID:
+        isBulk = true;
+        switch(operation) {
+          case LJUSB_WRITE:
+            endpoint = U3_PIPE_EP1_OUT;
+            break;
+          case LJUSB_READ:
+            endpoint = U3_PIPE_EP2_IN;
+            break;
+          case LJUSB_STREAM:
+            endpoint = U3_PIPE_EP3_IN;
+            break;
+        }
+        break;
+      case U6_PRODUCT_ID:
+        isBulk = true;
+        switch(operation) {
+          case LJUSB_WRITE:
+            endpoint = U6_PIPE_EP1_OUT;
+            break;
+          case LJUSB_READ:
+            endpoint = U6_PIPE_EP2_IN;
+            break;
+          case LJUSB_STREAM:
+            endpoint = U6_PIPE_EP3_IN;
+            break;
+        }
+        break;
 
-    r = libusb_bulk_transfer(hDevice, endpoint, pBuff, Count, &transferred, LJ_LIBUSB_TIMEOUT);
-    if (r != 0) {
-        return LJUSB_handleBulkTranferError(r);
+      /* These devices use interrupt transfers */
+      case U12_PRODUCT_ID:
+        isBulk = false;
+        switch(operation) {
+          case LJUSB_READ:
+            endpoint = U12_PIPE_EP1_IN;
+            break;
+          case LJUSB_WRITE:
+            endpoint = U12_PIPE_EP2_OUT;
+            break;
+          case LJUSB_STREAM:
+            // U12 has no streaming interface
+            errno = EINVAL;
+            return -1;
+        }
+        break;
+      case BRIDGE_PRODUCT_ID:
+        isBulk = false;
+        switch(operation) {
+          case LJUSB_READ:
+            endpoint = BRIDGE_PIPE_EP1_IN;
+            break;
+          case LJUSB_WRITE:
+            endpoint = BRIDGE_PIPE_EP1_OUT;
+            break;
+          case LJUSB_STREAM:
+            // SkyMote has no streaming interface
+            errno = EINVAL;
+            return -1;
+        }
+        break;
+    
+      default:
+        // Error, not a labjack device
+        errno = EINVAL;
+        return -1;
     }
+    
+    
+    
+    return LJUSB_DoTransfer(hDevice, endpoint, pBuff, count, isBulk);
+    
+}
+
+// Deprecated: Kept for backwards compatibility
+ULONG LJUSB_BulkRead(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, ULONG count)
+{
+    return LJUSB_DoTransfer(hDevice, endpoint, pBuff, count, true);
+}
+
+// Deprecated: Kept for backwards compatibility
+ULONG LJUSB_BulkWrite(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, ULONG count)
+{
+    return LJUSB_DoTransfer(hDevice, endpoint, pBuff, count, true);
+}
+
+
+ULONG LJUSB_Write(HANDLE hDevice, BYTE *pBuff, ULONG count) {
     if (DEBUG) {
-        fprintf(stderr, "LJUSB_BulkWrite: returning transferred = %d\n", transferred);
+        fprintf(stderr, "LJUSB_Write: calling LJUSB_Write.\n");
     }
-    return transferred;
+    return LJUSB_SetupTransfer(hDevice, pBuff, count, LJUSB_WRITE);
+}
+
+ULONG LJUSB_Read(HANDLE hDevice, BYTE *pBuff, ULONG count) {
+    if (DEBUG) {
+        fprintf(stderr, "LJUSB_Read: calling LJUSB_Read.\n");
+    }
+    return LJUSB_SetupTransfer(hDevice, pBuff, count, LJUSB_READ);
+}
+
+ULONG LJUSB_Stream(HANDLE hDevice, BYTE *pBuff, ULONG count) {
+    if (DEBUG) {
+        fprintf(stderr, "LJUSB_Stream: calling LJUSB_Stream.\n");
+    }
+    return LJUSB_SetupTransfer(hDevice, pBuff, count, LJUSB_STREAM);
 }
 
 void LJUSB_CloseDevice(HANDLE hDevice)
@@ -737,7 +718,7 @@ ULONG LJUSB_GetDevCount(ULONG ProductID)
             fprintf(stderr, "failed to initialize libusb\n");
             exit(1);
         }
-        isLibUSBInitialized = 1;
+        isLibUSBInitialized = true;
     }
 
     cnt = libusb_get_device_list(NULL, &devs);

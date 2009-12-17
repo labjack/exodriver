@@ -55,18 +55,18 @@ typedef unsigned int DWORD;
 
 //UE9 pipes to read/write through
 #define UE9_PIPE_EP1_OUT  1
-#define UE9_PIPE_EP1_IN   2
-#define UE9_PIPE_EP2_IN   4 //Stream Endpoint
+#define UE9_PIPE_EP1_IN   0x81
+#define UE9_PIPE_EP2_IN   0x82 //Stream Endpoint
 
 //U3 pipes to read/write through
 #define U3_PIPE_EP1_OUT   1
-#define U3_PIPE_EP2_IN    2
-#define U3_PIPE_EP3_IN    4  //Stream Endpoint
+#define U3_PIPE_EP2_IN    0x82
+#define U3_PIPE_EP3_IN    0x83  //Stream Endpoint
 
 //U6 pipes to read/write through
 #define U6_PIPE_EP1_OUT   1
-#define U6_PIPE_EP2_IN    2
-#define U6_PIPE_EP3_IN    4 //Stream Endpoint
+#define U6_PIPE_EP2_IN    0x82
+#define U6_PIPE_EP3_IN    0x83 //Stream Endpoint
 
 //U12 pipes to read/write through
 #define U12_PIPE_EP1_IN    0x81
@@ -101,41 +101,27 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, DWORD dwReserved, ULONG ProductID);
 //ProductID = The product ID of the LabJack USB device.  Currently the U3, U6,
 //            and UE9 are supported.
 
-ULONG LJUSB_IntRead(HANDLE hDevice, ULONG Pipe, BYTE *pBuff, ULONG Count);
-//Reads from an interrupt endpoint.  Returns the count of the number of bytes read,
-//or 0 on error (and sets errno).  If there is no response within a certain
-//amount of time (LJ_LIBUSB_TIMEOUT in labjackusb.c), the read will timeout.
-//hDevice = Handle of the LabJack USB device.
-//Pipe = The pipe you want to read your data through (xxx_PIPE_xxx_IN).
-//*pBuff = Pointer a buffer that will be read from the device.
-//Count = The size of the buffer to be read from the device.
+ULONG LJUSB_Write(HANDLE hDevice, BYTE *pBuff, ULONG count);
+// Writes to a device. Returns the number of bytes written, or -1 on error.
+// hDevice = The handle for your device
+// pBuff = The buffer to be written to the device.
+// count = The number of bytes to write.
+// This function replaces the deprecated LJUSB_BulkWrite, which required the endpoint
 
-ULONG LJUSB_IntWrite(HANDLE hDevice, ULONG Pipe, BYTE *pBuff, ULONG Count);
-//Writes to an interrupt endpoint.  Returns the count of the number of bytes wrote,
-//or 0 on error and sets errno.
-//hDevice = Handle of the LabJack USB device.
-//Pipe = The pipe you want to write your data through (xxx_PIPE_xxx_OUT).
-//*pBuff = Pointer to the buffer that will be written to the device.
-//Count = The size of the buffer to be written to the device.
+ULONG LJUSB_Read(HANDLE hDevice, BYTE *pBuff, ULONG count);
+// Reads from a device. Returns the number of bytes read, or -1 on error.
+// hDevice = The handle for your device
+// pBuff = The buffer to filled in with bytes from the device.
+// count = The number of bytes expected to be read.
+// This function replaces the deprecated LJUSB_BulkRead, which required the endpoint
 
-
-ULONG LJUSB_BulkRead(HANDLE hDevice, ULONG Pipe, BYTE *pBuff, ULONG Count);
-//Reads from a bulk endpoint.  Returns the count of the number of bytes read,
-//or 0 on error (and sets errno).  If there is no response within a certain
-//amount of time (LJ_LIBUSB_TIMEOUT in labjackusb.c), the read will timeout.
-//hDevice = Handle of the LabJack USB device.
-//Pipe = The pipe you want to read your data through (xxx_PIPE_xxx_IN).
-//*pBuff = Pointer a buffer that will be read from the device.
-//Count = The size of the buffer to be read from the device.
-
-
-ULONG LJUSB_BulkWrite(HANDLE hDevice, ULONG Pipe, BYTE *pBuff, ULONG Count);
-//Writes to a bulk endpoint.  Returns the count of the number of bytes wrote,
-//or 0 on error and sets errno.
-//hDevice = Handle of the LabJack USB device.
-//Pipe = The pipe you want to write your data through (xxx_PIPE_xxx_OUT).
-//*pBuff = Pointer to the buffer that will be written to the device.
-//Count = The size of the buffer to be written to the device.
+ULONG LJUSB_Stream(HANDLE hDevice, BYTE *pBuff, ULONG count);
+// Reads from a device's stream interface. 
+// Returns the number of bytes read, or -1 on error.
+// hDevice = The handle for your device
+// pBuff = The buffer to filled in with bytes from the device.
+// count = The number of bytes expected to be read.
+// This function replaces the deprecated LJUSB_BulkRead, which required the (stream) endpoint
 
 
 void LJUSB_CloseDevice(HANDLE hDevice);
@@ -150,6 +136,26 @@ BOOL LJUSB_AbortPipe(HANDLE hDevice, ULONG Pipe);
 //Pipes will timeout after LJ_LIBUSB_TIMEOUT, which is set by default to 1 second.
 
 //Note:  For all function errors, use errno to retrieve system error numbers.
+
+/* --------------- DEPRECATED Functions --------------- */
+
+ULONG LJUSB_BulkRead(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, ULONG count);
+//Reads from a bulk endpoint.  Returns the count of the number of bytes read,
+//or 0 on error (and sets errno).  If there is no response within a certain
+//amount of time (LJ_LIBUSB_TIMEOUT in labjackusb.c), the read will timeout.
+//hDevice = Handle of the LabJack USB device.
+//endpoint = The pipe you want to read your data through (xxx_PIPE_xxx_IN).
+//*pBuff = Pointer a buffer that will be read from the device.
+//count = The size of the buffer to be read from the device.
+
+
+ULONG LJUSB_BulkWrite(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, ULONG count);
+//Writes to a bulk endpoint.  Returns the count of the number of bytes wrote,
+//or 0 on error and sets errno.
+//hDevice = Handle of the LabJack USB device.
+//endpoint = The pipe you want to write your data through (xxx_PIPE_xxx_OUT).
+//*pBuff = Pointer to the buffer that will be written to the device.
+//count = The size of the buffer to be written to the device.
 
 #ifdef __cplusplus
 }
