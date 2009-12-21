@@ -522,7 +522,7 @@ ULONG LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, ULON
         return -1;
 
     if(isBulk){
-        r = libusb_interrupt_transfer(hDevice, endpoint, pBuff, count, &transferred, LJ_LIBUSB_TIMEOUT);
+        r = libusb_bulk_transfer(hDevice, endpoint, pBuff, count, &transferred, LJ_LIBUSB_TIMEOUT);
     }
     else {
         r = libusb_interrupt_transfer(hDevice, endpoint, pBuff, count, &transferred, LJ_LIBUSB_TIMEOUT);
