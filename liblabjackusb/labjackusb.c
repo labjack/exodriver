@@ -56,9 +56,9 @@ struct LJUSB_FirmwareHardwareVersion {
     unsigned char hardwareMinor;
 };
 
-void LJUSB_U3_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_FirmwareHardwareVersion * fhv) {
+static void LJUSB_U3_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_FirmwareHardwareVersion * fhv) {
     int i = 0, r;
-    ULONG epOut = U3_PIPE_EP1_OUT, epIn = U3_PIPE_EP2_IN;
+    unsigned long epOut = U3_PIPE_EP1_OUT, epIn = U3_PIPE_EP2_IN;
     const int COMMAND_LENGTH = 26;
     const int RESPONSE_LENGTH = 38;
     BYTE command[COMMAND_LENGTH];
@@ -105,9 +105,9 @@ void LJUSB_U3_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_FirmwareHardw
     return;
 }
 
-void LJUSB_U6_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_FirmwareHardwareVersion * fhv) {
+static void LJUSB_U6_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_FirmwareHardwareVersion * fhv) {
     int i = 0, r;
-    ULONG epOut = U6_PIPE_EP1_OUT, epIn = U6_PIPE_EP2_IN;
+    unsigned long epOut = U6_PIPE_EP1_OUT, epIn = U6_PIPE_EP2_IN;
     const int COMMAND_LENGTH = 26;
     const int RESPONSE_LENGTH = 38;
     BYTE command[COMMAND_LENGTH];
@@ -153,9 +153,9 @@ void LJUSB_U6_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_FirmwareHardw
     return;
 }
 
-void LJUSB_UE9_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_FirmwareHardwareVersion * fhv) {
+static void LJUSB_UE9_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_FirmwareHardwareVersion * fhv) {
     int i = 0, r;
-    ULONG epOut = UE9_PIPE_EP1_OUT, epIn = UE9_PIPE_EP1_IN;
+    unsigned long epOut = UE9_PIPE_EP1_OUT, epIn = UE9_PIPE_EP1_IN;
     const int COMMAND_LENGTH = 38;
     const int RESPONSE_LENGTH = 38;
     BYTE command[COMMAND_LENGTH];
@@ -201,7 +201,7 @@ void LJUSB_UE9_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_FirmwareHard
     return;
 }
 
-int LJUSB_isNullHandle(HANDLE hDevice)
+static int LJUSB_isNullHandle(HANDLE hDevice)
 {
     if(hDevice == NULL)
     {
@@ -212,7 +212,7 @@ int LJUSB_isNullHandle(HANDLE hDevice)
     return 0;
 }
 
-int LJUSB_libusbError(int r) {
+static int LJUSB_libusbError(int r) {
     switch (r) {
     case 0:
         // No error
@@ -258,7 +258,7 @@ int LJUSB_libusbError(int r) {
     return -1;
 }
 
-BOOL LJUSB_U3_isMinFirmware(struct LJUSB_FirmwareHardwareVersion * fhv) {
+static bool LJUSB_U3_isMinFirmware(struct LJUSB_FirmwareHardwareVersion * fhv) {
 
     if(fhv->hardwareMajor == U3C_HARDWARE_MAJOR && fhv->hardwareMinor == U3C_HARDWARE_MINOR) {
         if (fhv->firmwareMajor > MIN_U3C_FIRMWARE_MAJOR || (fhv->firmwareMajor == MIN_U3C_FIRMWARE_MAJOR && fhv->firmwareMinor >= MIN_U3C_FIRMWARE_MINOR)) {
@@ -278,7 +278,7 @@ BOOL LJUSB_U3_isMinFirmware(struct LJUSB_FirmwareHardwareVersion * fhv) {
     return 0;
 }
 
-BOOL LJUSB_U6_isMinFirmware(struct LJUSB_FirmwareHardwareVersion * fhv) {
+static bool LJUSB_U6_isMinFirmware(struct LJUSB_FirmwareHardwareVersion * fhv) {
 
         if (fhv->firmwareMajor > MIN_U6_FIRMWARE_MAJOR || (fhv->firmwareMajor == MIN_U6_FIRMWARE_MAJOR && fhv->firmwareMinor >= MIN_U6_FIRMWARE_MINOR)) {
             return 1;
@@ -291,7 +291,7 @@ BOOL LJUSB_U6_isMinFirmware(struct LJUSB_FirmwareHardwareVersion * fhv) {
     return 0;
 }
 
-BOOL LJUSB_UE9_isMinFirmware(struct LJUSB_FirmwareHardwareVersion * fhv) {
+static bool LJUSB_UE9_isMinFirmware(struct LJUSB_FirmwareHardwareVersion * fhv) {
         if (DEBUG) {
             fprintf(stderr, "In LJUSB_UE9_isMinFirmware\n");
         }
@@ -310,7 +310,7 @@ BOOL LJUSB_UE9_isMinFirmware(struct LJUSB_FirmwareHardwareVersion * fhv) {
     return 0;
 }
 
-BOOL LJUSB_isRecentKernel() {
+static bool LJUSB_isRecentKernel(void) {
 
     int kernelMajor, kernelMinor, kernelRev;
     char * tok;
@@ -359,7 +359,7 @@ BOOL LJUSB_isRecentKernel() {
            (kernelMajor > LJ_RECENT_KERNEL_MAJOR);
 }
 
-BOOL LJUSB_isMinFirmware(HANDLE hDevice, ULONG ProductID)
+static bool LJUSB_isMinFirmware(HANDLE hDevice, unsigned long ProductID)
 {
     struct LJUSB_FirmwareHardwareVersion fhv;
 
@@ -397,22 +397,24 @@ BOOL LJUSB_isMinFirmware(HANDLE hDevice, ULONG ProductID)
     }
 }
 
-float LJUSB_GetLibraryVersion()
+float LJUSB_GetLibraryVersion(void)
 {
     return LJUSB_LINUX_LIBRARY_VERSION;
 }
 
 
-HANDLE LJUSB_OpenDevice(UINT DevNum, DWORD dwReserved, ULONG ProductID)
+HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long ProductID)
 {
+	(void)dwReserved;
+	
     void * handle = NULL;
     struct libusb_device_handle *devh = NULL;
     libusb_device **devs;
     ssize_t cnt;
     int r = 1;
     libusb_device *dev;
-    int i = 0;
-    int ljFoundCount = 0;
+    unsigned int i = 0;
+    unsigned int ljFoundCount = 0;
     struct libusb_device_descriptor desc;
 
 
@@ -499,7 +501,7 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, DWORD dwReserved, ULONG ProductID)
     return handle;
 }
 
-int LJUSB_handleBulkTranferError(int r)
+static int LJUSB_handleBulkTranferError(int r)
 {
     int err = 0;
 
@@ -510,7 +512,7 @@ int LJUSB_handleBulkTranferError(int r)
     return err;
 }
 
-ULONG LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, ULONG count, bool isBulk) {
+static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, unsigned long count, bool isBulk) {
     int r;
     int transferred;
 
@@ -540,7 +542,7 @@ ULONG LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, ULON
 }
 
 // Automatically uses the correct endpoint and transfer method (bulk or interrupt)
-ULONG LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, ULONG count, enum LJUSB_TRANSFER_OPERATION operation) {
+static unsigned long LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, unsigned long count, enum LJUSB_TRANSFER_OPERATION operation) {
     unsigned char endpoint;
     bool isBulk;
     int r;
@@ -577,6 +579,9 @@ ULONG LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, ULONG count, enum LJUSB_T
           case LJUSB_STREAM:
             endpoint = UE9_PIPE_EP2_IN;
             break;
+		  default:
+            errno = EINVAL;
+            return -1;
         }
         break;
       case U3_PRODUCT_ID:
@@ -591,6 +596,9 @@ ULONG LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, ULONG count, enum LJUSB_T
           case LJUSB_STREAM:
             endpoint = U3_PIPE_EP3_IN;
             break;
+		  default:
+            errno = EINVAL;
+            return -1;
         }
         break;
       case U6_PRODUCT_ID:
@@ -605,6 +613,9 @@ ULONG LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, ULONG count, enum LJUSB_T
           case LJUSB_STREAM:
             endpoint = U6_PIPE_EP3_IN;
             break;
+		  default:
+            errno = EINVAL;
+            return -1;
         }
         break;
 
@@ -619,6 +630,7 @@ ULONG LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, ULONG count, enum LJUSB_T
             endpoint = U12_PIPE_EP2_OUT;
             break;
           case LJUSB_STREAM:
+		  default:
             // U12 has no streaming interface
             errno = EINVAL;
             return -1;
@@ -634,6 +646,7 @@ ULONG LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, ULONG count, enum LJUSB_T
             endpoint = BRIDGE_PIPE_EP1_OUT;
             break;
           case LJUSB_STREAM:
+		  default:
             // SkyMote has no streaming interface
             errno = EINVAL;
             return -1;
@@ -653,33 +666,33 @@ ULONG LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, ULONG count, enum LJUSB_T
 }
 
 // Deprecated: Kept for backwards compatibility
-ULONG LJUSB_BulkRead(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, ULONG count)
+unsigned long LJUSB_BulkRead(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, unsigned long count)
 {
     return LJUSB_DoTransfer(hDevice, endpoint, pBuff, count, true);
 }
 
 // Deprecated: Kept for backwards compatibility
-ULONG LJUSB_BulkWrite(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, ULONG count)
+unsigned long LJUSB_BulkWrite(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, unsigned long count)
 {
     return LJUSB_DoTransfer(hDevice, endpoint, pBuff, count, true);
 }
 
 
-ULONG LJUSB_Write(HANDLE hDevice, BYTE *pBuff, ULONG count) {
+unsigned long LJUSB_Write(HANDLE hDevice, BYTE *pBuff, unsigned long count) {
     if (DEBUG) {
         fprintf(stderr, "LJUSB_Write: calling LJUSB_Write.\n");
     }
     return LJUSB_SetupTransfer(hDevice, pBuff, count, LJUSB_WRITE);
 }
 
-ULONG LJUSB_Read(HANDLE hDevice, BYTE *pBuff, ULONG count) {
+unsigned long LJUSB_Read(HANDLE hDevice, BYTE *pBuff, unsigned long count) {
     if (DEBUG) {
         fprintf(stderr, "LJUSB_Read: calling LJUSB_Read.\n");
     }
     return LJUSB_SetupTransfer(hDevice, pBuff, count, LJUSB_READ);
 }
 
-ULONG LJUSB_Stream(HANDLE hDevice, BYTE *pBuff, ULONG count) {
+unsigned long LJUSB_Stream(HANDLE hDevice, BYTE *pBuff, unsigned long count) {
     if (DEBUG) {
         fprintf(stderr, "LJUSB_Stream: calling LJUSB_Stream.\n");
     }
@@ -706,7 +719,7 @@ void LJUSB_CloseDevice(HANDLE hDevice)
 }
 
 
-ULONG LJUSB_GetDevCount(ULONG ProductID)
+unsigned long LJUSB_GetDevCount(unsigned long ProductID)
 {
     libusb_device **devs;
     ssize_t cnt;
@@ -728,8 +741,8 @@ ULONG LJUSB_GetDevCount(ULONG ProductID)
     }
 
     libusb_device *dev;
-    int i = 0;
-    int ljFoundCount = 0;
+    unsigned int i = 0;
+    unsigned int ljFoundCount = 0;
 
     // Loop over all USB devices and count the ones with the LabJack
     // vendor ID and the passed in product ID.
@@ -750,7 +763,7 @@ ULONG LJUSB_GetDevCount(ULONG ProductID)
     return ljFoundCount;
 }
 
-BOOL LJUSB_IsHandleValid(HANDLE hDevice) {
+bool LJUSB_IsHandleValid(HANDLE hDevice) {
     int config = 0;
     int r = 1;
 
@@ -778,8 +791,11 @@ BOOL LJUSB_IsHandleValid(HANDLE hDevice) {
 }
 
 //not supported
-BOOL LJUSB_AbortPipe(HANDLE hDevice, ULONG Pipe)
+bool LJUSB_AbortPipe(HANDLE hDevice, unsigned long Pipe)
 {
+	(void)hDevice;
+	(void)Pipe;
+	
     errno = ENOSYS;
     return 0;
 }

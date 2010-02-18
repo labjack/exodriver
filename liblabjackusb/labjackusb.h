@@ -36,14 +36,13 @@
 #ifndef _LABJACKUSB_H_
 #define _LABJACKUSB_H_
 
-#define LJUSB_LINUX_LIBRARY_VERSION 2.0
+#define LJUSB_LINUX_LIBRARY_VERSION 2.0f
+
+#include <stdbool.h>
 
 typedef void * HANDLE;
-typedef unsigned long ULONG;
 typedef unsigned int UINT;
 typedef unsigned char BYTE;
-typedef int BOOL;
-typedef unsigned int DWORD;
 
 //Product IDs
 #define UE9_PRODUCT_ID    9
@@ -81,16 +80,16 @@ extern "C"{
 #endif
 
 
-float LJUSB_GetLibraryVersion();
+float LJUSB_GetLibraryVersion(void);
 //Returns the labjackusb library version number
 
 
-ULONG LJUSB_GetDevCount(ULONG ProductID);
+unsigned long LJUSB_GetDevCount(unsigned long ProductID);
 //Returns the total number of LabJack USB devices connected.
 //ProductID = The product ID of the devices you want to get the count of.
 
 
-HANDLE LJUSB_OpenDevice(UINT DevNum, DWORD dwReserved, ULONG ProductID);
+HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long ProductID);
 //Obtains a handle for a LabJack USB device.  Returns NULL if there is an
 //error.  If the device is already open, NULL is returned and errno is set to
 //EBUSY.
@@ -101,21 +100,21 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, DWORD dwReserved, ULONG ProductID);
 //ProductID = The product ID of the LabJack USB device.  Currently the U3, U6,
 //            and UE9 are supported.
 
-ULONG LJUSB_Write(HANDLE hDevice, BYTE *pBuff, ULONG count);
+unsigned long LJUSB_Write(HANDLE hDevice, BYTE *pBuff, unsigned long count);
 // Writes to a device. Returns the number of bytes written, or -1 on error.
 // hDevice = The handle for your device
 // pBuff = The buffer to be written to the device.
 // count = The number of bytes to write.
 // This function replaces the deprecated LJUSB_BulkWrite, which required the endpoint
 
-ULONG LJUSB_Read(HANDLE hDevice, BYTE *pBuff, ULONG count);
+unsigned long LJUSB_Read(HANDLE hDevice, BYTE *pBuff, unsigned long count);
 // Reads from a device. Returns the number of bytes read, or -1 on error.
 // hDevice = The handle for your device
 // pBuff = The buffer to filled in with bytes from the device.
 // count = The number of bytes expected to be read.
 // This function replaces the deprecated LJUSB_BulkRead, which required the endpoint
 
-ULONG LJUSB_Stream(HANDLE hDevice, BYTE *pBuff, ULONG count);
+unsigned long LJUSB_Stream(HANDLE hDevice, BYTE *pBuff, unsigned long count);
 // Reads from a device's stream interface. 
 // Returns the number of bytes read, or -1 on error.
 // hDevice = The handle for your device
@@ -127,19 +126,19 @@ ULONG LJUSB_Stream(HANDLE hDevice, BYTE *pBuff, ULONG count);
 void LJUSB_CloseDevice(HANDLE hDevice);
 //Closes the handle of a LabJack USB device.
 
-BOOL LJUSB_IsHandleValid(HANDLE hDevice);
+bool LJUSB_IsHandleValid(HANDLE hDevice);
 //Returns true if the handle is valid; this is, it is still connected to a
 //device on the system.
 
-BOOL LJUSB_AbortPipe(HANDLE hDevice, ULONG Pipe);
-//Not supported under Linux and will return false (0).
+bool LJUSB_AbortPipe(HANDLE hDevice, unsigned long Pipe);
+//Not supported under Linux and will return false.
 //Pipes will timeout after LJ_LIBUSB_TIMEOUT, which is set by default to 1 second.
 
 //Note:  For all function errors, use errno to retrieve system error numbers.
 
 /* --------------- DEPRECATED Functions --------------- */
 
-ULONG LJUSB_BulkRead(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, ULONG count);
+unsigned long LJUSB_BulkRead(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, unsigned long count);
 //Reads from a bulk endpoint.  Returns the count of the number of bytes read,
 //or 0 on error (and sets errno).  If there is no response within a certain
 //amount of time (LJ_LIBUSB_TIMEOUT in labjackusb.c), the read will timeout.
@@ -149,7 +148,7 @@ ULONG LJUSB_BulkRead(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, ULONG 
 //count = The size of the buffer to be read from the device.
 
 
-ULONG LJUSB_BulkWrite(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, ULONG count);
+unsigned long LJUSB_BulkWrite(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, unsigned long count);
 //Writes to a bulk endpoint.  Returns the count of the number of bytes wrote,
 //or 0 on error and sets errno.
 //hDevice = Handle of the LabJack USB device.
