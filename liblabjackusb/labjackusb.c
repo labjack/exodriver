@@ -205,7 +205,7 @@ static int LJUSB_isNullHandle(HANDLE hDevice)
 {
     if(hDevice == NULL)
     {
-        // TODO: Consider different errno
+        // TODO: Consider different errno here and in LJUSB_isHandleValid
         errno = EINVAL;
         return 1;
     }
@@ -520,8 +520,12 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
         fprintf(stderr, "Calling LJUSB_DoTransfer with endpoint = 0x%x, count = %lu, and isBulk = %d.\n", endpoint, count, isBulk);
     }
 
-    if(LJUSB_isNullHandle(hDevice))
+    if(LJUSB_IsHandleValid(hDevice) == false) {
+        if (DEBUG) {
+            fprintf(stderr, "Calling LJUSB_DoTransfer returning -1 because handle is invalid. errno = %d.\n", errno);
+        }
         return -1;
+    }
 
     if(isBulk){
         r = libusb_bulk_transfer(hDevice, endpoint, pBuff, count, &transferred, LJ_LIBUSB_TIMEOUT);
@@ -767,20 +771,28 @@ bool LJUSB_IsHandleValid(HANDLE hDevice) {
     int config = 0;
     int r = 1;
 
-    if (hDevice == NULL) {
+    if (LJUSB_isNullHandle(hDevice)) {
         if (DEBUG) {
             fprintf(stderr, "LJUSB_IsHandleValid: returning 0. hDevice is NULL.\n");
         }
+        // TODO: Consider different errno here and in LJUSB_isNullHandle
+        errno = EINVAL;
         return 0;
     }
+
 
     // If we can call get configuration without getting an error,
     // the handle is still valid.
     r = libusb_get_configuration(hDevice, &config);
+    if (DEBUG) {
+        fprintf(stderr, "LJUSB_IsHandleValid.\n");
+    }
     if (r < 0) {
         if (DEBUG) {
             fprintf(stderr, "LJUSB_IsHandleValid: returning 0. Return value from libusb_get_configuration was: %d\n", r);
         }
+        // TODO: Consider different errno here and in LJUSB_isNullHandle
+        errno = EINVAL;
         return 0;
     } else {
         if (DEBUG) {
