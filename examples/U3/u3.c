@@ -400,7 +400,7 @@ long getAinVoltCalibrated(u3CalibrationInfo *caliInfo, int dacEnabled, uint8 neg
             return getAinVoltCalibrated_hw130(caliInfo, 0, negChannel, bytesVolt, analogVolt);
     }
 
-    if((negChannel >= 0 && negChannel <= 15) || negChannel == 30)
+    if(negChannel <= 15 || negChannel == 30)
     {
         if(dacEnabled == 0)
             *analogVolt = caliInfo->ccConstants[2]*((double)bytesVolt) + caliInfo->ccConstants[3];
@@ -435,7 +435,7 @@ long getAinVoltCalibrated_hw130(u3CalibrationInfo *caliInfo, uint8 positiveChann
         return -1;
     }
 
-    if((negChannel >= 0 && negChannel <= 15) || negChannel == 30)
+    if(negChannel <= 15 || negChannel == 30)
     {
         if(caliInfo->highVoltage == 0
            || (caliInfo->highVoltage == 1 && positiveChannel >= 4 && negChannel >= 4))
@@ -448,10 +448,22 @@ long getAinVoltCalibrated_hw130(u3CalibrationInfo *caliInfo, uint8 positiveChann
     }
     else if(negChannel == 31)
     {
-        if(caliInfo->highVoltage == 1 && positiveChannel >= 0 && positiveChannel < 4)
+        if(caliInfo->highVoltage == 1 && positiveChannel < 4)
             *analogVolt = caliInfo->ccConstants[12+positiveChannel]*((double)bytesVolt) + caliInfo->ccConstants[16+positiveChannel];
         else
             *analogVolt = caliInfo->ccConstants[0]*((double)bytesVolt) + caliInfo->ccConstants[1];
+    }
+    else if(negChannel == 32)  //special range (binary value should be from a differential AIN reading with negative channel 30)
+    {
+        if(caliInfo->highVoltage == 1 && positiveChannel < 4)
+        {
+            *analogVolt = (caliInfo->ccConstants[2]*((double)bytesVolt) + caliInfo->ccConstants[3] + caliInfo->ccConstants[9]) * caliInfo->ccConstants[12 + positiveChannel] / caliInfo->ccConstants[0] +
+                            caliInfo->ccConstants[16 + positiveChannel];
+        }
+        else
+        {
+            *analogVolt = caliInfo->ccConstants[2]*((double)bytesVolt) + caliInfo->ccConstants[3] + caliInfo->ccConstants[9];
+        }
     }
     else
     {
@@ -746,6 +758,7 @@ long eAIN(HANDLE Handle, u3CalibrationInfo *CalibrationInfo, long ConfigIO, long
     long error;
     double hwver;
     int hv;
+    int isSpecialRange = 0;
 
     if(isCalibrationInfoValid(CalibrationInfo) != 1)
     {
@@ -762,12 +775,16 @@ long eAIN(HANDLE Handle, u3CalibrationInfo *CalibrationInfo, long ConfigIO, long
         return -1;
     }
 
-    if(ChannelN < 0 || (ChannelN > 15 && ChannelN != 30 && ChannelN != 31)
+    if(ChannelN < 0 || (ChannelN > 15 && ChannelN != 30 && ChannelN != 31 && ChannelN != 32)
      || (hwver >= 1.30 && hv == 1 && ((ChannelP < 4 && ChannelN != 31)
      || ChannelN < 4)))
     {
         printf("eAIN error: Invalid negative channel\n");
         return -1;
+    }
+    if (ChannelN == 32) {
+        isSpecialRange = 1;
+        ChannelN = 30; // Set to 30 for the feedback packet. We'll set it back to 32 for conversion.
     }
 
     if(ConfigIO != 0 && !(hwver >= 1.30 && hv == 1 && ChannelP < 4))
@@ -820,6 +837,10 @@ long eAIN(HANDLE Handle, u3CalibrationInfo *CalibrationInfo, long ConfigIO, long
         return (long)Errorcode;
 
     bytesVT = recDataBuff[0] + recDataBuff[1]*256;
+
+    if (isSpecialRange) {
+        ChannelN = 32; // Change the negative channel back to 32 from 30 for conversion.
+    }
 
     if(Binary != 0)
     {
