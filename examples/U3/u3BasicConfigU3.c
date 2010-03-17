@@ -173,8 +173,8 @@ void parseConfigU3Bytes(BYTE * recBuffer){
     printf("  FirmwareVersion = %d.%02d\n", recBuffer[10], recBuffer[9]);
     printf("  BootloaderVersion = %d.%02d\n", recBuffer[12], recBuffer[11]);
     printf("  HardwareVersion = %d.%02d\n", recBuffer[14], recBuffer[13]);
-    printf("  SerialNumber = %d", makeInt(recBuffer, 15));
-    printf("  ProductID = %d", makeShort(recBuffer, 19));
+    printf("  SerialNumber = %d\n", makeInt(recBuffer, 15));
+    printf("  ProductID = %d\n", makeShort(recBuffer, 19));
     printf("  LocalID = %d\n", recBuffer[21]);
     printf("  TimerCounterMask = %d\n", recBuffer[22]);
     printf("  FIOAnalog = %d\n", recBuffer[23]);
