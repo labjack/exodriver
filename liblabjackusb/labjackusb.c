@@ -507,7 +507,7 @@ static int LJUSB_handleBulkTranferError(int r)
 
     if((err = LJUSB_libusbError(r)) == -1) {
         // TODO: Consider different errno
-        errno = EINVAL;
+        errno = r;
     }
     return err;
 }
