@@ -4,7 +4,7 @@
 #
 
 TARGET = liblabjackusb.dylib
-VERSION = 2.0.1
+VERSION = 2.0.2
 DESTINATION = /usr/local/lib
 HEADER = labjackusb.h
 HEADER_DESTINATION = /usr/local/include
