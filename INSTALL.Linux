@@ -41,6 +41,11 @@ to access the LabJack.  To install the udev rules, run the following commands
 in the root directory of this package.
 
     $ sudo cp 10-labjack.rules /etc/udev/rules.d
+    $ sudo udevadm control --reload-rules
+
+Older vesions of udevadm (e.g., the version included in Ubuntu 8.04) use an
+underscore instead of a dash: "--reload_rules" instead of "--reload-rules"
+
     $ sudo udevadm control --reload_rules
 
 On Debian-based distributions, the above two commands are sufficient. If
@@ -96,4 +101,4 @@ new liblabjackusb 2.0 library:
 These commands remove the udev rules we provided on the forums:
 
     $ rm /etc/udev/rules.d/10-labjack.rules
-    $ sudo udevadm control --reload_rules
+    $ sudo udevadm control --reload-rules
