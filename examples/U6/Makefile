@@ -4,10 +4,10 @@
 U6ALLIO_SRC=u6allio.c u6.c
 U6ALLIO_OBJ=$(U6ALLIO_SRC:.c=.o)
 
-U6CONFIGU6_SRC=u6ConfigU6.c u6.c
+U6CONFIGU6_SRC=u6BasicConfigU6.c
 U6CONFIGU6_OBJ=$(U6CONFIGU6_SRC:.c=.o)
 
-U6EASY_SRC=u6Easy.c u6.c
+U6EASY_SRC=u6EFunctions.c u6.c
 U6EASY_OBJ=$(U6EASY_SRC:.c=.o)
 
 U6FEEDBACK_SRC=u6Feedback.c u6.c
@@ -26,16 +26,16 @@ CFLAGS=-Wall -g
 LDFLAGS=
 LIBS=-lm -llabjackusb
 
-all: u6allio u6ConfigU6 u6Easy u6Feedback u6Stream u6LJTDAC
+all: u6BasicConfigU6 u6allio u6EFunctions u6Feedback u6Stream u6LJTDAC
+
+u6BasicConfigU6: $(U6CONFIGU6_OBJ)
+	$(CC) -o u6BasicConfigU6 $(U6CONFIGU6_OBJ) $(LDFLAGS) $(LIBS)
 
 u6allio: $(U6ALLIO_OBJ)
 	$(CC) -o u6allio $(U6ALLIO_OBJ) $(LDFLAGS) $(LIBS)
 
-u6ConfigU6: $(U6CONFIGU6_OBJ)
-	$(CC) -o u6ConfigU6 $(U6CONFIGU6_OBJ) $(LDFLAGS) $(LIBS)
-
-u6Easy: $(U6EASY_OBJ)
-	$(CC) -o u6Easy $(U6EASY_OBJ) $(LDFLAGS) $(LIBS)
+u6EFunctions: $(U6EASY_OBJ)
+	$(CC) -o u6EFunctions $(U6EASY_OBJ) $(LDFLAGS) $(LIBS)
 
 u6Feedback: $(U6FEEDBACK_OBJ)
 	$(CC) -o u6Feedback $(U6FEEDBACK_OBJ) $(LDFLAGS) $(LIBS)
@@ -47,4 +47,4 @@ u6LJTDAC: $(U6LJTDAC_OBJ)
 	$(CC) -o u6LJTDAC $(U6LJTDAC_OBJ) $(LDFLAGS) $(LIBS)
 
 clean:
-	rm -f *.o u6Feedback u6ConfigU6 u6allio u6Stream u6Easy u6LJTDAC
+	rm -f *.o u6Feedback u6BasicConfigU6 u6allio u6Stream u6EFunctions u6LJTDAC
