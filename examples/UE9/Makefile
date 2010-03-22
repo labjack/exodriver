@@ -7,6 +7,9 @@ UE9SINGLEIO_OBJ=$(UE9SINGLEIO_SRC:.c=.o)
 UE9COMMCONFIG_SRC=ue9BasicCommConfig.c
 UE9COMMCONFIG_OBJ=$(UE9COMMCONFIG_SRC:.c=.o)
 
+UE9ETHERNET_SRC=ue9EthernetExample.c
+UE9ETHERNET_OBJ=$(UE9ETHERNET_SRC:.c=.o)
+
 UE9CONTROLCONFIG_SRC=ue9ControlConfig.c ue9.c
 UE9CONTROLCONFIG_OBJ=$(UE9CONTROLCONFIG_SRC:.c=.o)
 
@@ -35,10 +38,13 @@ CFLAGS=-Wall -g
 LDFLAGS=
 LIBS=-lm -llabjackusb
 
-all: ue9BasicCommConfig ue9SingleIO ue9ControlConfig ue9Feedback ue9Stream ue9TimerCounter ue9allio ue9EFunctions ue9LJTDAC
+all: ue9BasicCommConfig ue9EthernetExample ue9SingleIO ue9ControlConfig ue9Feedback ue9Stream ue9TimerCounter ue9allio ue9EFunctions ue9LJTDAC
 
 ue9BasicCommConfig: $(UE9COMMCONFIG_OBJ)
 	$(CC) -o ue9BasicCommConfig $(UE9COMMCONFIG_OBJ) $(LDFLAGS) $(LIBS)
+
+ue9EthernetExample: $(UE9ETHERNET_OBJ)
+	$(CC) -o ue9EthernetExample $(UE9ETHERNET_OBJ) $(LDFLAGS) $(LIBS)
 
 ue9SingleIO: $(UE9SINGLEIO_OBJ)
 	$(CC) -o ue9SingleIO $(UE9SINGLEIO_OBJ) $(LDFLAGS) $(LIBS)
@@ -65,4 +71,4 @@ ue9LJTDAC: $(UE9LJTDAC_OBJ)
 	$(CC) -o ue9LJTDAC $(UE9LJTDAC_OBJ) $(LDFLAGS) $(LIBS)
 
 clean:
-	rm -f *.o ue9BasicCommConfig ue9SingleIO ue9ControlConfig ue9Feedback ue9Stream ue9TimerCounter ue9allio ue9EFunctions ue9LJTDAC
+	rm -f *.o ue9BasicCommConfig ue9SingleIO ue9ControlConfig ue9Feedback ue9Stream ue9TimerCounter ue9allio ue9EFunctions ue9LJTDAC ue9EthernetExample

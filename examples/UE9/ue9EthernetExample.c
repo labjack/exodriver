@@ -1,18 +1,29 @@
 /*
-An example that shows a minimal use of Exodriver without the use of functions
-hidden in header files.
+An example that shows how to use sockets to talk with the UE9. You may notice
+that the code is VERY similar to ue9BasicCommConfig.c. The only difference is
+using socket calls instead of calls to the Exodriver. 
 
 You can compile this example with the following command:
-  $ g++ -lm -llabjackusb ue9BasicCommConfig.c
+  $ g++ -o ue9EthernetExample ue9EthernetExample.c
+
+To run it:
+  $ ./ue9EthernetExample <IP Address>
 
 It is also included in the Makefile.
 */
 
+//Because that is what an unsigned char is.
+typedef unsigned char BYTE;
+
 /* Includes */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 #include <errno.h>
-#include "labjackusb.h"
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netdb.h>
 
 // Defines how long the command is
 #define COMMCONFIG_COMMAND_LENGTH 38
@@ -44,47 +55,75 @@ int checkResponseForErrors(BYTE * recBuffer);
 // Demonstrates how to parse the response of CommConfig.
 void parseCommConfigBytes(BYTE * recBuffer);
 
-int main() {
+int main(int argc, char *argv[]) {
     // Setup the variables we will need.
     int r = 0; // For checking return values
-    HANDLE devHandle = 0;
+    int devHandle = 0;
     BYTE sendBuffer[COMMCONFIG_COMMAND_LENGTH], recBuffer[COMMCONFIG_RESPONSE_LENGTH];
+    struct addrinfo hints, *res;
 
-    // Open the UE9
-    devHandle = LJUSB_OpenDevice(1, 0, UE9_PRODUCT_ID);
+    if(argc < 2) {
+       fprintf(stderr,"Usage: %s <IP Address>\n", argv[0]);
+       exit(-1);
+    }
     
-    if( devHandle == NULL ) {
-        printf("Couldn't open UE9. Please connect one and try again.\n");
+    memset(&hints, 0, sizeof hints);
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    printf("Getting IP Info... ");
+    r = getaddrinfo(argv[1], "52360", &hints, &res);
+    if( r != 0 ){
+        perror("Couldn't parse address info. Error: ");
         exit(-1);
     }
+    printf("Done\n");
+
+    printf("Getting socket FD... ");
+    // Open the UE9, through a socket.
+    devHandle = socket(AF_INET, SOCK_STREAM, 0);
+    if( devHandle < 0 ) {
+        perror("Couldn't open socket.");
+        exit(-1);
+    }
+    printf("Done\n");
+    
+    printf("Connecting (time out after a minute)... ");
+    fflush(stdout);
+    r = connect(devHandle, res->ai_addr, res->ai_addrlen);
+    if( r < 0 ){
+        perror("\nCouldn't connect to UE9. The error was");
+        close(devHandle);
+        exit(-1);
+    }
+    printf("Done\n");
 
     // Builds the CommConfig command
     buildCommConfigBytes(sendBuffer);
     
     // Write the command to the device.
     // LJUSB_Write( handle, sendBuffer, length of sendBuffer )
-    r = LJUSB_Write( devHandle, sendBuffer, COMMCONFIG_COMMAND_LENGTH );
+    r = write( devHandle, sendBuffer, COMMCONFIG_COMMAND_LENGTH );
     
     if( r != COMMCONFIG_COMMAND_LENGTH ) {
         printf("An error occurred when trying to write the buffer. The error was: %d\n", errno);
         // *Always* close the device when you error out.
-        LJUSB_CloseDevice(devHandle);
+        close(devHandle);
         exit(-1);
     }
     
     // Read the result from the device.
     // LJUSB_Read( handle, recBuffer, number of bytes to read)
-    r = LJUSB_Read( devHandle, recBuffer, COMMCONFIG_RESPONSE_LENGTH );
+    r = read( devHandle, recBuffer, COMMCONFIG_RESPONSE_LENGTH );
     
     if( r != COMMCONFIG_RESPONSE_LENGTH ) {
         printf("An error occurred when trying to read from the UE9. The error was: %d\n", errno);
-        LJUSB_CloseDevice(devHandle);
+        close(devHandle);
         exit(-1);
     }
     
     // Check the command for errors
     if( checkResponseForErrors(recBuffer) != 0 ){
-        LJUSB_CloseDevice(devHandle);
+        close(devHandle);
         exit(-1);
     }
     
@@ -92,7 +131,7 @@ int main() {
     parseCommConfigBytes(recBuffer);
     
     //Close the device.
-    LJUSB_CloseDevice(devHandle);
+    close(devHandle);
     
     return 0;
 }
