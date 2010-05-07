@@ -6,5 +6,9 @@ SYSFS{idVendor}=="0cd5", SYSFS{idProduct}=="0003", GROUP="adm"
 SYSFS{idVendor}=="0cd5", SYSFS{idProduct}=="0006", GROUP="adm"
 # UE9
 SYSFS{idVendor}=="0cd5", SYSFS{idProduct}=="0009", GROUP="adm"
+# U12
+SYSFS{idVendor}=="0cd5", SYSFS{idProduct}=="0001", GROUP="adm"
+# SkyMote Bridge
+SYSFS{idVendor}=="0cd5", SYSFS{idProduct}=="0501", GROUP="adm"
 
 LABEL="labjack_rules_end"
