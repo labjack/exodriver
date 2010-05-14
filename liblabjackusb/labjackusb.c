@@ -251,7 +251,7 @@ static int LJUSB_libusbError(int r) {
         printf("errno: %d.\n", errno);
         break;
     default:
-        fprintf(stderr, "Unexpected error code: %d.\n", r);
+        fprintf(stderr, "LJUSB_libusbError: Unexpected error code: %d.\n", r);
         printf("errno: %d.\n", errno);
         break;
     }
@@ -525,6 +525,10 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
             fprintf(stderr, "Calling LJUSB_DoTransfer returning -1 because handle is invalid. errno = %d.\n", errno);
         }
         return -1;
+    }
+    
+    if(endpoint != 1 && endpoint < 0x81 ) {
+        fprintf(stderr, "LJUSB_DoTransfer warning: Got endpoint = %d, however this is not a known endpoint. Please verify you are using the header file provided in /usr/local/include/labjackusb.h and not an older header file.\n", endpoint);
     }
 
     if(isBulk){
