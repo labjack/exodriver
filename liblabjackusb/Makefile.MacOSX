@@ -10,7 +10,10 @@ HEADER = labjackusb.h
 HEADER_DESTINATION = /usr/local/include
 # Build for multiple architectures
 #CFLAGS = -fPIC -g -Wall -arch i386 -arch x86_64 -arch ppc7400 -arch ppc64
-CFLAGS = -fPIC -g -Wall
+# Build for 32- and 64-bit Intel architectures
+CFLAGS = -fPIC -g -Wall -arch i386 -arch x86_64
+# Build for only the host architecture
+#CFLAGS = -fPIC -g -Wall
 LIBFLAGS = -lusb-1.0 -lc
 
 %.o: %.c
