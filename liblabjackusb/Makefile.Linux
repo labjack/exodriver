@@ -21,7 +21,9 @@ $(TARGET): labjackusb.o
 	$(CC) -shared -Wl,-soname,liblabjackusb.so -o $(TARGET) labjackusb.o $(LIBFLAGS) 
 
 install: $(TARGET) 
+	test -z $(DESTINATION) || mkdir -p $(DESTINATION)
 	install $(TARGET) $(DESTINATION)
+	test -z $(HEADER_DESTINATION) || mkdir -p $(HEADER_DESTINATION)
 	install $(HEADER) $(HEADER_DESTINATION)
 	ldconfig $(DESTINATION)
 
