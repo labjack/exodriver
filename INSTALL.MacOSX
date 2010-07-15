@@ -41,7 +41,7 @@ directory.  To compile the programs go to your device's directory and run
 
 Run one of example programs like this:
 
-    $ ./u6ConfigU6
+    $ ./u6BasicConfigU6
 
 Uninstalling the Old U3 and UE9 Driver
 --------------------------------------

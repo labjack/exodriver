@@ -31,7 +31,7 @@ In the liblabjackusb/ directory, run the following commands to compile and
 install the library.
 
     $ cd liblabjackusb/
-    $ make -f Makefile.Linux
+    $ make
     $ sudo make install
 
 Programs that use the liblabjackusb will need to access the USB device bus
@@ -80,7 +80,7 @@ directory.  To compile the programs go to your device's directory and run
 
 Run one of example programs like this:
 
-    $ ./u6ConfigU6
+    $ ./u6BasicConfigU6
 
 Uninstalling the Old U3 and UE9 Driver
 --------------------------------------
