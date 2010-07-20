@@ -160,4 +160,4 @@ unsigned long LJUSB_BulkWrite(HANDLE hDevice, unsigned char endpoint, BYTE *pBuf
 }
 #endif
 
-#endif
+#endif // _LABJACKUSB_H_

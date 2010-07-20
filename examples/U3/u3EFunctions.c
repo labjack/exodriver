@@ -46,7 +46,7 @@ int main(int argc, char **argv)
        the DAC1Enable parameter with the current setting on the U3.  For the rest of the
        iterations, set ConfigIO to 0 (False) and use the outputted DAC1Enable parameter from
        the first interation from then on.  If DAC1 is enabled/disabled from a later eDAC
-       or ConfigIO low-level call, change the DAC1Enable paramter accordingly or make
+       or ConfigIO low-level call, change the DAC1Enable parameter accordingly or make
        another eAIN call with the ConfigIO parameter set to 1. */
 
     //Read the single-ended voltage from AIN3
