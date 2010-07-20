@@ -24,6 +24,12 @@ and custom kernel modules conflict with the current liblabjackusb library.
 See the "Uninstalling the Old U3 and UE9 Driver" section for more
 information.
 
+For Ubuntu 10.04, see the section titled
+
+    Up and running with LabJackPython and the Exodriver on Ubuntu 10.04
+
+later in this document.
+
 liblabjackusb Library Installation
 ----------------------------------
 
@@ -31,7 +37,7 @@ In the liblabjackusb/ directory, run the following commands to compile and
 install the library.
 
     $ cd liblabjackusb/
-    $ make -f Makefile.Linux
+    $ make
     $ sudo make install
 
 Programs that use the liblabjackusb will need to access the USB device bus
@@ -80,7 +86,7 @@ directory.  To compile the programs go to your device's directory and run
 
 Run one of example programs like this:
 
-    $ ./u6ConfigU6
+    $ ./u6BasicConfigU6
 
 Uninstalling the Old U3 and UE9 Driver
 --------------------------------------
@@ -102,3 +108,41 @@ These commands remove the udev rules we provided on the forums:
 
     $ rm /etc/udev/rules.d/10-labjack.rules
     $ sudo udevadm control --reload-rules
+
+
+
+Up and running with LabJackPython and the Exodriver on Ubuntu 10.04
+-------------------------------------------------------------------
+
+As we detailed in May 2010:
+
+http://labjack.com/blog/running-labjackpython-and-exodriver-ubuntu-1004
+
+Ubuntu 10.04 comes with a binary release of libusb-1.0, so building the 
+Exodriver is easier than ever. Install the dependencies with apt-get, 
+checkout the Exodriver source code, and build it. Here are the complete 
+steps, along with a handful of steps at the end that build LabJackPython:
+
+http://labjack.com/support/labjackpython
+
+which is our Python module that works well with the Exodriver:
+
+$ sudo apt-get install build-essential
+$ sudo apt-get install libusb-1.0-0-dev
+$ sudo apt-get install git-core
+$ git clone git://github.com/labjack/exodriver.git
+$ cd exodriver/liblabjackusb/
+$ make
+$ sudo make install
+$ cd ..
+$ sudo cp 10-labjack.rules /etc/udev/rules.d/.
+$ sudo udevadm control --reload-rules
+$ cd
+$ git clone git://github.com/labjack/LabJackPython.git
+$ cd LabJackPython/src/
+$ sudo python setup.py install
+$ python
+>>> import u3
+>>> d = u3.U3()
+>>> d.configU3()
+

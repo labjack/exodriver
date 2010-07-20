@@ -26,7 +26,9 @@ $(TARGET): labjackusb.o
 	libtool -dynamic -o $(TARGET) -install_name $(TARGET) -current_version $(VERSION) -compatibility_version $(VERSION) labjackusb.o $(LIBFLAGS)
 
 install: $(TARGET) 
+	test -z $(DESTINATION) || mkdir -p $(DESTINATION)
 	install $(TARGET) $(DESTINATION)
+	test -z $(HEADER_DESTINATION) || mkdir -p $(HEADER_DESTINATION)
 	install $(HEADER) $(HEADER_DESTINATION)
 
 clean:

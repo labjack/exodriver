@@ -8,6 +8,8 @@ Mac OS X Requirements
 
 2. The libusb-1.0 library.  Download it here:
     http://sourceforge.net/projects/libusb/
+and see the instructions under "Installing libusb-1.0"
+
 
 3. Mac OS X 10.5 Leopard or 10.6 Snow Leopard. We haven't tested the library 
 on Tiger or Panther.
@@ -41,7 +43,7 @@ directory.  To compile the programs go to your device's directory and run
 
 Run one of example programs like this:
 
-    $ ./u6ConfigU6
+    $ ./u6BasicConfigU6
 
 Uninstalling the Old U3 and UE9 Driver
 --------------------------------------
@@ -52,3 +54,103 @@ liblabjackusb.dylib:
 
     $ sudo rm -f /usr/lib/liblabjackusb.dylib
 
+
+Installing libusb-1.0
+---------------------
+
+Mac OS X requires libusb-1.0 to be built from the source (like many Linux 
+distributions). Download the source from SourceForge:
+
+http://sourceforge.net/projects/libusb/files/libusb-1.0/
+
+Version 1.0.8 is the latest as of July 2010. Build it in the standard way:
+
+    $ tar xvfj libusb-1.0.8.tar.bz2 
+    $ cd libusb-1.0.8/
+    $ ./configure
+    $ make
+    $ sudo make install
+
+Optional: Build a combined 32-/64-bit Exodriver on Mac OS X
+-----------------------------------------------------------
+
+These steps are generally not needed, but there are circumstances that require
+a combined 32-bit and 64-bit Exodriver. You need both architectures when you
+get error messages like the one in "this LabJack forum
+topic":http://forums.labjack.com/index.php?showtopic=4983
+
+    dlopen(liblabjackusb.dylib, 6): no suitable image found.  Did find:
+        /usr/local/lib/liblabjackusb.dylib: mach-o, but wrong architecture
+
+In this case, a 32-bit process tried to load a 64-bit Exodriver. Here's how it
+happened: When following the instructions in the Quickstart, the compiler built
+a copy of the Exodriver for its native architecture. On modern Mac OS X
+systems, that's x86_64 (64-bit). Verify this by running:
+
+    $ file /usr/local/lib/liblabjackusb.dylib 
+    /usr/local/lib/liblabjackusb.dylib: Mach-O 64-bit dynamically linked shared library x86_64
+
+Normally, this is what you want. The programs you will use to call the
+Exodriver will also be 64-bit. The built-in Python on Mac OS X, for example, is
+compiled for three architectures, including x86_64:
+
+    $ file /usr/bin/python
+    /usr/bin/python: Mach-O universal binary with 3 architectures
+    /usr/bin/python (for architecture x86_64):  Mach-O 64-bit executable x86_64
+    /usr/bin/python (for architecture i386):    Mach-O executable i386
+    /usr/bin/python (for architecture ppc7400): Mach-O executable ppc
+
+There are some programs on Mac OS X, though, that are not 64-bit (they're i368
+only), and they can't load a 64-bit Exodriver. The Python download from
+python.org, for example, is 32-bit at the time of this writing. We recommend
+using the built-in Python on Mac OS X.
+
+When you must load the Exodriver from a 32-bit process, you must compile
+libusb-1.0 and the Exodriver to be combined 32-/64-bit libraries. Start with
+libusb-1.0:
+
+    $ tar xvfj libusb-1.0.8.tar.bz2 
+    $ cd libusb-1.0.8/
+    $ export CFLAGS="-arch i386 -arch x86_64"
+    $ ./configure --disable-dependency-tracking
+    $ make
+    $ sudo make install
+
+Confirm it worked by running:
+
+    $ file /usr/local/lib/libusb-1.0.dylib
+    /usr/local/lib/libusb-1.0.dylib: Mach-O universal binary with 2 architectures
+    /usr/local/lib/libusb-1.0.dylib (for architecture i386):    Mach-O dynamically linked shared library i386
+    /usr/local/lib/libusb-1.0.dylib (for architecture x86_64):  Mach-O 64-bit dynamically linked shared library x86_64
+
+After libusb-1.0 is installed correctly, move on to the Exodriver. Find the
+Exodriver download directory
+
+    $ cd path/to/exodriver
+    $ cd liblabjackusb/
+    $ ln -s -f Makefile.MacOSX Makefile
+
+Now edit the Makefile in a text editor to comment out (put a # sign in front
+of) this CFLAGS line:
+
+    #CFLAGS = -fPIC -g -Wall
+
+and uncomment (remove the # sign from) this CFLAGS line two lines above it:
+
+    CFLAGS = -fPIC -g -Wall -arch i386 -arch x86_64
+
+Now build and install the software
+
+    $ make clean
+    $ make
+    $ sudo make install
+
+Verify that it worked by running:
+
+    $ file /usr/local/lib/liblabjackusb.dylib 
+    /usr/local/lib/liblabjackusb.dylib: Mach-O universal binary with 2 architectures
+    /usr/local/lib/liblabjackusb.dylib (for architecture i386): Mach-O dynamically linked shared library i386
+    /usr/local/lib/liblabjackusb.dylib (for architecture x86_64):   Mach-O 64-bit dynamically linked shared library x86_64
+
+Because libusb-1.0 and the Exodriver are built for the i386 architecture,
+32-bit applications can load them.
