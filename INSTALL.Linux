@@ -146,3 +146,8 @@ $ python
 >>> d = u3.U3()
 >>> d.configU3()
 
+Machines Using VirtualBox
+-------------------------
+Customers using Oracle's VirtualBox software should add themselves to the
+vboxusers group, either through their distribution's GUI interface or through
+the command: sudo usermod -a -G vboxusers USERNAME
