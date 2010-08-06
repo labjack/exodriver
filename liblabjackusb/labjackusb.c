@@ -772,7 +772,7 @@ unsigned long LJUSB_GetDevCount(unsigned long ProductID)
 }
 
 bool LJUSB_IsHandleValid(HANDLE hDevice) {
-    int config = 0;
+    uint8_t config = 0;
     int r = 1;
 
     if (LJUSB_isNullHandle(hDevice)) {
@@ -787,10 +787,12 @@ bool LJUSB_IsHandleValid(HANDLE hDevice) {
 
     // If we can call get configuration without getting an error,
     // the handle is still valid.
-    r = libusb_get_configuration(hDevice, &config);
-    if (DEBUG) {
-        fprintf(stderr, "LJUSB_IsHandleValid.\n");
-    }
+    // Note that libusb_get_configuration() will return a cached value,
+    // so we replace this call
+    //r = libusb_get_configuration(hDevice, &config);
+    // to the actual control transer, from the libusb source
+    r = libusb_control_transfer(hDevice, LIBUSB_ENDPOINT_IN,
+        LIBUSB_REQUEST_GET_CONFIGURATION, 0, 0, &config, 1, 1000);
     if (r < 0) {
         if (DEBUG) {
             fprintf(stderr, "LJUSB_IsHandleValid: returning 0. Return value from libusb_get_configuration was: %d\n", r);
