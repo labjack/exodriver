@@ -527,7 +527,7 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
         return -1;
     }
     
-    if(endpoint != 1 && endpoint < 0x81 ) {
+    if(isBulk && endpoint != 1 && endpoint < 0x81 ) {
         fprintf(stderr, "LJUSB_DoTransfer warning: Got endpoint = %d, however this not a known endpoint. Please verify you are using the header file provided in /usr/local/include/labjackusb.h and not an older header file.\n", endpoint);
     }
 
