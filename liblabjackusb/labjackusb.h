@@ -88,6 +88,37 @@ unsigned long LJUSB_GetDevCount(unsigned long ProductID);
 //Returns the total number of LabJack USB devices connected.
 //ProductID = The product ID of the devices you want to get the count of.
 
+int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n);
+// Returns the count for n products.
+// productCounts = Array of size n that holds the count
+// productIds = Array of size n which holds the product IDs.
+// n = The size of the arrays.
+// For example
+//   uint productCounts[10], productIds[10];
+//   r = LJUSB_GetDevCounts(productCounts, productIds, 10);
+// would return arrays that may look like
+//   {1, 2, 3, 4, 5, 0, 0, 0, 0, 0}
+//   {3, 6, 9, 1, 0x501, 0, 0, 0, 0, 0}
+// which means there are
+//   1 U3
+//   2 U6s
+//   3 UE9s
+//   4 U12s
+//   5 SkyMote Bridges
+// connected.
+
+int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices);
+// Opens all LabJack devices up to a maximum of maxDevices.
+// devHandles = An array of handles with a size of maxDevices
+// productIds = An array of product IDs with a size of maxDevices
+// maxDevices = Maximum number of devices to open.
+// Returns the number of devices actually opened, or -1 if a tragically bad 
+// error occurs. The structure of the arrays is similar to that of 
+// LJUSB_GetDevCounts above. A simple example would be:
+//   {2341234, 55343, 0, 0, ...}
+//   {3, 0x501, 0, 0, ...}
+// where the return value is 2. 2341234 is the handle for a U3, and 55343 is
+// the handle for a SkyMote Bridge.
 
 HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long ProductID);
 //Obtains a handle for a LabJack USB device.  Returns NULL if there is an

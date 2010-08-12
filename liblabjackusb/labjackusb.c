@@ -453,8 +453,10 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
             if (ljFoundCount == DevNum) {            
                 // Found the one requested
                 r = libusb_open(dev, &devh);
-                if (r < 0)
+                if (r < 0) {
+                    LJUSB_libusbError(r);
                     return NULL;
+                }
 
                 // Test if the kernel driver has the device.
                 // Should only be true for HIDs.
@@ -500,6 +502,112 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
        fprintf(stderr, "LJUSB_OpenDevice: Returning handle\n");
     return handle;
 }
+
+
+int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
+{	
+    void * handle = NULL;
+    struct libusb_device_handle *devh = NULL;
+    libusb_device **devs;
+    ssize_t cnt;
+    int r = 1;
+    libusb_device *dev;
+    unsigned int i = 0;
+    unsigned int ljFoundCount = 0;
+    struct libusb_device_descriptor desc;
+
+
+    if(!isLibUSBInitialized) {
+        r = libusb_init(NULL);
+        if (r < 0) {
+            fprintf(stderr, "failed to initialize libusb\n");
+            exit(1);
+        }
+        isLibUSBInitialized = true;
+    }
+
+    cnt = libusb_get_device_list(NULL, &devs);
+    if (cnt < 0) {
+        if (DEBUG) {
+            fprintf(stderr, "LJUSB_OpenDevice: failed to get device list\n");
+        }
+        exit(1);
+        libusb_exit(NULL);
+        return -1;
+    }
+
+    while ((dev = devs[i++]) != NULL) {
+        if (DEBUG) {
+            fprintf(stderr, "LJUSB_OpenDevice: calling libusb_get_device_descriptor\n");
+        }
+        r = libusb_get_device_descriptor(dev, &desc);
+        if (r < 0) {
+            libusb_exit(NULL);
+            fprintf(stderr, "failed to get device descriptor");
+            return -1;
+        }
+
+        if (LJ_VENDOR_ID == desc.idVendor) {
+            // Found a LabJack device
+            r = libusb_open(dev, &devh);
+            if (r < 0) {
+                LJUSB_libusbError(r);
+                continue;
+            }
+
+            // Test if the kernel driver has the device.
+            // Should only be true for HIDs.
+            if(libusb_kernel_driver_active(devh, 0) ){
+                if (DEBUG) {
+                    fprintf(stderr, "Kernel Driver was active, detaching...\n");
+                }
+                
+                // Detaches U12s from kernel driver.
+                r = libusb_detach_kernel_driver(devh, 0);
+                
+                // Check the return value
+                if( r != 0 ){
+                    fprintf(stderr, "failed to detach from kernel driver. Error Number: %i", r);
+                    libusb_close(devh);
+                    continue;
+                }
+            }
+
+            r = libusb_claim_interface(devh, 0);
+            if (r < 0) {
+                //LJUSB_libusbError(r);
+                libusb_close(devh);
+                continue;
+            }
+            
+            handle = (void *) devh;
+            
+            if(handle == NULL) {
+                // Not a valid handle
+                continue;
+            }
+            else if (ljFoundCount < maxDevices) {
+                if(LJUSB_isMinFirmware(handle, desc.idProduct)){
+                    devHandles[ljFoundCount] = handle;
+                    productIds[ljFoundCount] = desc.idProduct;
+                    ljFoundCount++;
+                } else {
+                    // Not high enough firmware, keep moving.
+                    libusb_close(devh);
+                    ljFoundCount--;
+                }
+            } else {
+                // Too many devices have been found.
+                libusb_close(devh);
+                break;
+            }
+        }
+    }
+    libusb_free_device_list(devs, 1);
+
+    return ljFoundCount;
+}
+
 
 static int LJUSB_handleBulkTranferError(int r)
 {
@@ -770,6 +878,96 @@ unsigned long LJUSB_GetDevCount(unsigned long ProductID)
 
     return ljFoundCount;
 }
+
+int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n)
+{
+    libusb_device **devs;
+    ssize_t cnt;
+    int r = 1;
+
+    if(!isLibUSBInitialized) {
+        r = libusb_init(NULL);
+        if (r < 0) {
+            fprintf(stderr, "failed to initialize libusb\n");
+            exit(1);
+        }
+        isLibUSBInitialized = true;
+    }
+
+    cnt = libusb_get_device_list(NULL, &devs);
+    if (cnt < 0) {
+        libusb_exit(NULL);
+        return 0;
+    }
+
+    libusb_device *dev;
+    UINT i = 0;
+    UINT u3ProductCount = 0;
+    UINT u6ProductCount = 0;
+    UINT ue9ProductCount = 0;
+    UINT u12ProductCount = 0;
+    UINT bridgeProductCount = 0;
+
+    // Loop over all USB devices and count the ones with the LabJack
+    // vendor ID and the passed in product ID.
+    while ((dev = devs[i++]) != NULL) {
+        struct libusb_device_descriptor desc;
+        r = libusb_get_device_descriptor(dev, &desc);
+        if (r < 0) {
+                libusb_exit(NULL);
+                fprintf(stderr, "failed to get device descriptor");
+                return 0;
+        }
+        if (LJ_VENDOR_ID == desc.idVendor) {
+            switch(desc.idProduct) {
+            case U3_PRODUCT_ID:
+                u3ProductCount++;
+                break;
+            case U6_PRODUCT_ID:
+                u6ProductCount++;
+                break;
+            case UE9_PRODUCT_ID:
+                ue9ProductCount++;
+                break;
+            case U12_PRODUCT_ID:
+                u12ProductCount++;
+                break;
+            case BRIDGE_PRODUCT_ID:
+                bridgeProductCount++;
+                break;
+            }
+        }
+    }
+    libusb_free_device_list(devs, 1);
+
+    for(i = 0; i < n; i++) {
+        switch(i) {
+            case 0:
+                productCounts[i] = u3ProductCount;
+                productIds[i] = U3_PRODUCT_ID;
+                break;
+            case 1:
+                productCounts[i] = u6ProductCount;
+                productIds[i] = U6_PRODUCT_ID;
+                break;
+            case 2:
+                productCounts[i] = ue9ProductCount;
+                productIds[i] = UE9_PRODUCT_ID;
+                break;
+            case 3:
+                productCounts[i] = u12ProductCount;
+                productIds[i] = U12_PRODUCT_ID;
+                break;
+            case 4:
+                productCounts[i] = bridgeProductCount;
+                productIds[i] = BRIDGE_PRODUCT_ID;
+                break;
+        }
+    }
+
+    return 0;
+}
+
 
 bool LJUSB_IsHandleValid(HANDLE hDevice) {
     uint8_t config = 0;
