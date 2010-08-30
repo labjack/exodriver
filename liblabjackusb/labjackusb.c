@@ -646,7 +646,16 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
         r = libusb_interrupt_transfer(hDevice, endpoint, pBuff, count, &transferred, LJ_LIBUSB_TIMEOUT);
     }
 
-    if (r != 0) {
+    if (r == LIBUSB_ERROR_TIMEOUT && !isBulk){
+        // We time out a lot using interrupt transfers, so there's no reason to
+        // cry about it. Just set the errno, and move on.
+        if (DEBUG) {
+            fprintf(stderr, "LJUSB_DoTransfer: Interrupt transfer timed out. Returning.\n");
+        }
+        errno = r;
+        return -1;
+    }
+    else if (r != 0) {
         return LJUSB_handleBulkTranferError(r);
     }
 
