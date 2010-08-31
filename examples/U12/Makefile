@@ -7,13 +7,12 @@ U12AISAMPLE_OBJ=$(U12AISAMPLE_SRC:.c=.o)
 SRCS=$(wildcard *.c)
 HDRS=$(wildcard *.h)
 
-CFLAGS=-Wall -g
-LDFLAGS=
+CFLAGS+=-Wall -g
 LIBS=-lm -llabjackusb
 
 all: u12AISample
 
-u12AISample: $(U12AISAMPLE_OBJ)
+u12AISample: $(U12AISAMPLE_OBJ) $(HDRS)
 	$(CC) -o u12AISample $(U12AISAMPLE_OBJ) $(LDFLAGS) $(LIBS)
 
 clean:

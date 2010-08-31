@@ -1,5 +1,5 @@
 #
-# Makefile for U3 examples
+# Makefile for Modbus examples
 #
 TESTMODBUS_SRC=testModbusFunctions.c modbus.c
 TESTMODBUS_OBJ=$(TESTMODBUS_SRC:.c=.o)
@@ -10,11 +10,7 @@ READMODBUS_OBJ=$(READMODBUS_SRC:.c=.o)
 WRITEMODBUS_SRC=writeModbusExample.c modbus.c
 WRITEMODBUS_OBJ=$(WRITEMODBUS_SRC:.c=.o)
 
-SRCS=$(wildcard *.c)
-HDRS=$(wildcard *.h)
-
-CFLAGS=-Wall -g
-LDFLAGS=
+CFLAGS+=-Wall -g
 LIBS=-lm -llabjackusb
 
 all: testModbusFunctions readModbusExample writeModbusExample

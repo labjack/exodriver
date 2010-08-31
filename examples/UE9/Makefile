@@ -34,40 +34,39 @@ UE9LJTDAC_OBJ=$(UE9LJTDAC_SRC:.c=.o)
 SRCS=$(wildcard *.c)
 HDRS=$(wildcard *.h)
 
-CFLAGS=-Wall -g
-LDFLAGS=
+CFLAGS +=-Wall -g
 LIBS=-lm -llabjackusb
 
 all: ue9BasicCommConfig ue9EthernetExample ue9SingleIO ue9ControlConfig ue9Feedback ue9Stream ue9TimerCounter ue9allio ue9EFunctions ue9LJTDAC
 
-ue9BasicCommConfig: $(UE9COMMCONFIG_OBJ)
+ue9BasicCommConfig: $(UE9COMMCONFIG_OBJ) $(HDRS)
 	$(CC) -o ue9BasicCommConfig $(UE9COMMCONFIG_OBJ) $(LDFLAGS) $(LIBS)
 
-ue9EthernetExample: $(UE9ETHERNET_OBJ)
+ue9EthernetExample: $(UE9ETHERNET_OBJ) $(HDRS)
 	$(CC) -o ue9EthernetExample $(UE9ETHERNET_OBJ) $(LDFLAGS) $(LIBS)
 
-ue9SingleIO: $(UE9SINGLEIO_OBJ)
+ue9SingleIO: $(UE9SINGLEIO_OBJ) $(HDRS)
 	$(CC) -o ue9SingleIO $(UE9SINGLEIO_OBJ) $(LDFLAGS) $(LIBS)
 
-ue9ControlConfig: $(UE9CONTROLCONFIG_OBJ)
+ue9ControlConfig: $(UE9CONTROLCONFIG_OBJ) $(HDRS)
 	$(CC) -o ue9ControlConfig $(UE9CONTROLCONFIG_OBJ) $(LDFLAGS) $(LIBS)
 
-ue9Feedback: $(UE9FEEDBACK_OBJ)
+ue9Feedback: $(UE9FEEDBACK_OBJ) $(HDRS)
 	$(CC) -o ue9Feedback $(UE9FEEDBACK_OBJ) $(LDFLAGS) $(LIBS)
 
-ue9Stream: $(UE9STREAM_OBJ)
+ue9Stream: $(UE9STREAM_OBJ) $(HDRS)
 	$(CC) -o ue9Stream $(UE9STREAM_OBJ) $(LDFLAGS) $(LIBS)
 
-ue9TimerCounter: $(UE9TIMERCOUNTER_OBJ)
+ue9TimerCounter: $(UE9TIMERCOUNTER_OBJ) $(HDRS)
 	$(CC) -o ue9TimerCounter $(UE9TIMERCOUNTER_OBJ) $(LDFLAGS) $(LIBS)
 
-ue9allio: $(UE9ALLIO_OBJ)
+ue9allio: $(UE9ALLIO_OBJ) $(HDRS)
 	$(CC) -o ue9allio $(UE9ALLIO_OBJ) $(LDFLAGS) $(LIBS)
 
-ue9EFunctions: $(UE9EFUNCTIONS_OBJ)
+ue9EFunctions: $(UE9EFUNCTIONS_OBJ) $(HDRS)
 	$(CC) -o ue9EFunctions $(UE9EFUNCTIONS_OBJ) $(LDFLAGS) $(LIBS)
 
-ue9LJTDAC: $(UE9LJTDAC_OBJ)
+ue9LJTDAC: $(UE9LJTDAC_OBJ) $(HDRS)
 	$(CC) -o ue9LJTDAC $(UE9LJTDAC_OBJ) $(LDFLAGS) $(LIBS)
 
 clean:

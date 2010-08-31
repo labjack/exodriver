@@ -3,13 +3,13 @@
 #
 #
 
-TARGET = liblabjackusb.so.2.0.2
+TARGET = liblabjackusb.so.2.0.3
 DESTINATION = /usr/local/lib
 
 HEADER = labjackusb.h
 HEADER_DESTINATION = /usr/local/include
 
-CFLAGS = -fPIC -g -Wall
+CFLAGS += -fPIC -g -Wall
 LIBFLAGS = -lusb-1.0 -lc
 
 %.o: %.c
@@ -17,10 +17,10 @@ LIBFLAGS = -lusb-1.0 -lc
 
 all: $(TARGET)
 
-$(TARGET): labjackusb.o
-	$(CC) -shared -Wl,-soname,liblabjackusb.so -o $(TARGET) labjackusb.o $(LIBFLAGS) 
+$(TARGET): labjackusb.o $(HEADER)
+	$(CC) -shared -Wl,-soname,liblabjackusb.so -o $(TARGET) labjackusb.o $(LIBFLAGS)
 
-install: $(TARGET) 
+install: $(TARGET)
 	test -z $(DESTINATION) || mkdir -p $(DESTINATION)
 	install $(TARGET) $(DESTINATION)
 	test -z $(HEADER_DESTINATION) || mkdir -p $(HEADER_DESTINATION)

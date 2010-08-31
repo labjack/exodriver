@@ -30,6 +30,10 @@
 //
 //  2.01 - Added U12 support
 //       - Added Wireless Bridge support
+//
+//  2.02 - Buxfix release
+//
+//  2.03 - Don't print libusb timeout errors on interupt transfers
 //----------------------------------------------------------------------
 //
 

@@ -22,8 +22,7 @@ U6LJTDAC_OBJ=$(U6LJTDAC_SRC:.c=.o)
 SRCS=$(wildcard *.c)
 HDRS=$(wildcard *.h)
 
-CFLAGS=-Wall -g
-LDFLAGS=
+CFLAGS +=-Wall -g
 LIBS=-lm -llabjackusb
 
 all: u6BasicConfigU6 u6allio u6EFunctions u6Feedback u6Stream u6LJTDAC
@@ -31,19 +30,19 @@ all: u6BasicConfigU6 u6allio u6EFunctions u6Feedback u6Stream u6LJTDAC
 u6BasicConfigU6: $(U6CONFIGU6_OBJ)
 	$(CC) -o u6BasicConfigU6 $(U6CONFIGU6_OBJ) $(LDFLAGS) $(LIBS)
 
-u6allio: $(U6ALLIO_OBJ)
+u6allio: $(U6ALLIO_OBJ) $(HDRS)
 	$(CC) -o u6allio $(U6ALLIO_OBJ) $(LDFLAGS) $(LIBS)
 
-u6EFunctions: $(U6EASY_OBJ)
+u6EFunctions: $(U6EASY_OBJ) $(HDRS)
 	$(CC) -o u6EFunctions $(U6EASY_OBJ) $(LDFLAGS) $(LIBS)
 
-u6Feedback: $(U6FEEDBACK_OBJ)
+u6Feedback: $(U6FEEDBACK_OBJ) $(HDRS)
 	$(CC) -o u6Feedback $(U6FEEDBACK_OBJ) $(LDFLAGS) $(LIBS)
 
-u6Stream: $(U6STREAM_OBJ)
+u6Stream: $(U6STREAM_OBJ) $(HDRS)
 	$(CC) -o u6Stream $(U6STREAM_OBJ) $(LDFLAGS) $(LIBS)
 
-u6LJTDAC: $(U6LJTDAC_OBJ)
+u6LJTDAC: $(U6LJTDAC_OBJ) $(HDRS)
 	$(CC) -o u6LJTDAC $(U6LJTDAC_OBJ) $(LDFLAGS) $(LIBS)
 
 clean:
