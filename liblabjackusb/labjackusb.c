@@ -997,7 +997,7 @@ bool LJUSB_IsHandleValid(HANDLE hDevice) {
     // Note that libusb_get_configuration() will return a cached value,
     // so we replace this call
     //r = libusb_get_configuration(hDevice, &config);
-    // to the actual control transer, from the libusb source
+    // to the actual control tranfser, from the libusb source
     r = libusb_control_transfer(hDevice, LIBUSB_ENDPOINT_IN,
         LIBUSB_REQUEST_GET_CONFIGURATION, 0, 0, &config, 1, 1000);
     if (r < 0) {
