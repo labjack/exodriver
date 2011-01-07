@@ -34,6 +34,10 @@
 //  2.02 - Buxfix release
 //
 //  2.03 - Don't print libusb timeout errors on interupt transfers
+//
+//  2.04 - Removed exit calls
+//       - Now using unique a libusb session instead of the default
+//       - Setting errno more often when libusb errors occur
 //----------------------------------------------------------------------
 //
 

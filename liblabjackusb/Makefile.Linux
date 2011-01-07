@@ -3,7 +3,7 @@
 #
 #
 
-TARGET = liblabjackusb.so.2.0.3
+TARGET = liblabjackusb.so.2.0.4
 DESTINATION = /usr/local/lib
 
 HEADER = labjackusb.h
