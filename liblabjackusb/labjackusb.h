@@ -44,7 +44,7 @@
 #ifndef _LABJACKUSB_H_
 #define _LABJACKUSB_H_
 
-#define LJUSB_LINUX_LIBRARY_VERSION 2.0f
+#define LJUSB_LINUX_LIBRARY_VERSION 2.04f
 
 #include <stdbool.h>
 
