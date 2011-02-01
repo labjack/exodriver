@@ -438,7 +438,7 @@ static bool LJUSB_isMinFirmware(HANDLE hDevice, unsigned long ProductID)
 }
 
 
-void LJUSB_libusb_exit(void)
+static void LJUSB_libusb_exit(void)
 {
     if (isLibUSBInitialized) {
         libusb_exit(ljContext);
