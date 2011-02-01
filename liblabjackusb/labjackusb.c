@@ -354,7 +354,7 @@ static bool LJUSB_UE9_isMinFirmware(struct LJUSB_FirmwareHardwareVersion * fhv)
 
 static bool LJUSB_isRecentKernel(void)
 {
-    int kernelMajor, kernelMinor, kernelRev;
+    unsigned long kernelMajor, kernelMinor, kernelRev;
     char * tok;
     struct utsname u;
     if (uname(&u) != 0) {
@@ -381,19 +381,19 @@ static bool LJUSB_isRecentKernel(void)
     kernelMajor = strtoul(tok, NULL, 10);
     if (DEBUG) {
         fprintf(stderr, "LJUSB_recentKernel: tok: %s\n", tok);
-        fprintf(stderr, "LJUSB_recentKernel: kernelMajor: %d\n", kernelMajor);
+        fprintf(stderr, "LJUSB_recentKernel: kernelMajor: %lu\n", kernelMajor);
     }
     tok = strtok(NULL, ".-");
     kernelMinor = strtoul(tok, NULL, 10);
     if (DEBUG) {
         fprintf(stderr, "LJUSB_recentKernel: tok: %s\n", tok);
-        fprintf(stderr, "LJUSB_recentKernel: kernelMinor: %d\n", kernelMinor);
+        fprintf(stderr, "LJUSB_recentKernel: kernelMinor: %lu\n", kernelMinor);
     }
     tok = strtok(NULL, ".-");
     kernelRev = strtoul(tok, NULL, 10);
     if (DEBUG) {
         fprintf(stderr, "LJUSB_recentKernel: tok: %s\n", tok);
-        fprintf(stderr, "LJUSB_recentKernel: kernelRev: %d\n", kernelRev);
+        fprintf(stderr, "LJUSB_recentKernel: kernelRev: %lu\n", kernelRev);
     }
 
     return (kernelMajor == LJ_RECENT_KERNEL_MAJOR && kernelMinor == LJ_RECENT_KERNEL_MINOR && kernelRev >= LJ_RECENT_KERNEL_REV) ||
