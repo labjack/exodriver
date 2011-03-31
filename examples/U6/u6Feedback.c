@@ -358,22 +358,23 @@ int feedback_loop_example(HANDLE hDevice, u6CalibrationInfo *caliInfo)
 
     sendBuff[7] = 2;    //IOType is AIN24
     sendBuff[8] = 0;    //Positive channel
-    sendBuff[9] = 0 + 8*8;  //GainIndex(Bits 0-2) = 0 (+-10V),
-                            //ResolutionIndex(Bits 3-7) = 8
+    sendBuff[9] = 8 + 0*16;  //ResolutionIndex(Bits 0-3) = 8,
+                             //GainIndex(Bits 4-7) = 0 (+-10V)
+                            
     sendBuff[10] =  0 + 0*128;  //SettlingFactor(Bits 0-2) = 0 (5 microseconds),
                                 // Differential(Bit 7) = 0
 
     sendBuff[11] = 2;   //IOType is AIN24
     sendBuff[12] = 1;   //Positive channel
-    sendBuff[13] = 0 + 8*8;  //GainIndex(Bits 0-2) = 0 (+-10V),
-                             //ResolutionIndex(Bits 3-7) = 8
+    sendBuff[13] = 8 + 0*16;  //ResolutionIndex(Bits 0-3) = 8,
+                              //GainIndex(Bits 4-7) = 0 (+-10V)
     sendBuff[14] =  0 + 0*128;  //SettlingFactor(Bits 0-2) = 0 (5 microseconds),
                                 //Differential(Bit 7) = 0
 
     sendBuff[15] = 2;   //IOType is AIN24
     sendBuff[16] = 0;   //Positive channel
-    sendBuff[17] = 0 + 8*8;  //GainIndex(Bits 0-2) = 0 (+-10V),
-                             // ResolutionIndex(Bits 3-7) = 8
+    sendBuff[17] = 8 + 0*16;  //ResolutionIndex(Bits 0-3) = 8,
+                              //GainIndex(Bits 4-7) = 0 (+-10V)
     sendBuff[18] = 0 + 1*128;  //SettlingFactor(Bits 0-2) = 0 (5 microseconds),
                                //Differential(Bit 7) = 1
 
@@ -385,8 +386,8 @@ int feedback_loop_example(HANDLE hDevice, u6CalibrationInfo *caliInfo)
 
     sendBuff[23] = 2;    //IOType is AIN24
     sendBuff[24] = 14;   //Positive channel = 14 (temperature sensor)
-    sendBuff[25] = 0 + 8*8;  //GainIndex(Bits 0-2) = 0 (+-10V),
-                             // ResolutionIndex(Bits 3-7) = 8
+    sendBuff[25] = 8 + 0*16;  //ResolutionIndex(Bits 0-3) = 8,
+                              //GainIndex(Bits 4-7) = 0 (+-10V)
     sendBuff[26] = 0 + 0*128;   //SettlingFactor(Bits 0-2) = 0 (5 microseconds), Differential(Bit 7) = 0
 
     sendBuff[27] = 0;    //Padding byte
