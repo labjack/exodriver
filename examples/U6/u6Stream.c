@@ -125,13 +125,13 @@ int ConfigIO_example(HANDLE hDevice)
 
     if( recBuff[8] != 0)
     {
-        printf("ConfigIO error : CounterEnable was not set to 0\n");
+        printf("ConfigIO error : NumberTimersEnabled was not set to 0\n");
         return -1;
     }
 
-   if( recBuff[8] != 0)
+    if( recBuff[9] != 0)
     {
-        printf("ConfigIO error : NumberTimersEnabled was not set to 0\n");
+        printf("ConfigIO error : CounterEnable was not set to 0\n");
         return -1;
     }
 
