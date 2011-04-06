@@ -1,5 +1,5 @@
 //Author: LabJack
-//June 25, 2009
+//April 6, 2011
 //Header for U6 example helper functions.
 
 #ifndef _U6_H
@@ -118,8 +118,9 @@ uint8 extendedChecksum8( uint8 *b);
 //b = data packet for extended command
 
 HANDLE openUSBConnection( int localID);
-//Opens a U6 with the given localID.  Returns NULL on failure, or a HANDLE on
-//success.
+//Opens a U6 connection over USB.  Returns NULL on failure, or a HANDLE
+//on success.
+//localID = the local ID or serial number of the U6 you want to open
 
 void closeUSBConnection( HANDLE hDevice);
 //Closes a HANDLE to a U6 device.

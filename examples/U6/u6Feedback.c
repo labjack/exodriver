@@ -1,5 +1,5 @@
 //Author : LabJack
-//June 25, 2009
+//April 5, 2011
 //This example does the following:
 //  Sets DAC0 to 3.5 volts.
 //  Reads AIN0-AIN1, and AIN0 differential voltage.
@@ -34,24 +34,24 @@ int main(int argc, char **argv)
     setTerm();
 
     //Opening first found U6 over USB
-    if((hDevice = openUSBConnection(-1)) == NULL)
+    if( (hDevice = openUSBConnection(-1)) == NULL )
         goto done;
 
     //Getting calibration information from U6
-    if(getCalibrationInfo(hDevice, &caliInfo) < 0)
+    if( getCalibrationInfo(hDevice, &caliInfo) < 0 )
         goto close;
 
-    if(configIO_example(hDevice, 1) != 0)
+    if( configIO_example(hDevice, 1) != 0 )
         goto close;
 
-    if(configTimerClock_example(hDevice) != 0)
+    if( configTimerClock_example(hDevice) != 0 )
         goto close;
 
 
-    if(feedback_setup_example(hDevice, &caliInfo) != 0)
+    if( feedback_setup_example(hDevice, &caliInfo) != 0 )
         goto close;
 
-    if(feedback_loop_example(hDevice, &caliInfo) != 0)
+    if( feedback_loop_example(hDevice, &caliInfo) != 0 )
         goto close;
 
     configIO_example(hDevice, 0);
@@ -75,7 +75,7 @@ int configIO_example(HANDLE hDevice, int enable)
     int sendChars, recChars, i;
     uint8 numTimers, counterEnable;
 
-    if(enable == 0)
+    if( enable == 0 )
     {
         numTimers = 0;  //Setting NumberTimersEnabled byte to zero to turn off all Timers
         counterEnable = 0 + 0*2;  //Setting CounterEnable bits 0 and 1 to zero to disabled
@@ -94,16 +94,16 @@ int configIO_example(HANDLE hDevice, int enable)
 
     sendBuff[6] = 1;  //Writemask : Setting writemask for timerCounterConfig (bit 0)
 
-    sendBuff[7] = numTimers;  //NumberTimersEnabled
+    sendBuff[7] = numTimers;      //NumberTimersEnabled
     sendBuff[8] = counterEnable;  //CounterEnable: Bit 0 is Counter 0, Bit 1 is Counter 1
     sendBuff[9] = 1;  //TimerCounterPinOffset:  Setting to 1 so Timer/Counters start on FIO1
 
-    for(i = 10; i < 16; i++)
+    for( i = 10; i < 16; i++ )
         sendBuff[i] = 0;  //Reserved
     extendedChecksum(sendBuff, 16);
 
     //Sending command to U6
-    if( (sendChars = LJUSB_BulkWrite(hDevice, U6_PIPE_EP1_OUT, sendBuff, 16)) < 16)
+    if( (sendChars = LJUSB_Write(hDevice, sendBuff, 16)) < 16 )
     {
         if(sendChars == 0)
             printf("ConfigIO error : write failed\n");
@@ -113,7 +113,7 @@ int configIO_example(HANDLE hDevice, int enable)
     }
 
     //Reading response from U6
-    if( (recChars = LJUSB_BulkRead(hDevice, U6_PIPE_EP2_IN, recBuff, 16)) < 16)
+    if( (recChars = LJUSB_Read(hDevice, recBuff, 16)) < 16 )
     {
         if(recChars == 0)
             printf("ConfigIO error : read failed\n");
@@ -123,19 +123,19 @@ int configIO_example(HANDLE hDevice, int enable)
     }
 
     checksumTotal = extendedChecksum16(recBuff, 16);
-    if( (uint8)((checksumTotal / 256 ) & 0xff) != recBuff[5])
+    if( (uint8)((checksumTotal / 256 ) & 0xff) != recBuff[5] )
     {
         printf("ConfigIO error : read buffer has bad checksum16(MSB)\n");
         return -1;
     }
 
-    if( (uint8)(checksumTotal & 0xff) != recBuff[4])
+    if( (uint8)(checksumTotal & 0xff) != recBuff[4] )
     {
         printf("ConfigIO error : read buffer has bad checksum16(LBS)\n");
         return -1;
     }
 
-    if( extendedChecksum8(recBuff) != recBuff[0])
+    if( extendedChecksum8(recBuff) != recBuff[0] )
     {
         printf("ConfigIO error : read buffer has bad checksum8\n");
         return -1;
@@ -147,7 +147,7 @@ int configIO_example(HANDLE hDevice, int enable)
         return -1;
     }
 
-    if( recBuff[6] != 0)
+    if( recBuff[6] != 0 )
     {
         printf("ConfigIO error : read buffer received errorcode %d\n", recBuff[6]);
         return -1;
@@ -168,50 +168,50 @@ int configTimerClock_example(HANDLE hDevice)
     sendBuff[2] = (uint8)(0x02);  //Number of data words
     sendBuff[3] = (uint8)(0x0A);  //Extended command number
 
-    sendBuff[6] = 0;   //Reserved
-    sendBuff[7] = 0;   //Reserved
+    sendBuff[6] = 0;  //Reserved
+    sendBuff[7] = 0;  //Reserved
 
-    sendBuff[8] = 6 + 1*128; //TimerClockConfig : Configuring the clock (bit 7) and
-                             //setting the TimerClockBase (bits 0-2) to
-                             //48MHz/TimerClockDivisor
-    sendBuff[9] = 2;    //TimerClockDivisor : Setting to 2, so the actual timer
-                        //clock is 24 MHz
+    sendBuff[8] = 6 + 1*128;  //TimerClockConfig : Configuring the clock (bit 7) and
+                              //setting the TimerClockBase (bits 0-2) to
+                              //48MHz/TimerClockDivisor
+    sendBuff[9] = 2;  //TimerClockDivisor : Setting to 2, so the actual timer
+                      //clock is 24 MHz
     extendedChecksum(sendBuff, 10);
 
     //Sending command to U6
-    if( (sendChars = LJUSB_BulkWrite(hDevice, U6_PIPE_EP1_OUT, sendBuff, 10)) < 10)
+    if( (sendChars = LJUSB_Write(hDevice, sendBuff, 10)) < 10 )
     {
         if(sendChars == 0)
-        printf("ConfigTimerClock error : write failed\n");
+            printf("ConfigTimerClock error : write failed\n");
         else
-        printf("ConfigTimerClock error : did not write all of the buffer\n");
+            printf("ConfigTimerClock error : did not write all of the buffer\n");
         return -1;
     }
 
     //Reading response from U6
-    if( (recChars = LJUSB_BulkRead(hDevice, U6_PIPE_EP2_IN, recBuff, 10)) < 10)
+    if( (recChars = LJUSB_Read(hDevice, recBuff, 10)) < 10 )
     {
-        if(recChars == 0)
-        printf("ConfigTimerClock error : read failed\n");
+        if( recChars == 0 )
+            printf("ConfigTimerClock error : read failed\n");
         else
-        printf("ConfigTimerClock error : did not read all of the buffer\n");
+            printf("ConfigTimerClock error : did not read all of the buffer\n");
         return -1;
     }
 
     checksumTotal = extendedChecksum16(recBuff, 10);
-    if( (uint8)((checksumTotal / 256 ) & 0xff) != recBuff[5])
+    if( (uint8)((checksumTotal / 256 ) & 0xff) != recBuff[5] )
     {
         printf("ConfigTimerClock error : read buffer has bad checksum16(MSB)\n");
         return -1;
     }
 
-    if( (uint8)(checksumTotal & 0xff) != recBuff[4])
+    if( (uint8)(checksumTotal & 0xff) != recBuff[4] )
     {
         printf("ConfigTimerClock error : read buffer has bad checksum16(LBS)\n");
         return -1;
     }
 
-    if( extendedChecksum8(recBuff) != recBuff[0])
+    if( extendedChecksum8(recBuff) != recBuff[0] )
     {
         printf("ConfigTimerClock error : read buffer has bad checksum8\n");
         return -1;
@@ -223,7 +223,7 @@ int configTimerClock_example(HANDLE hDevice)
         return -1;
     }
 
-    if( recBuff[6] != 0)
+    if( recBuff[6] != 0 )
     {
         printf("ConfigTimerClock error : read buffer received errorcode %d\n", recBuff[6]);
         return -1;
@@ -252,27 +252,27 @@ int feedback_setup_example(HANDLE hDevice, u6CalibrationInfo *caliInfo)
     sendBuff[8] = 0 + 128*0;  //IONumber (bits 0 - 4) is 0 (FIO0) and Direction (bit 7) is
                               //input
 
-    sendBuff[9] = 43;    //IOType is Timer0Config
-    sendBuff[10] = 0;    //TimerMode is 16 bit PWM output (mode 0)
-    sendBuff[11] = 0;    //Value LSB
-    sendBuff[12] = 0;    //Value MSB, Whole value is 32768
+    sendBuff[9] = 43;  //IOType is Timer0Config
+    sendBuff[10] = 0;  //TimerMode is 16 bit PWM output (mode 0)
+    sendBuff[11] = 0;  //Value LSB
+    sendBuff[12] = 0;  //Value MSB, Whole value is 32768
 
     sendBuff[13] = 42;   //IOType is Timer0
     sendBuff[14] = 1;    //UpdateReset
     sendBuff[15] = 0;    //Value LSB
     sendBuff[16] = 128;  //Value MSB, Whole Value is 32768
 
-    sendBuff[17] = 45;   //IOType is Timer1Config
-    sendBuff[18] = 1;    //TimerMode is 8 bit PWM output (mode 1)
-    sendBuff[19] = 0;    //Value LSB
-    sendBuff[20] = 0;    //Value MSB, Whole value is 32768
+    sendBuff[17] = 45;  //IOType is Timer1Config
+    sendBuff[18] = 1;   //TimerMode is 8 bit PWM output (mode 1)
+    sendBuff[19] = 0;   //Value LSB
+    sendBuff[20] = 0;   //Value MSB, Whole value is 32768
 
     sendBuff[21] = 44;   //IOType is Timer1
     sendBuff[22] = 1;    //UpdateReset
     sendBuff[23] = 0;    //Value LSB
     sendBuff[24] = 128;  //Value MSB, Whole Value is 32768
 
-    sendBuff[25] = 38;   //IOType is DAC0 (16-bit)
+    sendBuff[25] = 38;  //IOType is DAC0 (16-bit)
 
     //Value is 3.5 volts (in binary form)
     getDacBinVoltCalibrated16Bit(caliInfo, 0, 3.5, &binVoltage16);
@@ -283,9 +283,9 @@ int feedback_setup_example(HANDLE hDevice, u6CalibrationInfo *caliInfo)
     extendedChecksum(sendBuff, 28);
 
     //Sending command to U6
-    if( (sendChars = LJUSB_BulkWrite(hDevice, U6_PIPE_EP1_OUT, sendBuff, 28)) < 28)
+    if( (sendChars = LJUSB_Write(hDevice, sendBuff, 28)) < 28 )
     {
-        if(sendChars == 0)
+        if( sendChars == 0 )
             printf("Feedback setup error : write failed\n");
         else
             printf("Feedback setup error : did not write all of the buffer\n");
@@ -293,9 +293,9 @@ int feedback_setup_example(HANDLE hDevice, u6CalibrationInfo *caliInfo)
     }
 
     //Reading response from U6
-    if( (recChars = LJUSB_BulkRead(hDevice, U6_PIPE_EP2_IN, recBuff, 18)) < 18)
+    if( (recChars = LJUSB_Read(hDevice, recBuff, 18)) < 18 )
     {
-        if(recChars == 0)
+        if( recChars == 0 )
         {
             printf("Feedback setup error : read failed\n");
             return -1;
@@ -305,19 +305,19 @@ int feedback_setup_example(HANDLE hDevice, u6CalibrationInfo *caliInfo)
     }
 
     checksumTotal = extendedChecksum16(recBuff, 18);
-    if( (uint8)((checksumTotal / 256 ) & 0xff) != recBuff[5])
+    if( (uint8)((checksumTotal / 256 ) & 0xff) != recBuff[5] )
     {
         printf("Feedback setup error : read buffer has bad checksum16(MSB)\n");
         return -1;
     }
 
-    if( (uint8)(checksumTotal & 0xff) != recBuff[4])
+    if( (uint8)(checksumTotal & 0xff) != recBuff[4] )
     {
         printf("Feedback setup error : read buffer has bad checksum16(LBS)\n");
         return -1;
     }
 
-    if( extendedChecksum8(recBuff) != recBuff[0])
+    if( extendedChecksum8(recBuff) != recBuff[0] )
     {
         printf("Feedback setup error : read buffer has bad checksum8\n");
         return -1;
@@ -329,7 +329,7 @@ int feedback_setup_example(HANDLE hDevice, u6CalibrationInfo *caliInfo)
         return -1;
     }
 
-    if( recBuff[6] != 0)
+    if( recBuff[6] != 0 )
     {
         printf("Feedback setup error : received errorcode %d for frame %d in Feedback response. \n", recBuff[6], recBuff[7]);
         return -1;
@@ -354,27 +354,27 @@ int feedback_loop_example(HANDLE hDevice, u6CalibrationInfo *caliInfo)
                                   //words for IOTypes)
     sendBuff[3] = (uint8)(0x00);  //Extended command number
 
-    sendBuff[6] = 0;    //Echo
+    sendBuff[6] = 0;  //Echo
 
-    sendBuff[7] = 2;    //IOType is AIN24
-    sendBuff[8] = 0;    //Positive channel
+    sendBuff[7] = 2;         //IOType is AIN24
+    sendBuff[8] = 0;         //Positive channel
     sendBuff[9] = 8 + 0*16;  //ResolutionIndex(Bits 0-3) = 8,
                              //GainIndex(Bits 4-7) = 0 (+-10V)
                             
     sendBuff[10] =  0 + 0*128;  //SettlingFactor(Bits 0-2) = 0 (5 microseconds),
                                 // Differential(Bit 7) = 0
 
-    sendBuff[11] = 2;   //IOType is AIN24
-    sendBuff[12] = 1;   //Positive channel
-    sendBuff[13] = 8 + 0*16;  //ResolutionIndex(Bits 0-3) = 8,
-                              //GainIndex(Bits 4-7) = 0 (+-10V)
+    sendBuff[11] = 2;           //IOType is AIN24
+    sendBuff[12] = 1;           //Positive channel
+    sendBuff[13] = 8 + 0*16;    //ResolutionIndex(Bits 0-3) = 8,
+                                //GainIndex(Bits 4-7) = 0 (+-10V)
     sendBuff[14] =  0 + 0*128;  //SettlingFactor(Bits 0-2) = 0 (5 microseconds),
                                 //Differential(Bit 7) = 0
 
-    sendBuff[15] = 2;   //IOType is AIN24
-    sendBuff[16] = 0;   //Positive channel
-    sendBuff[17] = 8 + 0*16;  //ResolutionIndex(Bits 0-3) = 8,
-                              //GainIndex(Bits 4-7) = 0 (+-10V)
+    sendBuff[15] = 2;          //IOType is AIN24
+    sendBuff[16] = 0;          //Positive channel
+    sendBuff[17] = 8 + 0*16;   //ResolutionIndex(Bits 0-3) = 8,
+                               //GainIndex(Bits 4-7) = 0 (+-10V)
     sendBuff[18] = 0 + 1*128;  //SettlingFactor(Bits 0-2) = 0 (5 microseconds),
                                //Differential(Bit 7) = 1
 
@@ -384,11 +384,11 @@ int feedback_loop_example(HANDLE hDevice, u6CalibrationInfo *caliInfo)
     sendBuff[21] = 55;  //IOType is Counter1
     sendBuff[22] = 0;   //Reset (bit 0) is not set
 
-    sendBuff[23] = 2;    //IOType is AIN24
-    sendBuff[24] = 14;   //Positive channel = 14 (temperature sensor)
-    sendBuff[25] = 8 + 0*16;  //ResolutionIndex(Bits 0-3) = 8,
-                              //GainIndex(Bits 4-7) = 0 (+-10V)
-    sendBuff[26] = 0 + 0*128;   //SettlingFactor(Bits 0-2) = 0 (5 microseconds), Differential(Bit 7) = 0
+    sendBuff[23] = 2;          //IOType is AIN24
+    sendBuff[24] = 14;         //Positive channel = 14 (temperature sensor)
+    sendBuff[25] = 8 + 0*16;   //ResolutionIndex(Bits 0-3) = 8,
+                               //GainIndex(Bits 4-7) = 0 (+-10V)
+    sendBuff[26] = 0 + 0*128;  //SettlingFactor(Bits 0-2) = 0 (5 microseconds), Differential(Bit 7) = 0
 
     sendBuff[27] = 0;    //Padding byte
 
@@ -397,13 +397,13 @@ int feedback_loop_example(HANDLE hDevice, u6CalibrationInfo *caliInfo)
     printf("Running Feedback calls in a loop\n");
 
     count = 0;
-    while(!kbhit())
+    while( !kbhit() )
     {
         count++;
         printf("Iteration %ld\n", count);
 
         //Sending command to U6
-        if( (sendChars = LJUSB_BulkWrite(hDevice, U6_PIPE_EP1_OUT, sendBuff, 28)) < 28)
+        if( (sendChars = LJUSB_Write(hDevice, sendBuff, 28)) < 28 )
         {
             if(sendChars == 0)
                 printf("Feedback loop error : write failed\n");
@@ -413,9 +413,9 @@ int feedback_loop_example(HANDLE hDevice, u6CalibrationInfo *caliInfo)
         }
 
         //Reading response from U6
-        if( (recChars = LJUSB_BulkRead(hDevice, U6_PIPE_EP2_IN, recBuff, 26)) < 26)
+        if( (recChars = LJUSB_Read(hDevice, recBuff, 26)) < 26 )
         {
-            if(recChars == 0)
+            if( recChars == 0 )
             {
                 printf("Feedback loop error : read failed\n");
                 return -1;
@@ -424,26 +424,26 @@ int feedback_loop_example(HANDLE hDevice, u6CalibrationInfo *caliInfo)
                 printf("Feedback loop error : did not read all of the expected buffer\n");
         }
 
-        if(recChars < 10)
+        if( recChars < 10 )
         {
             printf("Feedback loop error : response is not large enough\n");
             return -1;
         }
 
         checksumTotal = extendedChecksum16(recBuff, recChars);
-        if( (uint8)((checksumTotal / 256 ) & 0xff) != recBuff[5])
+        if( (uint8)((checksumTotal / 256 ) & 0xff) != recBuff[5] )
         {
             printf("Feedback loop error : read buffer has bad checksum16(MSB)\n");
             return -1;
         }
 
-        if( (uint8)(checksumTotal & 0xff) != recBuff[4])
+        if( (uint8)(checksumTotal & 0xff) != recBuff[4] )
         {
             printf("Feedback loop error : read buffer has bad checksum16(LBS)\n");
             return -1;
         }
 
-        if( extendedChecksum8(recBuff) != recBuff[0])
+        if( extendedChecksum8(recBuff) != recBuff[0] )
         {
             printf("Feedback loop error : read buffer has bad checksum8\n");
             return -1;
@@ -455,10 +455,10 @@ int feedback_loop_example(HANDLE hDevice, u6CalibrationInfo *caliInfo)
             return -1;
         }
 
-        if( recBuff[6] != 0)
+        if( recBuff[6] != 0 )
         {
             printf("Feedback loop error : received errorcode %d for frame %d ", recBuff[6], recBuff[7]);
-            switch(recBuff[7])
+            switch( recBuff[7] )
             {
                 case 1: printf("(AIN0(SE))\n"); break;
                 case 2: printf("(AIN1(SE))\n"); break;
@@ -509,7 +509,7 @@ int kbhit()
     char ch;
     int nread;
 
-    if(peek != -1)
+    if( peek != -1 )
         return 1;
 
     termNew.c_cc[VMIN]=0;
@@ -518,7 +518,7 @@ int kbhit()
     termNew.c_cc[VMIN]=1;
     tcsetattr(0, TCSANOW, &termNew);
 
-    if(nread == 1)
+    if( nread == 1 )
     {
         peek = ch;
         return 1;

@@ -1,5 +1,5 @@
 //Author : LabJack
-//July 8, 2009
+//April 6, 2011
 //This example calls the ConfigU6 low-level function and reads back
 //configuration settings.
 
@@ -13,7 +13,7 @@ int main(int argc, char **argv)
     HANDLE hDevice;
 
     //Opening first found U6 over USB
-    if( (hDevice = openUSBConnection(-1)) == NULL)
+    if( (hDevice = openUSBConnection(-1)) == NULL )
         return 1;
 
     configU6_example(hDevice);
@@ -37,21 +37,21 @@ int configU6_example(HANDLE hDevice)
 
     //Setting all bytes to zero since we only want to read back the U6
     //configuration settings
-    for(i = 6; i < 26; i++)
+    for( i = 6; i < 26; i++ )
         sendBuff[i] = 0;
 
     /* The commented out code below sets the U6's local ID to 3.  After setting
         the local ID, reset the device for this change to take effect. */
 
-    //sendBuff[6] = 8;   //WriteMask : setting bit 3
-    //sendBuff[8] = 3;   //LocalID : setting local ID to 3
+    //sendBuff[6] = 8;  //WriteMask : setting bit 3
+    //sendBuff[8] = 3;  //LocalID : setting local ID to 3
 
     extendedChecksum(sendBuff, 26);
 
     //Sending command to U6
-    if( (sendChars = LJUSB_BulkWrite(hDevice, U6_PIPE_EP1_OUT, sendBuff, 26)) < 26)
+    if( (sendChars = LJUSB_Write(hDevice, sendBuff, 26)) < 26 )
     {
-        if(sendChars == 0)
+        if( sendChars == 0 )
             printf("ConfigU6 error : write failed\n");
         else
             printf("ConfigU6 error : did not write all of the buffer\n");
@@ -59,9 +59,9 @@ int configU6_example(HANDLE hDevice)
     }
 
     //Reading response from U6
-    if( (recChars = LJUSB_BulkRead(hDevice, U6_PIPE_EP2_IN, recBuff, 38)) < 38)
+    if( (recChars = LJUSB_Read(hDevice, recBuff, 38)) < 38 )
     {
-        if(recChars == 0)
+        if( recChars == 0 )
             printf("ConfigU6 error : read failed\n");
         else
             printf("ConfigU6 error : did not read all of the buffer\n");
@@ -69,19 +69,19 @@ int configU6_example(HANDLE hDevice)
     }
 
     checksumTotal = extendedChecksum16(recBuff, 38);
-    if( (uint8)((checksumTotal / 256) & 0xff) != recBuff[5])
+    if( (uint8)((checksumTotal / 256) & 0xff) != recBuff[5] )
     {
         printf("ConfigU6 error : read buffer has bad checksum16(MSB)\n");
         return -1;
     }
 
-    if( (uint8)(checksumTotal & 0xff) != recBuff[4])
+    if( (uint8)(checksumTotal & 0xff) != recBuff[4] )
     {
         printf("ConfigU6 error : read buffer has bad checksum16(LBS)\n");
         return -1;
     }
 
-    if( extendedChecksum8(recBuff) != recBuff[0])
+    if( extendedChecksum8(recBuff) != recBuff[0] )
     {
         printf("ConfigU6 error : read buffer has bad checksum8\n");
         return -1;
@@ -93,7 +93,7 @@ int configU6_example(HANDLE hDevice)
         return -1;
     }
 
-    if( recBuff[6] != 0)
+    if( recBuff[6] != 0 )
     {
         printf("ConfigU6 error : read buffer received errorcode %d\n", recBuff[6]);
         return -1;

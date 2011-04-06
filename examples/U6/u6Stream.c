@@ -1,5 +1,5 @@
 //Author: LabJack
-//June 11, 2009
+//April 5, 2011
 //This example program reads analog inputs AI0-AI4 using stream mode.
 
 #include "u6.h"
@@ -23,23 +23,23 @@ int main(int argc, char **argv)
     u6CalibrationInfo caliInfo;
 
     //Opening first found U6 over USB
-    if( (hDevice = openUSBConnection(-1)) == NULL)
+    if( (hDevice = openUSBConnection(-1)) == NULL )
         goto done;
 
     //Getting calibration information from U6
-    if(getCalibrationInfo(hDevice, &caliInfo) < 0)
+    if( getCalibrationInfo(hDevice, &caliInfo) < 0 )
         goto close;
 
-    if(ConfigIO_example(hDevice) != 0)
+    if( ConfigIO_example(hDevice) != 0 )
         goto close;
 
     //Stopping any previous streams
     StreamStop(hDevice);
 
-    if(StreamConfig_example(hDevice) != 0)
+    if( StreamConfig_example(hDevice) != 0 )
         goto close;
 
-    if(StreamStart(hDevice) != 0)
+    if( StreamStart(hDevice) != 0 )
         goto close;
 
     StreamData_example(hDevice, &caliInfo);
@@ -68,14 +68,14 @@ int ConfigIO_example(HANDLE hDevice)
     sendBuff[8] = 0;  //CounterEnable: Setting bit 0 and bit 1 to zero to disable both counters
     sendBuff[9] = 0;  //TimerCounterPinOffset
 
-    for(i = 10; i < 16; i++)
+    for( i = 10; i < 16; i++ )
         sendBuff[i] = 0;   //Reserved
     extendedChecksum(sendBuff, 16);
 
     //Sending command to U6
-    if( (sendChars = LJUSB_BulkWrite(hDevice, U6_PIPE_EP1_OUT, sendBuff, 16)) < 16)
+    if( (sendChars = LJUSB_Write(hDevice, sendBuff, 16)) < 16 )
     {
-        if(sendChars == 0)
+        if( sendChars == 0 )
             printf("ConfigIO error : write failed\n");
         else
             printf("ConfigIO error : did not write all of the buffer\n");
@@ -83,9 +83,9 @@ int ConfigIO_example(HANDLE hDevice)
     }
 
     //Reading response from U6
-    if( (recChars = LJUSB_BulkRead(hDevice, U6_PIPE_EP2_IN, recBuff, 16)) < 16)
+    if( (recChars = LJUSB_Read(hDevice, recBuff, 16)) < 16 )
     {
-        if(recChars == 0)
+        if( recChars == 0 )
             printf("ConfigIO error : read failed\n");
         else
             printf("ConfigIO error : did not read all of the buffer\n");
@@ -93,19 +93,19 @@ int ConfigIO_example(HANDLE hDevice)
     }
 
     checksumTotal = extendedChecksum16(recBuff, 15);
-    if( (uint8)((checksumTotal / 256 ) & 0xff) != recBuff[5])
+    if( (uint8)((checksumTotal / 256 ) & 0xff) != recBuff[5] )
     {
         printf("ConfigIO error : read buffer has bad checksum16(MSB)\n");
         return -1;
     }
 
-    if( (uint8)(checksumTotal & 0xff) != recBuff[4])
+    if( (uint8)(checksumTotal & 0xff) != recBuff[4] )
     {
         printf("ConfigIO error : read buffer has bad checksum16(LBS)\n");
         return -1;
     }
 
-    if( extendedChecksum8(recBuff) != recBuff[0])
+    if( extendedChecksum8(recBuff) != recBuff[0] )
     {
         printf("ConfigIO error : read buffer has bad checksum8\n");
         return -1;
@@ -117,19 +117,19 @@ int ConfigIO_example(HANDLE hDevice)
         return -1;
     }
 
-    if( recBuff[6] != 0)
+    if( recBuff[6] != 0 )
     {
         printf("ConfigIO error : read buffer received errorcode %d\n", recBuff[6]);
         return -1;
     }
 
-    if( recBuff[8] != 0)
+    if( recBuff[8] != 0 )
     {
         printf("ConfigIO error : NumberTimersEnabled was not set to 0\n");
         return -1;
     }
 
-    if( recBuff[9] != 0)
+    if( recBuff[9] != 0 )
     {
         printf("ConfigIO error : CounterEnable was not set to 0\n");
         return -1;
@@ -149,55 +149,56 @@ int StreamConfig_example(HANDLE hDevice)
     uint16 scanInterval;
     int i;
 
-    sendBuff[1] = (uint8)(0xF8);    //command byte
-    sendBuff[2] = 4 + NumChannels;  //number of data words = NumChannels + 4
-    sendBuff[3] = (uint8)(0x11);    //extended command number
-    sendBuff[6] = NumChannels;      //NumChannels
-    sendBuff[7] = 1;                //ResolutionIndex
-    sendBuff[8] = SamplesPerPacket; //SamplesPerPacket
-    sendBuff[9] = 0;                //Reserved
-    sendBuff[10] = 0;               //SettlingFactor: 0
-    sendBuff[11] = 0;               //ScanConfig:
-                                    // Bit 3: Internal stream clock frequency = b0: 4 MHz
-                                    // Bit 1: Divide Clock by 256 = b0
+    sendBuff[1] = (uint8)(0xF8);     //Command byte
+    sendBuff[2] = 4 + NumChannels;   //Number of data words = NumChannels + 4
+    sendBuff[3] = (uint8)(0x11);     //Extended command number
+    sendBuff[6] = NumChannels;       //NumChannels
+    sendBuff[7] = 1;                 //ResolutionIndex
+    sendBuff[8] = SamplesPerPacket;  //SamplesPerPacket
+    sendBuff[9] = 0;                 //Reserved
+    sendBuff[10] = 0;                //SettlingFactor: 0
+    sendBuff[11] = 0;  //ScanConfig:
+                       //  Bit 3: Internal stream clock frequency = b0: 4 MHz
+                       //  Bit 1: Divide Clock by 256 = b0
 
     scanInterval = 4000;
     sendBuff[12] = (uint8)(scanInterval&(0x00FF));  //scan interval (low byte)
     sendBuff[13] = (uint8)(scanInterval/256);       //scan interval (high byte)
 
-    for(i = 0; i < NumChannels; i++)
+    for( i = 0; i < NumChannels; i++ )
     {
         sendBuff[14 + i*2] = i;  //ChannelNumber (Positive) = i
-        sendBuff[15 + i*2] = 0;  //ChannelOptions: Bit 7: Differential = 0
-                                 //                Bit 5-4: GainIndex = 0 (+-10V)
+        sendBuff[15 + i*2] = 0;  //ChannelOptions: 
+                                 //  Bit 7: Differential = 0
+                                 //  Bit 5-4: GainIndex = 0 (+-10V)
     }
 
     extendedChecksum(sendBuff, sendBuffSize);
 
     //Sending command to U6
-    sendChars = LJUSB_BulkWrite(hDevice, U6_PIPE_EP1_OUT, sendBuff, sendBuffSize);
-    if(sendChars < sendBuffSize)
+    sendChars = LJUSB_Write(hDevice, sendBuff, sendBuffSize);
+    if( sendChars < sendBuffSize )
     {
-        if(sendChars == 0)
+        if( sendChars == 0 )
             printf("Error : write failed (StreamConfig).\n");
         else
             printf("Error : did not write all of the buffer (StreamConfig).\n");
         return -1;
     }
 
-    for(i = 0; i < 8; i++)
+    for( i = 0; i < 8; i++ )
         recBuff[i] = 0;
 
     //Reading response from U6
-    recChars = LJUSB_BulkRead(hDevice, U6_PIPE_EP2_IN, recBuff, 8);
-    if(recChars < 8)
+    recChars = LJUSB_Read(hDevice, recBuff, 8);
+    if( recChars < 8 )
     {
-        if(recChars == 0)
+        if( recChars == 0 )
             printf("Error : read failed (StreamConfig).\n");
         else
             printf("Error : did not read all of the buffer, %d (StreamConfig).\n", recChars);
 
-        for(i=0; i<8; i++)
+        for( i = 0; i < 8; i++)
             printf("%d ", recBuff[i]);
 
         return -1;
@@ -210,25 +211,25 @@ int StreamConfig_example(HANDLE hDevice)
         return -1;
     }
 
-    if( (uint8)(checksumTotal & 0xff) != recBuff[4])
+    if( (uint8)(checksumTotal & 0xff) != recBuff[4] )
     {
         printf("Error : read buffer has bad checksum16(LBS) (StreamConfig).\n");
         return -1;
     }
 
-    if( extendedChecksum8(recBuff) != recBuff[0])
+    if( extendedChecksum8(recBuff) != recBuff[0] )
     {
         printf("Error : read buffer has bad checksum8 (StreamConfig).\n");
         return -1;
     }
 
-    if( recBuff[1] != (uint8)(0xF8) || recBuff[2] != (uint8)(0x01) || recBuff[3] != (uint8)(0x11) || recBuff[7] != (uint8)(0x00))
+    if( recBuff[1] != (uint8)(0xF8) || recBuff[2] != (uint8)(0x01) || recBuff[3] != (uint8)(0x11) || recBuff[7] != (uint8)(0x00) )
     {
         printf("Error : read buffer has wrong command bytes (StreamConfig).\n");
         return -1;
     }
 
-    if(recBuff[6] != 0)
+    if( recBuff[6] != 0 )
     {
         printf("Errorcode # %d from StreamConfig read.\n", (unsigned int)recBuff[6]);
         return -1;
@@ -247,10 +248,10 @@ int StreamStart(HANDLE hDevice)
     sendBuff[1] = (uint8)(0xA8);  //command byte
 
     //Sending command to U6
-    sendChars = LJUSB_BulkWrite(hDevice, U6_PIPE_EP1_OUT, sendBuff, 2);
-    if(sendChars < 2)
+    sendChars = LJUSB_Write(hDevice, sendBuff, 2);
+    if( sendChars < 2 )
     {
-        if(sendChars == 0)
+        if( sendChars == 0 )
             printf("Error : write failed.\n");
         else
             printf("Error : did not write all of the buffer.\n");
@@ -258,10 +259,10 @@ int StreamStart(HANDLE hDevice)
     }
 
     //Reading response from U6
-    recChars = LJUSB_BulkRead(hDevice, U6_PIPE_EP2_IN, recBuff, 4);
-    if(recChars < 4)
+    recChars = LJUSB_Read(hDevice, recBuff, 4);
+    if( recChars < 4 )
     {
-        if(recChars == 0)
+        if( recChars == 0 )
             printf("Error : read failed.\n");
         else
             printf("Error : did not read all of the buffer.\n");
@@ -274,7 +275,7 @@ int StreamStart(HANDLE hDevice)
         return -1;
     }
 
-    if(recBuff[2] != 0)
+    if( recBuff[2] != 0 )
     {
         printf("Errorcode # %d from StreamStart read.\n", (unsigned int)recBuff[2]);
         return -1;
@@ -291,7 +292,7 @@ int StreamData_example(HANDLE hDevice, u6CalibrationInfo *caliInfo)
     recBuffSize = 14 + SamplesPerPacket*2;
     int recChars, backLog;
     int i, j, k, m, packetCounter, currChannel, scanNumber;
-    int totalPackets;        //The total number of StreamData responses read
+    int totalPackets;  //The total number of StreamData responses read
     uint16 voltageBytes, checksumTotal;
     long startTime, endTime;
     int autoRecoveryOn;
@@ -323,9 +324,9 @@ int StreamData_example(HANDLE hDevice, u6CalibrationInfo *caliInfo)
 
     startTime = getTickCount();
 
-    for (i = 0; i < numDisplay; i++)
+    for( i = 0; i < numDisplay; i++ )
     {
-        for(j = 0; j < numReadsPerDisplay; j++)
+        for( j = 0; j < numReadsPerDisplay; j++ )
         {
             /* For USB StreamData, use Endpoint 3 for reads.  You can read the multiple
              * StreamData responses of 64 bytes only if SamplesPerPacket is 25 to help
@@ -334,37 +335,37 @@ int StreamData_example(HANDLE hDevice, u6CalibrationInfo *caliInfo)
              */
 
             //Reading stream response from U6
-            recChars = LJUSB_BulkRead(hDevice, U6_PIPE_EP3_IN, recBuff, responseSize*readSizeMultiplier);
-            if(recChars < responseSize*readSizeMultiplier)
+            recChars = LJUSB_Stream(hDevice, recBuff, responseSize*readSizeMultiplier);
+            if( recChars < responseSize*readSizeMultiplier )
             {
                 if(recChars == 0)
-                printf("Error : read failed (StreamData).\n");
+                    printf("Error : read failed (StreamData).\n");
                 else
-                printf("Error : did not read all of the buffer, expected %d bytes but received %d(StreamData).\n", responseSize*readSizeMultiplier, recChars);
+                    printf("Error : did not read all of the buffer, expected %d bytes but received %d(StreamData).\n", responseSize*readSizeMultiplier, recChars);
 
                 return -1;
             }
 
             //Checking for errors and getting data out of each StreamData response
-            for (m = 0; m < readSizeMultiplier; m++)
+            for( m = 0; m < readSizeMultiplier; m++ )
             {
                 totalPackets++;
 
                 checksumTotal = extendedChecksum16(recBuff + m*recBuffSize, recBuffSize);
-                if( (uint8)((checksumTotal >> 8) & 0xff) != recBuff[m*recBuffSize + 5])
+                if( (uint8)((checksumTotal >> 8) & 0xff) != recBuff[m*recBuffSize + 5] )
                 {
                     printf("Error : read buffer has bad checksum16(MSB) (StreamData).\n");
                     return -1;
                 }
 
-                if( (uint8)(checksumTotal & 0xff) != recBuff[m*recBuffSize + 4])
+                if( (uint8)(checksumTotal & 0xff) != recBuff[m*recBuffSize + 4] )
                 {
                     printf("Error : read buffer has bad checksum16(LBS) (StreamData).\n");
                     return -1;
                 }
 
                 checksumTotal = extendedChecksum8(recBuff + m*recBuffSize);
-                if( checksumTotal != recBuff[m*recBuffSize])
+                if( checksumTotal != recBuff[m*recBuffSize] )
                 {
                     printf("Error : read buffer has bad checksum8 (StreamData).\n");
                     return -1;
@@ -376,26 +377,26 @@ int StreamData_example(HANDLE hDevice, u6CalibrationInfo *caliInfo)
                     return -1;
                 }
 
-                if(recBuff[m*recBuffSize + 11] == 59)
+                if( recBuff[m*recBuffSize + 11] == 59 )
                 {
-                    if(!autoRecoveryOn)
+                    if( !autoRecoveryOn )
                     {
                         printf("\nU6 data buffer overflow detected in packet %d.\nNow using auto-recovery and reading buffered samples.\n", totalPackets);
                         autoRecoveryOn = 1;
                     }
                 }
-                else if(recBuff[m*recBuffSize + 11] == 60)
+                else if( recBuff[m*recBuffSize + 11] == 60 )
                 {
                     printf("Auto-recovery report in packet %d: %d scans were dropped.\nAuto-recovery is now off.\n", totalPackets, recBuff[m*recBuffSize + 6] + recBuff[m*recBuffSize + 7]*256);
                     autoRecoveryOn = 0;
                 }
-                else if(recBuff[m*recBuffSize + 11] != 0)
+                else if( recBuff[m*recBuffSize + 11] != 0 )
                 {
                     printf("Errorcode # %d from StreamData read.\n", (unsigned int)recBuff[11]);
                     return -1;
                 }
 
-                if(packetCounter != (int)recBuff[m*recBuffSize + 10])
+                if( packetCounter != (int)recBuff[m*recBuffSize + 10] )
                 {
                     printf("PacketCounter (%d) does not match with with current packet count (%d)(StreamData).\n", recBuff[m*recBuffSize + 10], packetCounter);
                     return -1;
@@ -403,14 +404,14 @@ int StreamData_example(HANDLE hDevice, u6CalibrationInfo *caliInfo)
 
                 backLog = (int)recBuff[m*48 + 12 + SamplesPerPacket*2];
 
-                for(k = 12; k < (12 + SamplesPerPacket*2); k += 2)
+                for( k = 12; k < (12 + SamplesPerPacket*2); k += 2 )
                 {
                     voltageBytes = (uint16)recBuff[m*recBuffSize + k] + (uint16)recBuff[m*recBuffSize + k+1]*256;
 
                     getAinVoltCalibrated(caliInfo, 1, 0, 0, voltageBytes, &(voltages[scanNumber][currChannel]));
 
                     currChannel++;
-                    if(currChannel >= NumChannels)
+                    if( currChannel >= NumChannels )
                     {
                         currChannel = 0;
                         scanNumber++;
@@ -429,7 +430,7 @@ int StreamData_example(HANDLE hDevice, u6CalibrationInfo *caliInfo)
         printf("Current PacketCounter: %d\n", ((packetCounter == 0) ? 255 : packetCounter-1));
         printf("Current BackLog: %d\n", backLog);
 
-        for(k = 0; k < NumChannels; k++)
+        for( k = 0; k < NumChannels; k++ )
             printf("  AI%d: %.4f V\n", k, voltages[scanNumber - 1][k]);
     }
 
@@ -450,10 +451,10 @@ int StreamStop(HANDLE hDevice)
     sendBuff[1] = (uint8)(0xB0);  //command byte
 
     //Sending command to U6
-    sendChars = LJUSB_BulkWrite(hDevice, U6_PIPE_EP1_OUT, sendBuff, 2);
-    if(sendChars < 2)
+    sendChars = LJUSB_Write(hDevice, sendBuff, 2);
+    if( sendChars < 2 )
     {
-        if(sendChars == 0)
+        if( sendChars == 0 )
             printf("Error : write failed (StreamStop).\n");
         else
             printf("Error : did not write all of the buffer (StreamStop).\n");
@@ -461,19 +462,19 @@ int StreamStop(HANDLE hDevice)
     }
 
     //Reading response from U6
-    recChars = LJUSB_BulkRead(hDevice, U6_PIPE_EP2_IN, recBuff, 4);
-    if(recChars < 4)
+    recChars = LJUSB_Read(hDevice, recBuff, 4);
+    if( recChars < 4 )
     {
-        if(recChars == 0)
+        if( recChars == 0 )
             printf("Error : read failed (StreamStop).\n");
         else
             printf("Error : did not read all of the buffer (StreamStop).\n");
         return -1;
     }
 
-    if(recChars < 4)
+    if( recChars < 4 )
     {
-        if(recChars == 0)
+        if( recChars == 0 )
             printf("Error : read failed (StreamStop).\n");
         else
             printf("Error : did not read all of the buffer (StreamStop).\n");
@@ -486,7 +487,7 @@ int StreamStop(HANDLE hDevice)
         return -1;
     }
 
-    if(recBuff[2] != 0)
+    if( recBuff[2] != 0 )
     {
         printf("Errorcode # %d from StreamStop read.\n", (unsigned int)recBuff[2]);
         return -1;
@@ -498,8 +499,8 @@ int StreamStop(HANDLE hDevice)
     uint8 recBuffS[64];
     int recCharsS = 64;
     printf("Reading left over data from stream endpoint.\n");
-    while(recCharsS > 0)
-        recCharsS = LJUSB_BulkRead(hDevice, U6_PIPE_EP3_IN, recBuffS, 64);
+    while( recCharsS > 0 )
+        recCharsS = LJUSB_Stream(hDevice, recBuffS, 64);
     */
 
     return 0;

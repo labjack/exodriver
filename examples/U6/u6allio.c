@@ -1,5 +1,5 @@
 //Author : LabJack
-//July 8, 2009
+//April 5, 2011
 //This example demonstrates how to write and read some or all analog I/O.
 //By default, it records the time for 1000 iterations and divides by 1000,
 //to allow measurement of the basic command/response communication times.  These
@@ -24,11 +24,11 @@ int main(int argc, char **argv)
     u6CalibrationInfo caliInfo;
 
     //Opening first found U6 over USB
-    if( (hDevice = openUSBConnection(-1)) == NULL)
+    if( (hDevice = openUSBConnection(-1)) == NULL )
         goto done;
 
     //Getting calibration information from U6
-    if(getCalibrationInfo(hDevice, &caliInfo) < 0)
+    if( getCalibrationInfo(hDevice, &caliInfo) < 0 )
         goto close;
 
     allIO(hDevice, &caliInfo);
@@ -52,13 +52,13 @@ int allIO(HANDLE hDevice, u6CalibrationInfo *caliInfo)
     long time;
     int ret = 0;
 
-    for(i = 0; i < 14; i++)
+    for( i = 0; i < 14; i++ )
         valueAIN[i] = 9999;
 
     //Setting up a Feedback command that will set CIO0-3 as input, and
     //set DAC0 voltage
-    sendBuff = malloc(18*sizeof(uint8));  //Creating an array of size 18
-    recBuff = malloc(10*sizeof(uint8));   //Creating an array of size 10
+    sendBuff = (uint8 *)malloc(18*sizeof(uint8));  //Creating an array of size 18
+    recBuff = (uint8 *)malloc(10*sizeof(uint8));   //Creating an array of size 10
 
     sendBuff[1] = (uint8)(0xF8);  //Command byte
     sendBuff[2] = 6;              //Number of data words (.5 word for echo, 5.5
@@ -87,7 +87,7 @@ int allIO(HANDLE hDevice, u6CalibrationInfo *caliInfo)
     extendedChecksum(sendBuff, 18);
 
     //Sending command to U6
-    if( (sendChars = LJUSB_BulkWrite(hDevice, U6_PIPE_EP1_OUT, sendBuff, 18)) < 18)
+    if( (sendChars = LJUSB_Write(hDevice, sendBuff, 18)) < 18 )
     {
         if(sendChars == 0)
             printf("Feedback (CIO input) error : write failed\n");
@@ -98,34 +98,34 @@ int allIO(HANDLE hDevice, u6CalibrationInfo *caliInfo)
     }
 
     //Reading response from U6
-    if( (recChars = LJUSB_BulkRead(hDevice, U6_PIPE_EP2_IN, recBuff, 10)) < 10)
+    if( (recChars = LJUSB_Read(hDevice, recBuff, 10)) < 10 )
     {
-        if(recChars == 0)
+        if( recChars == 0 )
         {
             printf("Feedback (CIO input) error : read failed\n");
             ret = -1;
             goto cleanmem;
         }
         else
-        printf("Feedback (CIO input) error : did not read all of the buffer\n");
+            printf("Feedback (CIO input) error : did not read all of the buffer\n");
     }
 
     checksumTotal = extendedChecksum16(recBuff, 10);
-    if( (uint8)((checksumTotal / 256) & 0xff) != recBuff[5])
+    if( (uint8)((checksumTotal / 256) & 0xff) != recBuff[5] )
     {
         printf("Feedback (CIO input) error : read buffer has bad checksum16(MSB)\n");
         ret = -1;
         goto cleanmem;
     }
 
-    if( (uint8)(checksumTotal & 0xff) != recBuff[4])
+    if( (uint8)(checksumTotal & 0xff) != recBuff[4] )
     {
         printf("Feedback (CIO input) error : read buffer has bad checksum16(LBS)\n");
         ret = -1;
         goto cleanmem;
     }
 
-    if( extendedChecksum8(recBuff) != recBuff[0])
+    if( extendedChecksum8(recBuff) != recBuff[0] )
     {
         printf("Feedback (CIO input) error : read buffer has bad checksum8\n");
         ret = -1;
@@ -139,7 +139,7 @@ int allIO(HANDLE hDevice, u6CalibrationInfo *caliInfo)
         goto cleanmem;
     }
 
-    if( recBuff[6] != 0)
+    if( recBuff[6] != 0 )
     {
         printf("Feedback (CIO input) error : received errorcode %d for frame %d in Feedback response. \n", recBuff[6], recBuff[7]);
         ret = -1;
@@ -150,11 +150,11 @@ int allIO(HANDLE hDevice, u6CalibrationInfo *caliInfo)
     free(recBuff);
 
     //Setting up Feedback command that will run numIterations times
-    if( ((sendSize = 7+numChannels*4) % 2) != 0)
+    if( ((sendSize = 7+numChannels*4) % 2) != 0 )
         sendSize++;
     sendBuff = malloc(sendSize*sizeof(uint8)); //Creating an array of size sendSize
 
-    if( ((recSize = 9+numChannels*3) % 2) != 0)
+    if( ((recSize = 9+numChannels*3) % 2) != 0 )
         recSize++;
     recBuff = malloc(recSize*sizeof(uint8));   //Creating an array of size recSize
 
@@ -165,7 +165,7 @@ int allIO(HANDLE hDevice, u6CalibrationInfo *caliInfo)
     sendBuff[6] = 0;     //Echo
 
     //Setting AIN read commands
-    for(j = 0; j < numChannels; j++)
+    for( j = 0; j < numChannels; j++ )
     {
         sendBuff[7 + j*4] = 2;     //IOType is AIN24
 
@@ -173,18 +173,18 @@ int allIO(HANDLE hDevice, u6CalibrationInfo *caliInfo)
         sendBuff[8 + j*4] = j; //Positive Channel
         sendBuff[9 + j*4] = (uint8)(resolution&15) + (uint8)((gainIndex&15)*16);   //ResolutionIndex(Bits 0-3), GainIndex(Bits 4-7)
         sendBuff[10 + j*4] = (uint8)(settlingFactor&7);  //SettlingFactor(Bits 0-2)
-        if(j%2 == 0)
+        if( j%2 == 0 )
             sendBuff[10 + j*4] += (uint8)((differential&1)*128);   //Differential(Bits 7)
     }
 
-    extendedChecksum(sendBuff,sendSize);
+    extendedChecksum(sendBuff, sendSize);
 
     time = getTickCount();
 
-    for(i = 0; i < numIterations; i++)
+    for( i = 0; i < numIterations; i++ )
     {
         //Sending command to U6
-        if( (sendChars = LJUSB_BulkWrite(hDevice, U6_PIPE_EP1_OUT, sendBuff, sendSize)) < sendSize)
+        if( (sendChars = LJUSB_Write(hDevice, sendBuff, sendSize)) < sendSize )
         {
             if(sendChars == 0)
                 printf("Feedback error (Iteration %d): write failed\n", i);
@@ -195,9 +195,9 @@ int allIO(HANDLE hDevice, u6CalibrationInfo *caliInfo)
         }
 
         //Reading response from U6
-        if( (recChars = LJUSB_BulkRead(hDevice, U6_PIPE_EP2_IN, recBuff, recSize)) < recSize)
+        if( (recChars = LJUSB_Read(hDevice, recBuff, recSize)) < recSize )
         {
-            if(recChars == 0)
+            if( recChars == 0 )
             {
                 printf("Feedback error (Iteration %d): read failed\n", i);
                 ret = -1;
@@ -206,21 +206,21 @@ int allIO(HANDLE hDevice, u6CalibrationInfo *caliInfo)
         }
 
         checksumTotal = extendedChecksum16(recBuff, recChars);
-        if( (uint8)((checksumTotal / 256) & 0xff) != recBuff[5])
+        if( (uint8)((checksumTotal / 256) & 0xff) != recBuff[5] )
         {
             printf("Feedback error (Iteration %d): read buffer has bad checksum16(MSB)\n", i);
             ret = -1;
             goto cleanmem;
         }
 
-        if( (uint8)(checksumTotal & 0xff) != recBuff[4])
+        if( (uint8)(checksumTotal & 0xff) != recBuff[4] )
         {
             printf("Feedback error (Iteration %d): read buffer has bad checksum16(LBS)\n", i);
             ret = -1;
             goto cleanmem;
         }
 
-        if( extendedChecksum8(recBuff) != recBuff[0])
+        if( extendedChecksum8(recBuff) != recBuff[0] )
         {
             printf("Feedback error (Iteration %d): read buffer has bad checksum8\n", i);
             ret = -1;
@@ -234,14 +234,14 @@ int allIO(HANDLE hDevice, u6CalibrationInfo *caliInfo)
             goto cleanmem;
         }
 
-        if( recBuff[6] != 0)
+        if( recBuff[6] != 0 )
         {
             printf("Feedback error (Iteration %d): received errorcode %d for frame %d in Feedback response. \n", i, recBuff[6], recBuff[7]);
             ret = -1;
             goto cleanmem;
         }
 
-        if(recChars != recSize)
+        if( recChars != recSize )
         {
             printf("Feedback error (Iteration %d): received packet if %d size when expecting %d\n", i, recChars, recSize);
             ret = -1;
@@ -260,7 +260,7 @@ int allIO(HANDLE hDevice, u6CalibrationInfo *caliInfo)
     printf("Milliseconds per iteration = %.3f\n", (double)time / (double)numIterations);
     printf("\nAIN readings from last iteration:\n");
 
-    for(j = 0; j < numChannels; j++)
+    for( j = 0; j < numChannels; j++ )
         printf("%.3f\n", valueAIN[j]);
 
 cleanmem:
