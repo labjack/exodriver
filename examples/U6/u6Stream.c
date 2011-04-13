@@ -101,7 +101,7 @@ int ConfigIO_example(HANDLE hDevice)
 
     if( (uint8)(checksumTotal & 0xff) != recBuff[4] )
     {
-        printf("ConfigIO error : read buffer has bad checksum16(LBS)\n");
+        printf("ConfigIO error : read buffer has bad checksum16(LSB)\n");
         return -1;
     }
 
@@ -213,7 +213,7 @@ int StreamConfig_example(HANDLE hDevice)
 
     if( (uint8)(checksumTotal & 0xff) != recBuff[4] )
     {
-        printf("Error : read buffer has bad checksum16(LBS) (StreamConfig).\n");
+        printf("Error : read buffer has bad checksum16(LSB) (StreamConfig).\n");
         return -1;
     }
 
@@ -244,8 +244,8 @@ int StreamStart(HANDLE hDevice)
     uint8 sendBuff[2], recBuff[4];
     int sendChars, recChars;
 
-    sendBuff[0] = (uint8)(0xA8);  //CheckSum8
-    sendBuff[1] = (uint8)(0xA8);  //command byte
+    sendBuff[0] = (uint8)(0xA8);  //Checksum8
+    sendBuff[1] = (uint8)(0xA8);  //Command byte
 
     //Sending command to U6
     sendChars = LJUSB_Write(hDevice, sendBuff, 2);
@@ -266,6 +266,12 @@ int StreamStart(HANDLE hDevice)
             printf("Error : read failed.\n");
         else
             printf("Error : did not read all of the buffer.\n");
+        return -1;
+    }
+
+    if( normalChecksum8(recBuff, 4) != recBuff[0] )
+    {
+        printf("Error : read buffer has bad checksum8 (StreamStart).\n");
         return -1;
     }
 
@@ -360,7 +366,7 @@ int StreamData_example(HANDLE hDevice, u6CalibrationInfo *caliInfo)
 
                 if( (uint8)(checksumTotal & 0xff) != recBuff[m*recBuffSize + 4] )
                 {
-                    printf("Error : read buffer has bad checksum16(LBS) (StreamData).\n");
+                    printf("Error : read buffer has bad checksum16(LSB) (StreamData).\n");
                     return -1;
                 }
 
@@ -447,8 +453,8 @@ int StreamStop(HANDLE hDevice)
     uint8 sendBuff[2], recBuff[4];
     int sendChars, recChars;
 
-    sendBuff[0] = (uint8)(0xB0);  //CheckSum8
-    sendBuff[1] = (uint8)(0xB0);  //command byte
+    sendBuff[0] = (uint8)(0xB0);  //Checksum8
+    sendBuff[1] = (uint8)(0xB0);  //Command byte
 
     //Sending command to U6
     sendChars = LJUSB_Write(hDevice, sendBuff, 2);
@@ -472,12 +478,9 @@ int StreamStop(HANDLE hDevice)
         return -1;
     }
 
-    if( recChars < 4 )
+    if( normalChecksum8(recBuff, 4) != recBuff[0] )
     {
-        if( recChars == 0 )
-            printf("Error : read failed (StreamStop).\n");
-        else
-            printf("Error : did not read all of the buffer (StreamStop).\n");
+        printf("Error : read buffer has bad checksum8 (StreamStop).\n");
         return -1;
     }
 
