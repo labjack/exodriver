@@ -1,5 +1,5 @@
 //Author: LabJack
-//June 25, 2009
+//April 6, 2011
 //Example U6 helper functions.  Function descriptions are in the u6.h file.
 
 #include "u6.h"
@@ -76,8 +76,8 @@ uint8 normalChecksum8(uint8 *b, int n)
     //Sums bytes 1 to n-1 unsigned to a 2 byte value. Sums quotient and
     //remainder of 256 division.  Again, sums quotient and remainder of
     //256 division.
-    for(i = 1, a = 0; i < n; i++)
-        a+=(uint16)b[i];
+    for( i = 1, a = 0; i < n; i++ )
+        a += (uint16)b[i];
 
     bb = a/256;
     a = (a-256*bb)+bb;
@@ -92,7 +92,7 @@ uint16 extendedChecksum16(uint8 *b, int n)
     int i, a = 0;
 
     //Sums bytes 6 to n-1 to a unsigned 2 byte value
-    for(i = 6; i < n; i++)
+    for( i = 6; i < n; i++ )
         a += (uint16)b[i];
 
     return a;
@@ -105,12 +105,12 @@ uint8 extendedChecksum8(uint8 *b)
 
     //Sums bytes 1 to 5. Sums quotient and remainder of 256 division. Again, sums
     //quotient and remainder of 256 division.
-    for(i = 1, a = 0; i < 6; i++)
-        a+=(uint16)b[i];
+    for( i = 1, a = 0; i < 6; i++ )
+        a += (uint16)b[i];
 
-    bb=a/256;
-    a=(a-256*bb)+bb;
-    bb=a/256;
+    bb = a/256;
+    a = (a-256*bb)+bb;
+    bb = a/256;
 
     return (uint8)((a-256*bb)+bb);
 }
@@ -120,24 +120,23 @@ HANDLE openUSBConnection(int localID)
 {
     BYTE sendBuffer[26], recBuffer[38];
     uint16 checksumTotal = 0;
-    HANDLE hDevice = 0;
-    uint32 numDevices = 0;
-    uint32 dev;
+    uint32 dev, numDevices = 0;
     int i;
+    HANDLE hDevice = 0;
 
     numDevices = LJUSB_GetDevCount(U6_PRODUCT_ID);
-    if(numDevices == 0)
+    if( numDevices == 0 )
     {
         printf("Open error: No U6 devices could be found\n");
         return NULL;
     }
 
-    for(dev = 1;  dev <= numDevices; dev++)
+    for( dev = 1;  dev <= numDevices; dev++ )
     {
         hDevice = LJUSB_OpenDevice(dev, 0, U6_PRODUCT_ID);
-        if(hDevice != NULL)
+        if( hDevice != NULL )
         {
-            if(localID < 0)
+            if( localID < 0 )
             {
                 return hDevice;
             }
@@ -150,43 +149,46 @@ HANDLE openUSBConnection(int localID)
                 sendBuffer[2] = (uint8)(0x0A);
                 sendBuffer[3] = (uint8)(0x08);
 
-                for(i = 6; i < 26; i++)
+                for( i = 6; i < 26; i++ )
                     sendBuffer[i] = (uint8)(0x00);
 
                 extendedChecksum(sendBuffer, 26);
 
-                if(LJUSB_BulkWrite(hDevice, U6_PIPE_EP1_OUT, sendBuffer, 26) != 26)
+                if( LJUSB_Write(hDevice, sendBuffer, 26) != 26 )
                     goto locid_error;
 
-                if(LJUSB_BulkRead(hDevice, U6_PIPE_EP2_IN, recBuffer, 38) != 38)
+                if( LJUSB_Read(hDevice, recBuffer, 38) != 38 )
                     goto locid_error;
 
                 checksumTotal = extendedChecksum16(recBuffer, 38);
-                if( (uint8)((checksumTotal / 256) & 0xff) != recBuffer[5])
+                if( (uint8)((checksumTotal / 256) & 0xff) != recBuffer[5] )
                     goto locid_error;
 
-                if( (uint8)(checksumTotal & 0xff) != recBuffer[4])
+                if( (uint8)(checksumTotal & 0xff) != recBuffer[4] )
                     goto locid_error;
 
-                if( extendedChecksum8(recBuffer) != recBuffer[0])
+                if( extendedChecksum8(recBuffer) != recBuffer[0] )
                     goto locid_error;
 
                 if( recBuffer[1] != (uint8)(0xF8) || recBuffer[2] != (uint8)(0x10) ||
                     recBuffer[3] != (uint8)(0x08) )
                     goto locid_error;
 
-                if( recBuffer[6] != 0)
+                if( recBuffer[6] != 0 )
                     goto locid_error;
 
-                if( (int)recBuffer[21] == localID)
+                //Check locasl ID and serial number
+                if( (int)recBuffer[21] == localID ||
+                    (int)(recBuffer[15] + recBuffer[16]*256 + recBuffer[17]*65536 + recBuffer[18]*16777216) == localID )
                     return hDevice;
-                else
-                    LJUSB_CloseDevice(hDevice);
-            } //else localID >= 0 end
-        } //if hDevice != NULL end
-    } //for end
 
-    printf("Open error: could not find a U6 with a local ID of %d\n", localID);
+                //No matches, not our device
+                LJUSB_CloseDevice(hDevice);
+            }  //else localID >= 0 end
+        }  //if hDevice != NULL end
+    }  //for end
+
+    printf("Open error: could not find a U6 with a local ID or serial number of %d\n", localID);
     return NULL;
 
 locid_error:
@@ -213,9 +215,9 @@ long getTickCount()
 
 long isCalibrationInfoValid(u6CalibrationInfo *caliInfo)
 {
-    if(caliInfo == NULL)
+    if( caliInfo == NULL )
         goto invalid;
-    if(caliInfo->prodID != 6)
+    if( caliInfo->prodID != 6 )
         goto invalid;
 
     return 1;
@@ -227,9 +229,9 @@ invalid:
 
 long isTdacCalibrationInfoValid(u6TdacCalibrationInfo *caliInfo)
 {
-    if(caliInfo == NULL)
+    if( caliInfo == NULL )
         goto invalid;
-    if(caliInfo->prodID != 6)
+    if( caliInfo->prodID != 6 )
         goto invalid;
     return 1;
 invalid:
@@ -241,9 +243,7 @@ invalid:
 long getCalibrationInfo(HANDLE hDevice, u6CalibrationInfo *caliInfo)
 {
     uint8 sendBuffer[64], recBuffer[64];
-    int sentRec = 0;
-    int i = 0;
-    int offset = 0;
+    int sentRec = 0, offset = 0, i = 0;
 
     /* sending ConfigU6 command to get see if hi res */
     sendBuffer[1] = (uint8)(0xF8);  //command byte
@@ -251,35 +251,35 @@ long getCalibrationInfo(HANDLE hDevice, u6CalibrationInfo *caliInfo)
     sendBuffer[3] = (uint8)(0x08);  //extended command number
 
     //setting WriteMask0 and all other bytes to 0 since we only want to read the response
-    for(i = 6; i < 26; i++)
+    for( i = 6; i < 26; i++ )
         sendBuffer[i] = 0;
 
     extendedChecksum(sendBuffer, 26);
 
-    sentRec = LJUSB_BulkWrite(hDevice, U6_PIPE_EP1_OUT, sendBuffer, 26);
-    if(sentRec < 26)
+    sentRec = LJUSB_Write(hDevice, sendBuffer, 26);
+    if( sentRec < 26 )
     {
-        if(sentRec == 0)
+        if( sentRec == 0 )
             goto writeError0;
         else
             goto writeError1;
     }
 
-    sentRec = LJUSB_BulkRead(hDevice, U6_PIPE_EP2_IN, recBuffer, 38);
-    if(sentRec < 38)
+    sentRec = LJUSB_Read(hDevice, recBuffer, 38);
+    if( sentRec < 38 )
     {
-        if(sentRec == 0)
+        if( sentRec == 0 )
             goto readError0;
         else
             goto readError1;
     }
 
-    if(recBuffer[1] != (uint8)(0xF8) || recBuffer[2] != (uint8)(0x10) || recBuffer[3] != (uint8)(0x08))
+    if( recBuffer[1] != (uint8)(0xF8) || recBuffer[2] != (uint8)(0x10) || recBuffer[3] != (uint8)(0x08) )
         goto commandByteError;
 
-    caliInfo->hiRes  = (((recBuffer[37]&8) == 8)?1:0);
+    caliInfo->hiRes = (((recBuffer[37]&8) == 8)?1:0);
 
-    for(i = 0; i < 10; i++)
+    for( i = 0; i < 10; i++ )
     {
         /* reading block i from memory */
         sendBuffer[1] = (uint8)(0xF8);  //command byte
@@ -289,25 +289,25 @@ long getCalibrationInfo(HANDLE hDevice, u6CalibrationInfo *caliInfo)
         sendBuffer[7] = (uint8)i;       //Blocknum = i
         extendedChecksum(sendBuffer, 8);
 
-        sentRec = LJUSB_BulkWrite(hDevice, U6_PIPE_EP1_OUT, sendBuffer, 8);
-        if(sentRec < 8)
+        sentRec = LJUSB_Write(hDevice, sendBuffer, 8);
+        if( sentRec < 8 )
         {
-            if(sentRec == 0)
+            if( sentRec == 0 )
                 goto writeError0;
             else
                 goto writeError1;
         }
 
-        sentRec = LJUSB_BulkRead(hDevice, U6_PIPE_EP2_IN, recBuffer, 40);
-        if(sentRec < 40)
+        sentRec = LJUSB_Read(hDevice, recBuffer, 40);
+        if( sentRec < 40 )
         {
-            if(sentRec == 0)
+            if( sentRec == 0 )
                 goto readError0;
             else
                 goto readError1;
         }
 
-        if(recBuffer[1] != (uint8)(0xF8) || recBuffer[2] != (uint8)(0x11) || recBuffer[3] != (uint8)(0x2D))
+        if( recBuffer[1] != (uint8)(0xF8) || recBuffer[2] != (uint8)(0x11) || recBuffer[3] != (uint8)(0x2D) )
             goto commandByteError;
 
         offset = i*4;
@@ -345,36 +345,36 @@ commandByteError:
 }
 
 
-long getTdacCalibrationInfo(HANDLE hDevice, u6TdacCalibrationInfo *caliInfo, uint8 DIOAPinNum) {
+long getTdacCalibrationInfo(HANDLE hDevice, u6TdacCalibrationInfo *caliInfo, uint8 DIOAPinNum)
+{
     int err;
-    uint8 options, speedAdjust, sdaPinNum, sclPinNum, address, numByteToSend, numBytesToReceive, errorcode;
-    uint8 bytesCommand[1];
-    uint8 bytesResponse[32];
-    uint8 ackArray[4];
+    uint8 options, speedAdjust, sdaPinNum, sclPinNum;
+    uint8 address, numByteToSend, numBytesToReceive, errorcode;
+    uint8 bytesCommand[1], bytesResponse[32], ackArray[4];
 
     err = 0;
 
     //Setting up I2C command for LJTDAC
-    options = 0;                //I2COptions : 0
-    speedAdjust = 0;            //SpeedAdjust : 0 (for max communication speed of about 130 kHz)
-    sdaPinNum = DIOAPinNum+1;   //SDAPinNum : FIO channel connected to pin DIOB
-    sclPinNum = DIOAPinNum;     //SCLPinNum : FIO channel connected to pin DIOA
-    address = (uint8)(0xA0);    //Address : h0xA0 is the address for EEPROM
-    numByteToSend = 1;          //NumI2CByteToSend : 1 byte for the EEPROM address
-    numBytesToReceive = 32;     //NumI2CBytesToReceive : getting 32 bytes starting at EEPROM address specified in I2CByte0
+    options = 0;               //I2COptions : 0
+    speedAdjust = 0;           //SpeedAdjust : 0 (for max communication speed of about 130 kHz)
+    sdaPinNum = DIOAPinNum+1;  //SDAPinNum : FIO channel connected to pin DIOB
+    sclPinNum = DIOAPinNum;    //SCLPinNum : FIO channel connected to pin DIOA
+    address = (uint8)(0xA0);   //Address : h0xA0 is the address for EEPROM
+    numByteToSend = 1;         //NumI2CByteToSend : 1 byte for the EEPROM address
+    numBytesToReceive = 32;    //NumI2CBytesToReceive : getting 32 bytes starting at EEPROM address specified in I2CByte0
 
     bytesCommand[0] = 64;       //I2CByte0 : Memory Address (starting at address 64 (DACA Slope)
 
     //Performing I2C low-level call
     err = I2C(hDevice, options, speedAdjust, sdaPinNum, sclPinNum, address, numByteToSend, numBytesToReceive, bytesCommand, &errorcode, ackArray, bytesResponse);
 
-    if(errorcode != 0)
+    if( errorcode != 0 )
     {
         printf("Getting LJTDAC calibration info error : received errorcode %d in response\n", errorcode);
         err = -1;
     }
 
-    if(err == -1)
+    if( err == -1 )
         return err;
 
     caliInfo->ccConstants[0] = FPuint8ArrayToFPDouble(bytesResponse, 0);
@@ -389,11 +389,10 @@ long getTdacCalibrationInfo(HANDLE hDevice, u6TdacCalibrationInfo *caliInfo, uin
 
 double FPuint8ArrayToFPDouble(uint8 *buffer, int startIndex)
 {
-    uint32 resultDec = 0;
-    uint32 resultWh = 0;
+    uint32 resultDec = 0, resultWh = 0;
     int i;
 
-    for(i = 0; i < 4; i++)
+    for( i = 0; i < 4; i++ )
     {
         resultDec += (uint32)buffer[startIndex + i] * pow(2, i*8);
         resultWh += (uint32)buffer[startIndex + i + 4] * pow(2, i*8);
@@ -408,22 +407,22 @@ long getAinVoltCalibrated(u6CalibrationInfo *caliInfo, int resolutionIndex, int 
     double value = 0;
     int indexAdjust = 0;
 
-    if(isCalibrationInfoValid(caliInfo) == -1)
+    if( isCalibrationInfoValid(caliInfo) == -1 )
         return -1;
 
     value = (double)bytesVolt;
-    if(bits24)
+    if( bits24)
         value = value/256.0;
 
-    if(gainIndex > 4)
+    if( gainIndex > 4 )
     {
         printf("getAinVoltCalibrated error: invalid gain index.\n");
         return -1;
     }
-    if(resolutionIndex > 8)
+    if( resolutionIndex > 8 )
         indexAdjust = 24;
 
-    if(value < caliInfo->ccConstants[indexAdjust + gainIndex*2 + 9])
+    if( value < caliInfo->ccConstants[indexAdjust + gainIndex*2 + 9] )
         *analogVolt = (caliInfo->ccConstants[indexAdjust + gainIndex*2 + 9] - value) * caliInfo->ccConstants[indexAdjust + gainIndex*2 + 8];
     else
         *analogVolt = (value - caliInfo->ccConstants[indexAdjust + gainIndex*2 + 9]) * caliInfo->ccConstants[indexAdjust + gainIndex*2];
@@ -435,7 +434,8 @@ long getAinVoltCalibrated(u6CalibrationInfo *caliInfo, int resolutionIndex, int 
 long getDacBinVoltCalibrated8Bit(u6CalibrationInfo *caliInfo, int dacNumber, double analogVolt, uint8 *bytesVolt8)
 {
     uint16 u16BytesVolt = 0;
-    if(getDacBinVoltCalibrated16Bit(caliInfo, dacNumber, analogVolt, &u16BytesVolt) != -1)
+
+    if( getDacBinVoltCalibrated16Bit(caliInfo, dacNumber, analogVolt, &u16BytesVolt) != -1 )
     {
         *bytesVolt8 = (uint8)(u16BytesVolt/256);
         return 0;
@@ -448,10 +448,10 @@ long getDacBinVoltCalibrated16Bit(u6CalibrationInfo *caliInfo, int dacNumber, do
 {
     uint32 dBytesVolt;
 
-    if(isCalibrationInfoValid(caliInfo) == -1)
+    if( isCalibrationInfoValid(caliInfo) == -1 )
         return -1;
 
-    if(dacNumber < 0 || dacNumber > 2)
+    if( dacNumber < 0 || dacNumber > 2 )
     {
         printf("getDacBinVoltCalibrated error: invalid channelNumber.\n");
         return -1;
@@ -460,9 +460,9 @@ long getDacBinVoltCalibrated16Bit(u6CalibrationInfo *caliInfo, int dacNumber, do
     dBytesVolt = analogVolt*caliInfo->ccConstants[16 + dacNumber*2] + caliInfo->ccConstants[17 + dacNumber*2];
 
     //Checking to make sure bytesVolt will be a value between 0 and 65535.
-    if(dBytesVolt < 0)
+    if( dBytesVolt < 0 )
         dBytesVolt = 0;
-    if(dBytesVolt > 65535)
+    if( dBytesVolt > 65535 )
         dBytesVolt = 65535;
 
     *bytesVolt16 = (uint16)dBytesVolt;
@@ -476,7 +476,7 @@ long getTempKCalibrated(u6CalibrationInfo *caliInfo, int resolutionIndex, int ga
     double value;
 
     //convert to voltage first
-    if(getAinVoltCalibrated(caliInfo, resolutionIndex, gainIndex, bits24, bytesTemp, &value) == -1)
+    if( getAinVoltCalibrated(caliInfo, resolutionIndex, gainIndex, bits24, bytesTemp, &value) == -1 )
         return -1;
 
     *kelvinTemp = caliInfo->ccConstants[22]*value + caliInfo->ccConstants[23];
@@ -487,10 +487,10 @@ long getTdacBinVoltCalibrated(u6TdacCalibrationInfo *caliInfo, int dacNumber, do
 {
     uint32 dBytesVolt;
 
-    if(isTdacCalibrationInfoValid(caliInfo) == -1)
+    if( isTdacCalibrationInfoValid(caliInfo) == -1 )
         return -1;
 
-    if(dacNumber < 0 || dacNumber > 2)
+    if( dacNumber < 0 || dacNumber > 2 )
     {
         printf("getTdacBinVoltCalibrated error: invalid channelNumber.\n");
         return -1;
@@ -499,9 +499,9 @@ long getTdacBinVoltCalibrated(u6TdacCalibrationInfo *caliInfo, int dacNumber, do
     dBytesVolt = analogVolt*caliInfo->ccConstants[dacNumber*2] + caliInfo->ccConstants[dacNumber*2 + 1];
 
     //Checking to make sure bytesVolt will be a value between 0 and 65535.
-    if(dBytesVolt < 0)
+    if( dBytesVolt < 0 )
         dBytesVolt = 0;
-    if(dBytesVolt > 65535)
+    if( dBytesVolt > 65535 )
         dBytesVolt = 65535;
 
     *bytesVolt = (uint16)dBytesVolt;
@@ -536,24 +536,24 @@ long getTempKUncalibrated(int resolutionIndex, int gainIndex, int bits24, uint32
 long I2C(HANDLE hDevice, uint8 I2COptions, uint8 SpeedAdjust, uint8 SDAPinNum, uint8 SCLPinNum, uint8 Address, uint8 NumI2CBytesToSend, uint8 NumI2CBytesToReceive, uint8 *I2CBytesCommand, uint8 *Errorcode, uint8 *AckArray, uint8 *I2CBytesResponse)
 {
     uint8 *sendBuff, *recBuff;
-    int sendChars, recChars, sendSize, recSize, i, ret;
     uint16 checksumTotal = 0;
     uint32 ackArrayTotal, expectedAckArray;
+    int sendChars, recChars, sendSize, recSize, i, ret;
 
     *Errorcode = 0;
     ret = 0;
     sendSize = 6 + 8 + ((NumI2CBytesToSend%2 != 0)?(NumI2CBytesToSend + 1):(NumI2CBytesToSend));
     recSize = 6 + 6 + ((NumI2CBytesToReceive%2 != 0)?(NumI2CBytesToReceive + 1):(NumI2CBytesToReceive));
 
-    sendBuff = malloc(sizeof(uint8)*sendSize);
-    recBuff = malloc(sizeof(uint8)*recSize);
+    sendBuff = (uint8 *)malloc(sizeof(uint8)*sendSize);
+    recBuff = (uint8 *)malloc(sizeof(uint8)*recSize);
 
     sendBuff[sendSize - 1] = 0;
 
     //I2C command
-    sendBuff[1] = (uint8)(0xF8);          //command byte
-    sendBuff[2] = (sendSize - 6)/2;       //number of data words = 4 + NumI2CBytesToSend
-    sendBuff[3] = (uint8)(0x3B);          //extended command number
+    sendBuff[1] = (uint8)(0xF8);     //Command byte
+    sendBuff[2] = (sendSize - 6)/2;  //Number of data words = 4 + NumI2CBytesToSend
+    sendBuff[3] = (uint8)(0x3B);     //Extended command number
 
     sendBuff[6] = I2COptions;             //I2COptions
     sendBuff[7] = SpeedAdjust;            //SpeedAdjust
@@ -564,16 +564,16 @@ long I2C(HANDLE hDevice, uint8 I2COptions, uint8 SpeedAdjust, uint8 SDAPinNum, u
     sendBuff[12] = NumI2CBytesToSend;     //NumI2CByteToSend
     sendBuff[13] = NumI2CBytesToReceive;  //NumI2CBytesToReceive
 
-    for(i = 0; i < NumI2CBytesToSend; i++)
+    for( i = 0; i < NumI2CBytesToSend; i++ )
         sendBuff[14 + i] = I2CBytesCommand[i];  //I2CByte
 
     extendedChecksum(sendBuff, sendSize);
 
     //Sending command to U6
-    sendChars = LJUSB_BulkWrite(hDevice, U6_PIPE_EP1_OUT, sendBuff, sendSize);
-    if(sendChars < sendSize)
+    sendChars = LJUSB_Write(hDevice, sendBuff, sendSize);
+    if( sendChars < sendSize )
     {
-        if(sendChars == 0)
+        if( sendChars == 0 )
             printf("I2C Error : write failed\n");
         else
             printf("I2C Error : did not write all of the buffer\n");
@@ -582,15 +582,15 @@ long I2C(HANDLE hDevice, uint8 I2COptions, uint8 SpeedAdjust, uint8 SDAPinNum, u
     }
 
     //Reading response from U6
-    recChars = LJUSB_BulkRead(hDevice, U6_PIPE_EP2_IN, recBuff, recSize);
-    if(recChars < recSize)
+    recChars = LJUSB_Read(hDevice, recBuff, recSize);
+    if( recChars < recSize )
     {
-        if(recChars == 0)
+        if( recChars == 0 )
             printf("I2C Error : read failed\n");
         else
         {
             printf("I2C Error : did not read all of the buffer\n");
-            if(recChars >= 12)
+            if( recChars >= 12 )
                 *Errorcode = recBuff[6];
         }
         ret = -1;
@@ -604,35 +604,35 @@ long I2C(HANDLE hDevice, uint8 I2COptions, uint8 SpeedAdjust, uint8 SDAPinNum, u
     AckArray[2] = recBuff[10];
     AckArray[3] = recBuff[11];
 
-    for(i = 0; i < NumI2CBytesToReceive; i++)
+    for( i = 0; i < NumI2CBytesToReceive; i++ )
         I2CBytesResponse[i] = recBuff[12 + i];
 
-    if((uint8)(extendedChecksum8(recBuff)) != recBuff[0])
+    if( (uint8)(extendedChecksum8(recBuff)) != recBuff[0] )
     {
         printf("I2C Error : read buffer has bad checksum (%d)\n", recBuff[0]);
         ret = -1;
     }
 
-    if(recBuff[1] != (uint8)(0xF8))
+    if( recBuff[1] != (uint8)(0xF8) )
     {
         printf("I2C Error : read buffer has incorrect command byte (%d)\n", recBuff[1]);
         ret = -1;
     }
 
-    if(recBuff[2] != (uint8)((recSize - 6)/2))
+    if( recBuff[2] != (uint8)((recSize - 6)/2) )
     {
         printf("I2C Error : read buffer has incorrect number of data words (%d)\n", recBuff[2]);
         ret = -1;
     }
 
-    if(recBuff[3] != (uint8)(0x3B))
+    if( recBuff[3] != (uint8)(0x3B) )
     {
         printf("I2C Error : read buffer has incorrect extended command number (%d)\n", recBuff[3]);
         ret = -1;
     }
 
     checksumTotal = extendedChecksum16(recBuff, recSize);
-    if( (uint8)((checksumTotal / 256) & 0xff) != recBuff[5] || (uint8)(checksumTotal & 255) != recBuff[4])
+    if( (uint8)((checksumTotal / 256) & 0xff) != recBuff[5] || (uint8)(checksumTotal & 255) != recBuff[4] )
     {
         printf("I2C error : read buffer has bad checksum16 (%d)\n", checksumTotal);
         ret = -1;
@@ -641,7 +641,7 @@ long I2C(HANDLE hDevice, uint8 I2COptions, uint8 SpeedAdjust, uint8 SDAPinNum, u
     //ackArray should ack the Address byte in the first ack bit
     ackArrayTotal = AckArray[0] + AckArray[1]*256 + AckArray[2]*65536 + AckArray[3]*16777216;
     expectedAckArray = pow(2.0,  NumI2CBytesToSend+1)-1;
-    if(ackArrayTotal != expectedAckArray)
+    if( ackArrayTotal != expectedAckArray )
         printf("I2C error : expected an ack of %d, but received %d\n", expectedAckArray, ackArrayTotal);
 
 cleanmem:
@@ -656,32 +656,32 @@ cleanmem:
 
 long eAIN(HANDLE Handle, u6CalibrationInfo *CalibrationInfo, long ChannelP, long ChannelN, double *Voltage, long Range, long Resolution, long Settling, long Binary, long Reserved1, long Reserved2)
 {
-    uint8 sendDataBuff[4], recDataBuff[5];
     uint8 diff, gain, Errorcode, ErrorFrame;
+    uint8 sendDataBuff[4], recDataBuff[5];
     uint32 bytesV;
 
-    if(isCalibrationInfoValid(CalibrationInfo) != 1)
+    if( isCalibrationInfoValid(CalibrationInfo) != 1 )
     {
         printf("eAIN error: Invalid calibration information.\n");
         return -1;
     }
 
     //Checking if acceptable positive channel
-    if(ChannelP < 0 || ChannelP > 143)
+    if( ChannelP < 0 || ChannelP > 143 )
     {
         printf("eAIN error: Invalid ChannelP value.\n");
         return -1;
     }
 
     //Checking if single ended or differential readin
-    if(ChannelN == 0 || ChannelN == 15)
+    if( ChannelN == 0 || ChannelN == 15 )
     {
-        //single ended reading
+        //Single ended reading
         diff = 0;
     }
-    else if((ChannelN&1) == 1 && ChannelN == ChannelP + 1)
+    else if( (ChannelN&1) == 1 && ChannelN == ChannelP + 1 )
     {
-        //differential reading
+        //Differential reading
         diff = 1;
     }
     else
@@ -690,15 +690,15 @@ long eAIN(HANDLE Handle, u6CalibrationInfo *CalibrationInfo, long ChannelP, long
         return -1;
     }
 
-    if(Range == LJ_rgAUTO)
+    if( Range == LJ_rgAUTO )
         gain = 15;
-    else if(Range == LJ_rgBIP10V)
+    else if( Range == LJ_rgBIP10V )
         gain = 0;
-    else if(Range == LJ_rgBIP1V)
+    else if( Range == LJ_rgBIP1V )
         gain = 1;
-    else if(Range == LJ_rgBIPP1V)
+    else if( Range == LJ_rgBIPP1V )
         gain = 2;
-    else if(Range == LJ_rgBIPP01V)
+    else if( Range == LJ_rgBIPP01V )
         gain = 3;
     else
     {
@@ -706,13 +706,13 @@ long eAIN(HANDLE Handle, u6CalibrationInfo *CalibrationInfo, long ChannelP, long
         return -1;
     }
 
-    if(Resolution < 0 || Resolution > 13)
+    if( Resolution < 0 || Resolution > 13 )
     {
         printf("eAIN error: Invalid Resolution value\n");
         return -1;
     }
 
-    if(Settling < 0 && Settling > 4)
+    if( Settling < 0 && Settling > 4 )
     {
         printf("eAIN error: Invalid Settling value\n");
         return -1;
@@ -725,29 +725,29 @@ long eAIN(HANDLE Handle, u6CalibrationInfo *CalibrationInfo, long ChannelP, long
     sendDataBuff[2] = (uint8)Resolution + gain*16; //Res Index (0-3), Gain Index (4-7)
     sendDataBuff[3] = (uint8)Settling + diff*128; //Settling factor (0-2), Differential (7)
 
-    if(ehFeedback(Handle, sendDataBuff, 4, &Errorcode, &ErrorFrame, recDataBuff, 5) < 0)
+    if( ehFeedback(Handle, sendDataBuff, 4, &Errorcode, &ErrorFrame, recDataBuff, 5) < 0 )
         return -1;
-    if(Errorcode)
+    if( Errorcode )
         return (long)Errorcode;
 
     bytesV = recDataBuff[0] + ((uint32)recDataBuff[1])*256 + ((uint32)recDataBuff[2])*65536;
     gain = recDataBuff[3]/16;
 
-    if(Binary != 0)
+    if( Binary != 0 )
     {
         *Voltage = (double)bytesV;
     }
     else
     {
-        if(ChannelP == 14)
+        if( ChannelP == 14 )
         {
-            if(getTempKCalibrated(CalibrationInfo, Resolution, gain, 1, bytesV, Voltage) < 0)
+            if( getTempKCalibrated(CalibrationInfo, Resolution, gain, 1, bytesV, Voltage) < 0 )
                 return -1;
         }
         else
         {
             gain = recDataBuff[3]/16;
-            if(getAinVoltCalibrated(CalibrationInfo, Resolution, gain, 1, bytesV, Voltage) < 0)
+            if( getAinVoltCalibrated(CalibrationInfo, Resolution, gain, 1, bytesV, Voltage) < 0 )
                 return -1;
         }
     }
@@ -758,18 +758,18 @@ long eAIN(HANDLE Handle, u6CalibrationInfo *CalibrationInfo, long ChannelP, long
 
 long eDAC(HANDLE Handle, u6CalibrationInfo *CalibrationInfo, long Channel, double Voltage, long Binary, long Reserved1, long Reserved2)
 {
-    uint8 sendDataBuff[3];
     uint8 Errorcode, ErrorFrame;
+    uint8 sendDataBuff[3];
     uint16 bytesV;
     long sendSize;
 
-    if(isCalibrationInfoValid(CalibrationInfo) != 1)
+    if( isCalibrationInfoValid(CalibrationInfo) != 1 )
     {
         printf("eDAC error: Invalid calibration information.\n");
         return -1;
     }
 
-    if(Channel < 0 || Channel > 1)
+    if( Channel < 0 || Channel > 1 )
     {
         printf("eDAC error: Invalid Channel.\n");
         return -1;
@@ -779,15 +779,15 @@ long eDAC(HANDLE Handle, u6CalibrationInfo *CalibrationInfo, long Channel, doubl
 
     sendDataBuff[0] = 38 + Channel;  //IOType is DAC0/1 (16 bit)
 
-    if(getDacBinVoltCalibrated16Bit(CalibrationInfo, (int)Channel, Voltage, &bytesV) < 0)
+    if( getDacBinVoltCalibrated16Bit(CalibrationInfo, (int)Channel, Voltage, &bytesV) < 0 )
         return -1;
 
     sendDataBuff[1] = (uint8)(bytesV&255);          //Value LSB
     sendDataBuff[2] = (uint8)((bytesV&65280)/256);  //Value MSB
 
-    if(ehFeedback(Handle, sendDataBuff, sendSize, &Errorcode, &ErrorFrame, NULL, 0) < 0)
+    if( ehFeedback(Handle, sendDataBuff, sendSize, &Errorcode, &ErrorFrame, NULL, 0) < 0 )
         return -1;
-    if(Errorcode)
+    if( Errorcode )
         return (long)Errorcode;
 
     return 0;
@@ -799,7 +799,7 @@ long eDI(HANDLE Handle, long Channel, long *State)
     uint8 sendDataBuff[4], recDataBuff[1];
     uint8 Errorcode, ErrorFrame;
 
-    if(Channel < 0 || Channel > 19)
+    if( Channel < 0 || Channel > 19 )
     {
         printf("eDI error: Invalid Channel.\n");
         return -1;
@@ -813,9 +813,9 @@ long eDI(HANDLE Handle, long Channel, long *State)
     sendDataBuff[2] = 10;       //IOType is BitStateRead
     sendDataBuff[3] = Channel;  //IONumber
 
-    if(ehFeedback(Handle, sendDataBuff, 4, &Errorcode, &ErrorFrame, recDataBuff, 1) < 0)
+    if( ehFeedback(Handle, sendDataBuff, 4, &Errorcode, &ErrorFrame, recDataBuff, 1) < 0 )
         return -1;
-    if(Errorcode)
+    if( Errorcode )
         return (long)Errorcode;
 
     *State = recDataBuff[0];
@@ -825,10 +825,10 @@ long eDI(HANDLE Handle, long Channel, long *State)
 
 long eDO(HANDLE Handle, long Channel, long State)
 {
-    uint8 sendDataBuff[4];
     uint8 Errorcode, ErrorFrame;
+    uint8 sendDataBuff[4];
 
-    if(Channel < 0 || Channel > 19)
+    if( Channel < 0 || Channel > 19 )
     {
         printf("eD0 error: Invalid Channel\n");
         return -1;
@@ -841,9 +841,9 @@ long eDO(HANDLE Handle, long Channel, long State)
     sendDataBuff[2] = 11;             //IOType is BitStateWrite
     sendDataBuff[3] = Channel + 128*((State > 0) ? 1 : 0);  //IONumber(bits 0-4) + State (bit 7)
 
-    if(ehFeedback(Handle, sendDataBuff, 4, &Errorcode, &ErrorFrame, NULL, 0) < 0)
+    if( ehFeedback(Handle, sendDataBuff, 4, &Errorcode, &ErrorFrame, NULL, 0) < 0 )
         return -1;
-    if(Errorcode)
+    if( Errorcode )
         return (long)Errorcode;
 
     return 0;
@@ -856,53 +856,53 @@ long eTCConfig(HANDLE Handle, long *aEnableTimers, long *aEnableCounters, long T
     uint8 numTimers, counters, cNumTimers, cCounters, cPinOffset, Errorcode, ErrorFrame;
     int sendDataBuffSize, i;
     long error;
-
-    if(TCPinOffset < 0 && TCPinOffset > 8)
+ 
+    if( TCPinOffset < 0 && TCPinOffset > 8)
     {
         printf("eTCConfig error: Invalid TCPinOffset.\n");
         return -1;
     }
 
     /* ConfigTimerClock */
-    if(TimerClockBaseIndex == LJ_tc4MHZ || TimerClockBaseIndex ==  LJ_tc12MHZ || TimerClockBaseIndex == LJ_tc48MHZ ||
+    if( TimerClockBaseIndex == LJ_tc4MHZ || TimerClockBaseIndex ==  LJ_tc12MHZ || TimerClockBaseIndex == LJ_tc48MHZ ||
         TimerClockBaseIndex == LJ_tc1MHZ_DIV || TimerClockBaseIndex == LJ_tc4MHZ_DIV || TimerClockBaseIndex == LJ_tc12MHZ_DIV ||
-        TimerClockBaseIndex == LJ_tc48MHZ_DIV)
+        TimerClockBaseIndex == LJ_tc48MHZ_DIV )
         TimerClockBaseIndex = TimerClockBaseIndex - 20;
 
     error = ehConfigTimerClock(Handle, (uint8)(TimerClockBaseIndex + 128), (uint8)TimerClockDivisor, NULL, NULL);
-    if(error != 0)
+    if( error != 0 )
         return error;
 
     numTimers = 0;
     counters = 0;
 
-    for(i = 0; i < 4; i++)
+    for( i = 0; i < 4; i++ )
     {
-        if(aEnableTimers[i] != 0)
+        if( aEnableTimers[i] != 0 )
             numTimers++;
         else
             i = 999;
     }
 
-    for(i = 0; i < 2; i++)
+    for( i = 0; i < 2; i++ )
     {
-        if(aEnableCounters[i] != 0)
+        if( aEnableCounters[i] != 0 )
         {
             counters += pow(2, i);
         }
     }
 
     error = ehConfigIO(Handle, 1, numTimers, counters, TCPinOffset, &cNumTimers, &cCounters, &cPinOffset);
-    if(error != 0)
+    if( error != 0 )
         return error;
 
-    if(numTimers > 0)
+    if( numTimers > 0 )
     {
         /* Feedback */
-        for(i = 0; i < 8; i++)
+        for( i = 0; i < 8; i++ )
             sendDataBuff[i] = 0;
 
-        for(i = 0; i < numTimers; i++)
+        for( i = 0; i < numTimers; i++ )
         {
             sendDataBuff[i*4] = 43 + i*2;                                         //TimerConfig
             sendDataBuff[1 + i*4] = (uint8)aTimerModes[i];                        //TimerMode
@@ -912,9 +912,9 @@ long eTCConfig(HANDLE Handle, long *aEnableTimers, long *aEnableCounters, long T
 
         sendDataBuffSize = 4*numTimers;
 
-        if(ehFeedback(Handle, sendDataBuff, sendDataBuffSize, &Errorcode, &ErrorFrame, NULL, 0) < 0)
+        if( ehFeedback(Handle, sendDataBuff, sendDataBuffSize, &Errorcode, &ErrorFrame, NULL, 0) < 0 )
             return -1;
-        if(Errorcode)
+        if( Errorcode )
             return (long)Errorcode;
     }
 
@@ -924,8 +924,8 @@ long eTCConfig(HANDLE Handle, long *aEnableTimers, long *aEnableCounters, long T
 
 long eTCValues(HANDLE Handle, long *aReadTimers, long *aUpdateResetTimers, long *aReadCounters, long *aResetCounters, double *aTimerValues, double *aCounterValues, long Reserved1, long Reserved2)
 {
-    uint8 sendDataBuff[20], recDataBuff[24];
     uint8 Errorcode, ErrorFrame;
+    uint8 sendDataBuff[20], recDataBuff[24];
     int sendDataBuffSize, recDataBuffSize, i, j;
     int numTimers, dataCountCounter, dataCountTimer;
 
@@ -936,9 +936,9 @@ long eTCValues(HANDLE Handle, long *aReadTimers, long *aUpdateResetTimers, long 
     sendDataBuffSize = 0;
     recDataBuffSize = 0;
 
-    for(i = 0; i < 4; i++)
+    for( i = 0; i < 4; i++ )
     {
-        if(aReadTimers[i] != 0 || aUpdateResetTimers[i] != 0)
+        if( aReadTimers[i] != 0 || aUpdateResetTimers[i] != 0 )
         {
             sendDataBuff[sendDataBuffSize] = 42 + i*2;                                          //Timer
             sendDataBuff[1 + sendDataBuffSize] = ((aUpdateResetTimers[i] != 0) ? 1 : 0);        //UpdateReset
@@ -950,9 +950,9 @@ long eTCValues(HANDLE Handle, long *aReadTimers, long *aUpdateResetTimers, long 
         }
     }
 
-    for(i = 0; i < 2; i++)
+    for( i = 0; i < 2; i++ )
     {
-        if(aReadCounters[i] != 0 || aResetCounters[i] != 0)
+        if( aReadCounters[i] != 0 || aResetCounters[i] != 0 )
         {
             sendDataBuff[sendDataBuffSize] = 54 + i;                                 //Counter
             sendDataBuff[1 + sendDataBuffSize] = ((aResetCounters[i] != 0) ? 1 : 0); //Reset
@@ -961,31 +961,31 @@ long eTCValues(HANDLE Handle, long *aReadTimers, long *aUpdateResetTimers, long 
         }
     }
 
-    if(ehFeedback(Handle, sendDataBuff, sendDataBuffSize, &Errorcode, &ErrorFrame, recDataBuff, recDataBuffSize) < 0)
+    if( ehFeedback(Handle, sendDataBuff, sendDataBuffSize, &Errorcode, &ErrorFrame, recDataBuff, recDataBuffSize) < 0 )
         return -1;
-    if(Errorcode)
+    if( Errorcode )
         return (long)Errorcode;
 
-    for(i = 0; i < 4; i++)
+    for( i = 0; i < 4; i++ )
     {
         aTimerValues[i] = 0;
-        if(aReadTimers[i] != 0)
+        if( aReadTimers[i] != 0 )
         {
-            for(j = 0; j < 4; j++)
+            for( j = 0; j < 4; j++ )
                 aTimerValues[i] += (double)((long)recDataBuff[j + dataCountTimer*4]*pow(2, 8*j));
         }
-        if(aReadTimers[i] != 0 || aUpdateResetTimers[i] != 0)
+        if( aReadTimers[i] != 0 || aUpdateResetTimers[i] != 0 )
             dataCountTimer++;
 
-        if(i < 2)
+        if( i < 2 )
         {
             aCounterValues[i] = 0;
-            if(aReadCounters[i] != 0)
+            if( aReadCounters[i] != 0 )
             {
-                for(j = 0; j < 4; j++)
+                for( j = 0; j < 4; j++ )
                     aCounterValues[i] += (double)((long)recDataBuff[j + numTimers*4 + dataCountCounter*4]*pow(2, 8*j));
             }
-            if(aReadCounters[i] != 0 || aResetCounters[i] != 0)
+            if( aReadCounters[i] != 0 || aResetCounters[i] != 0 )
                 dataCountCounter++;
         }
     }
@@ -1010,15 +1010,15 @@ long ehConfigIO(HANDLE hDevice, uint8 inWriteMask, uint8 inNumberTimersEnabled, 
     sendBuff[8] = inCounterEnable;
     sendBuff[9] = inPinOffset;
 
-    for(i = 10; i < 16; i++)
+    for( i = 10; i < 16; i++ )
         sendBuff[i] = 0;
 
     extendedChecksum(sendBuff, 16);
 
     //Sending command to U6
-    if( (sendChars = LJUSB_BulkWrite(hDevice, U6_PIPE_EP1_OUT, sendBuff, 16)) < 16)
+    if( (sendChars = LJUSB_Write(hDevice, sendBuff, 16)) < 16 )
     {
-        if(sendChars == 0)
+        if( sendChars == 0 )
             printf("ehConfigIO error : write failed\n");
         else
             printf("ehConfigIO error : did not write all of the buffer\n");
@@ -1026,9 +1026,9 @@ long ehConfigIO(HANDLE hDevice, uint8 inWriteMask, uint8 inNumberTimersEnabled, 
     }
 
     //Reading response from U6
-    if( (recChars = LJUSB_BulkRead(hDevice, U6_PIPE_EP2_IN, recBuff, 16)) < 16)
+    if( (recChars = LJUSB_Read(hDevice, recBuff, 16)) < 16 )
     {
-        if(recChars == 0)
+        if( recChars == 0 )
             printf("ehConfigIO error : read failed\n");
         else
             printf("ehConfigIO error : did not read all of the buffer\n");
@@ -1036,19 +1036,19 @@ long ehConfigIO(HANDLE hDevice, uint8 inWriteMask, uint8 inNumberTimersEnabled, 
     }
 
     checksumTotal = extendedChecksum16(recBuff, 16);
-    if( (uint8)((checksumTotal / 256 ) & 0xff) != recBuff[5])
+    if( (uint8)((checksumTotal / 256 ) & 0xff) != recBuff[5] )
     {
         printf("ehConfigIO error : read buffer has bad checksum16(MSB)\n");
         return -1;
     }
 
-    if( (uint8)(checksumTotal & 0xff) != recBuff[4])
+    if( (uint8)(checksumTotal & 0xff) != recBuff[4] )
     {
         printf("ehConfigIO error : read buffer has bad checksum16(LBS)\n");
         return -1;
     }
 
-    if( extendedChecksum8(recBuff) != recBuff[0])
+    if( extendedChecksum8(recBuff) != recBuff[0] )
     {
         printf("ehConfigIO error : read buffer has bad checksum8\n");
         return -1;
@@ -1060,17 +1060,17 @@ long ehConfigIO(HANDLE hDevice, uint8 inWriteMask, uint8 inNumberTimersEnabled, 
         return -1;
     }
 
-    if( recBuff[6] != 0)
+    if( recBuff[6] != 0 )
     {
         printf("ehConfigIO error : read buffer received errorcode %d\n", recBuff[6]);
         return (int)recBuff[6];
     }
 
-    if(outNumberTimersEnabled != NULL)
+    if( outNumberTimersEnabled != NULL )
         *outNumberTimersEnabled = recBuff[7];
-    if(outCounterEnable != NULL)
+    if( outCounterEnable != NULL )
         *outCounterEnable = recBuff[8];
-    if(outPinOffset != NULL)
+    if( outPinOffset != NULL)
         *outPinOffset = recBuff[9];
 
     return 0;
@@ -1095,9 +1095,9 @@ long ehConfigTimerClock(HANDLE hDevice, uint8 inTimerClockConfig, uint8 inTimerC
     extendedChecksum(sendBuff, 10);
 
     //Sending command to U6
-    if( (sendChars = LJUSB_BulkWrite(hDevice, U6_PIPE_EP1_OUT, sendBuff, 10)) < 10)
+    if( (sendChars = LJUSB_Write(hDevice, sendBuff, 10)) < 10 )
     {
-        if(sendChars == 0)
+        if( sendChars == 0 )
             printf("ehConfigTimerClock error : write failed\n");
         else
             printf("ehConfigTimerClock error : did not write all of the buffer\n");
@@ -1105,9 +1105,9 @@ long ehConfigTimerClock(HANDLE hDevice, uint8 inTimerClockConfig, uint8 inTimerC
     }
 
     //Reading response from U6
-    if( (recChars = LJUSB_BulkRead(hDevice, U6_PIPE_EP2_IN, recBuff, 10)) < 10)
+    if( (recChars = LJUSB_Read(hDevice, recBuff, 10)) < 10 )
     {
-        if(recChars == 0)
+        if( recChars == 0 )
             printf("ehConfigTimerClock error : read failed\n");
         else
             printf("ehConfigTimerClock error : did not read all of the buffer\n");
@@ -1115,19 +1115,19 @@ long ehConfigTimerClock(HANDLE hDevice, uint8 inTimerClockConfig, uint8 inTimerC
     }
 
     checksumTotal = extendedChecksum16(recBuff, 10);
-    if( (uint8)((checksumTotal / 256 ) & 0xff) != recBuff[5])
+    if( (uint8)((checksumTotal / 256 ) & 0xff) != recBuff[5] )
     {
         printf("ehConfigTimerClock error : read buffer has bad checksum16(MSB)\n");
         return -1;
     }
 
-    if( (uint8)(checksumTotal & 0xff) != recBuff[4])
+    if( (uint8)(checksumTotal & 0xff) != recBuff[4] )
     {
         printf("ehConfigTimerClock error : read buffer has bad checksum16(LBS)\n");
         return -1;
     }
 
-    if( extendedChecksum8(recBuff) != recBuff[0])
+    if( extendedChecksum8(recBuff) != recBuff[0] )
     {
         printf("ehConfigTimerClock error : read buffer has bad checksum8\n");
         return -1;
@@ -1139,13 +1139,13 @@ long ehConfigTimerClock(HANDLE hDevice, uint8 inTimerClockConfig, uint8 inTimerC
         return -1;
     }
 
-    if(outTimerClockConfig != NULL)
+    if( outTimerClockConfig != NULL )
         *outTimerClockConfig = recBuff[8];
 
-    if(outTimerClockDivisor != NULL)
+    if( outTimerClockDivisor != NULL )
         *outTimerClockDivisor = recBuff[9];
 
-    if( recBuff[6] != 0)
+    if( recBuff[6] != 0 )
     {
         printf("ehConfigTimerClock error : read buffer received errorcode %d\n", recBuff[6]);
         return recBuff[6];
@@ -1164,15 +1164,15 @@ long ehFeedback(HANDLE hDevice, uint8 *inIOTypesDataBuff, long inIOTypesDataSize
     ret = 0;
     commandBytes = 6;
 
-    if(((sendDWSize = inIOTypesDataSize + 1)%2) != 0)
+    if( ((sendDWSize = inIOTypesDataSize + 1)%2) != 0 )
         sendDWSize++;
-    if(((recDWSize = outDataSize + 3)%2) != 0)
+    if( ((recDWSize = outDataSize + 3)%2) != 0 )
         recDWSize++;
 
-    sendBuff = malloc(sizeof(uint8)*(commandBytes + sendDWSize));
-    recBuff = malloc(sizeof(uint8)*(commandBytes + recDWSize));
+    sendBuff = (uint8 *)malloc(sizeof(uint8)*(commandBytes + sendDWSize));
+    recBuff = (uint8 *)malloc(sizeof(uint8)*(commandBytes + recDWSize));
 
-    if(sendBuff == NULL || recBuff == NULL)
+    if( sendBuff == NULL || recBuff == NULL )
     {
         ret = -1;
         goto cleanmem;
@@ -1183,20 +1183,20 @@ long ehFeedback(HANDLE hDevice, uint8 *inIOTypesDataBuff, long inIOTypesDataSize
     /* Setting up Feedback command */
     sendBuff[1] = (uint8)(0xF8);  //Command byte
     sendBuff[2] = sendDWSize/2;   //Number of data words (.5 word for echo, 1.5
-                                   //words for IOTypes)
+                                  //words for IOTypes)
     sendBuff[3] = (uint8)(0x00);  //Extended command number
 
     sendBuff[6] = 0;    //Echo
 
-    for(i = 0; i < inIOTypesDataSize; i++)
+    for( i = 0; i < inIOTypesDataSize; i++ )
         sendBuff[i+commandBytes+1] = inIOTypesDataBuff[i];
 
     extendedChecksum(sendBuff, (sendDWSize+commandBytes));
 
     //Sending command to U6
-    if( (sendChars = LJUSB_BulkWrite(hDevice, U6_PIPE_EP1_OUT, sendBuff, (sendDWSize+commandBytes))) < sendDWSize+commandBytes)
+    if( (sendChars = LJUSB_Write(hDevice, sendBuff, (sendDWSize+commandBytes))) < sendDWSize+commandBytes )
     {
-        if(sendChars == 0)
+        if( sendChars == 0 )
             printf("ehFeedback error : write failed\n");
         else
             printf("ehFeedback error : did not write all of the buffer\n");
@@ -1205,18 +1205,18 @@ long ehFeedback(HANDLE hDevice, uint8 *inIOTypesDataBuff, long inIOTypesDataSize
     }
 
     //Reading response from U6
-    if( (recChars = LJUSB_BulkRead(hDevice, U6_PIPE_EP2_IN, recBuff, (commandBytes+recDWSize))) < commandBytes+recDWSize)
+    if( (recChars = LJUSB_Read(hDevice, recBuff, (commandBytes+recDWSize))) < commandBytes+recDWSize )
     {
-        if(recChars == -1)
+        if( recChars == -1 )
         {
             printf("ehFeedback error : read failed\n");
             ret = -1;
             goto cleanmem;
         }
-        else if(recChars < 8)
+        else if( recChars < 8 )
         {
             printf("ehFeedback error : response buffer is too small\n");
-            for(i = 0; i < recChars; i++)
+            for( i = 0; i < recChars; i++ )
                 printf("%d ", recBuff[i]);
             ret = -1;
             goto cleanmem;
@@ -1226,21 +1226,21 @@ long ehFeedback(HANDLE hDevice, uint8 *inIOTypesDataBuff, long inIOTypesDataSize
     }
 
     checksumTotal = extendedChecksum16(recBuff, recChars);
-    if( (uint8)((checksumTotal / 256 ) & 0xff) != recBuff[5])
+    if( (uint8)((checksumTotal / 256 ) & 0xff) != recBuff[5] )
     {
         printf("ehFeedback error : read buffer has bad checksum16(MSB)\n");
         ret = -1;
         goto cleanmem;
     }
 
-    if( (uint8)(checksumTotal & 0xff) != recBuff[4])
+    if( (uint8)(checksumTotal & 0xff) != recBuff[4] )
     {
         printf("ehFeedback error : read buffer has bad checksum16(LBS)\n");
         ret = -1;
         goto cleanmem;
     }
 
-    if( extendedChecksum8(recBuff) != recBuff[0])
+    if( extendedChecksum8(recBuff) != recBuff[0] )
     {
         printf("ehFeedback error : read buffer has bad checksum8\n");
         ret = -1;
@@ -1257,7 +1257,7 @@ long ehFeedback(HANDLE hDevice, uint8 *inIOTypesDataBuff, long inIOTypesDataSize
     *outErrorcode = recBuff[6];
     *outErrorFrame = recBuff[7];
 
-    for(i = 0; i+commandBytes+3 < recChars && i < outDataSize; i++)
+    for( i = 0; i+commandBytes+3 < recChars && i < outDataSize; i++ )
         outDataBuff[i] = recBuff[i+commandBytes+3];
 
 cleanmem:
