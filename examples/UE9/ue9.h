@@ -1,16 +1,17 @@
 //Author: LabJack
-//June 25, 2009
+//May 25, 2011
 //Header for UE9 example helper functions.
 //
 //History
-//-added easy functions
-//-added I2C function and LJTDAC functions and structure (09/04/2007)
-//-fixed memory leak issue in I2C functions (09/27/2007)
-//-fixed a bug in ehDIO_Feedback where CIO and MIO states were only being
-// set (08/08/2008)
+//-Added easy functions.
+//-Added I2C function and LJTDAC functions and structure. (09/04/2007)
+//-Fixed memory leak issue in I2C functions. (09/27/2007)
+//-Fixed a bug in ehDIO_Feedback where CIO and MIO states were only being
+// set. (08/08/2008)
 //-Modified calibration constants structs.  Modified the names and code of the
 // functions that apply the calibration constants. (06/25/2009)
-
+//-Replaced LJUSB_BulkWrite/Read with LJUSB_write/Read calls.  Added serial 
+// support to openUSBConnectionnow. (05/25/2011)
 #ifndef _UE9_H
 #define _UE9_H
 
@@ -109,8 +110,9 @@ uint8 extendedChecksum8( uint8 *b);
 //b = data packet for extended command
 
 HANDLE openUSBConnection( int localID);
-//Opens a UE9 with the given localID.  Returns NULL on failure, or a HANDLE
+//Opens a UE9 connection over USB.  Returns NULL on failure, or a HANDLE
 //on success.
+//localID = the local ID or serial number of the U6 you want to open
 
 void closeUSBConnection( HANDLE hDevice);
 //Closes a HANDLE to a UE9 device.

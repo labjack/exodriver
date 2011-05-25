@@ -1,5 +1,5 @@
 //Author : LabJack
-//June 23, 2009
+//May 25, 2011
 //This example demonstrates how to write and read some or all analog and digital
 //I/O.  It records the time for 1000 iterations and divides by 1000, to allow
 //measurement of the basic command/response communication times.  These times
@@ -17,11 +17,11 @@ int main(int argc, char **argv)
     ue9CalibrationInfo caliInfo;
 
     //Opening first found UE9 over USB
-    if( (hDevice = openUSBConnection(-1)) == NULL)
+    if( (hDevice = openUSBConnection(-1)) == NULL )
         goto done;
 
     //Getting calibration information from UE9
-    if(getCalibrationInfo(hDevice, &caliInfo) < 0)
+    if( getCalibrationInfo(hDevice, &caliInfo) < 0 )
         goto close;
 
     allIO(hDevice, &caliInfo);
@@ -37,33 +37,28 @@ done:
 //volts, and digital IOs to inputs.
 int allIO(HANDLE hDevice, ue9CalibrationInfo *caliInfo)
 {
-    uint8 sendBuff[34], recBuff[64];
-    int sendChars, recChars;
-    int i, j;
-    uint16 checksumTotal, bytesVoltage;
-    int initialize;  //boolean to init. DAC and digital IO settings
-    int numIterations;
-    long time;
+    uint8 sendBuff[34], recBuff[64], settlingTime;
     uint8 numChannels;  //Number of AIN channels, 0-16.
-    long ainResolution;
+    uint16 checksumTotal, bytesVoltage, ainMask;
+    int sendChars, recChars, i, j;
+    int initialize;  //boolean to init. DAC and digital IO settings
+    int numIterations, valueDIPort;
+    long time, ainResolution;
     double valueAIN[16];
-    int valueDIPort;
-    uint8 settlingTime;
-    uint16 ainMask;
 
     numIterations = 1000;
     initialize = 1;
     time = 0;
     numChannels = 8; 
     ainResolution = 12;
-    for(i = 0; i < 16; i++)
+    for( i = 0; i < 16; i++ )
         valueAIN[i] = 9999.0;
     settlingTime = 0;
     ainMask = pow(2.0, numChannels) - 1;
 
-    sendBuff[1] = (uint8)(0xF8);  //command byte
-    sendBuff[2] = (uint8)(0x0E);  //number of data words
-    sendBuff[3] = (uint8)(0x00);  //extended command number
+    sendBuff[1] = (uint8)(0xF8);  //Command byte
+    sendBuff[2] = (uint8)(0x0E);  //Number of data words
+    sendBuff[3] = (uint8)(0x00);  //Extended command number
 
     sendBuff[6] = 255;  //FIOMask : setting the mask of all FIOs
     sendBuff[7] = 0;    //FIODir : setting all FIO directions to input
@@ -81,22 +76,22 @@ int allIO(HANDLE hDevice, ue9CalibrationInfo *caliInfo)
     sendBuff[15] = 0;   //MIODirState : setting all MIO directions to input,
                         //              state writes do not apply
 
-    //getting binary DAC0 value of 2.5 volts 
-    if(getDacBinVoltCalibrated(caliInfo, 0, 2.500, &bytesVoltage) < 0)
+    //Getting binary DAC0 value of 2.5 volts 
+    if( getDacBinVoltCalibrated(caliInfo, 0, 2.500, &bytesVoltage) < 0 )
         return -1;
-    //setting the voltage of DAC0 to 2.5
-    sendBuff[16] = (uint8)(bytesVoltage & 255);     //low bits of DAC0
-    sendBuff[17] = (uint8)(bytesVoltage/256) + 192; //high bits of DAC0 
-                                                    //(bit 7 : Enable,
-                                                    //bit 6: Update)
-    //getting binary DAC1 value of 3.5 volts
-    if(getDacBinVoltCalibrated(caliInfo, 1, 3.500, &bytesVoltage) < 0)
+    //Setting the voltage of DAC0 to 2.5
+    sendBuff[16] = (uint8)(bytesVoltage & 255);      //low bits of DAC0
+    sendBuff[17] = (uint8)(bytesVoltage/256) + 192;  //high bits of DAC0 
+                                                     //(bit 7 : Enable,
+                                                     // bit 6: Update)
+    //Getting binary DAC1 value of 3.5 volts
+    if( getDacBinVoltCalibrated(caliInfo, 1, 3.500, &bytesVoltage) < 0 )
         return -1;
-    //setting the voltage of DAC1 to 3.5 volts
-    sendBuff[18] = (uint8)(bytesVoltage & 255);     //low bits of DAC1
-    sendBuff[19] = (uint8)(bytesVoltage/256) + 192; //high bits of DAC1 
-                                                    //(bit 7 : Enable,
-                                                    //bit 6: Update)
+    //Setting the voltage of DAC1 to 3.5 volts
+    sendBuff[18] = (uint8)(bytesVoltage & 255);      //low bits of DAC1
+    sendBuff[19] = (uint8)(bytesVoltage/256) + 192;  //high bits of DAC1 
+                                                     //(bit 7 : Enable,
+                                                     // bit 6: Update)
 
     //AINMask - reading the number of AINs specified by numChannels
     sendBuff[20] = ainMask & 255;  //AINMask (low byte)
@@ -107,76 +102,77 @@ int allIO(HANDLE hDevice, ue9CalibrationInfo *caliInfo)
                                    //             ainResolution
     sendBuff[25] = settlingTime;   //SettlingTime
 
-    //setting all BipGains (Gain = 1, Bipolar = 1) 
-    for(i = 26; i < 34; i++)
+    //Setting all BipGains (Gain = 1, Bipolar = 1) 
+    for( i = 26; i < 34; i++ )
         sendBuff[i] = (uint8)(0x00);
 
     extendedChecksum(sendBuff, 34);
 
     time = getTickCount();
-    for(i = 0; i < numIterations; i++)
+
+    for( i = 0; i < numIterations; i++ )
     {
         //Sending command to UE9
-        sendChars = LJUSB_BulkWrite(hDevice, UE9_PIPE_EP1_OUT, sendBuff, 34);
-        if(sendChars < 34)
+        sendChars = LJUSB_Write(hDevice, sendBuff, 34);
+        if( sendChars < 34 )
         {
-            if(sendChars == 0)
+            if( sendChars == 0 )
                 printf("Feedback error (Iteration %d) : write failed\n", i);
-            else  
+            else
                 printf("Feedback error (Iteration %d) : did not write all of the buffer\n", i);
             return -1;
         }
 
         //Reading response from UE9
-        recChars = LJUSB_BulkRead(hDevice, UE9_PIPE_EP1_IN, recBuff, 64);
-        if(recChars < 64)
+        recChars = LJUSB_Read(hDevice, recBuff, 64);
+        if( recChars < 64 )
         {
-            if(recChars == 0)
+            if( recChars == 0 )
                 printf("Feedback error (Iteration %d) : read failed\n", i);
-            else  
+            else
                 printf("Feedback error (Iteration %d) : did not read all of the buffer\n", i);
             return -1;
         }
 
         checksumTotal = extendedChecksum16(recBuff, 64);
-        if( (uint8)((checksumTotal / 256) & 0xff) != recBuff[5])
+        if( (uint8)((checksumTotal / 256) & 0xff) != recBuff[5] )
         {
             printf("Feedback error (Iteration %d) : read buffer has bad checksum16(MSB)\n", i);
             return -1;
         }
 
-        if( (uint8)(checksumTotal & 255) != recBuff[4])
+        if( (uint8)(checksumTotal & 255) != recBuff[4] )
         {
-            printf("Feedback error (Iteration %d) : read buffer has bad checksum16(LBS)\n", i);
+            printf("Feedback error (Iteration %d) : read buffer has bad checksum16(LSB)\n", i);
             return -1;
         }
 
-        if( extendedChecksum8(recBuff) != recBuff[0])
+        if( extendedChecksum8(recBuff) != recBuff[0] )
         {
             printf("Feedback error (Iteration %d) : read buffer has bad checksum8\n", i);
             return -1;
         }
 
-        if(recBuff[1] != (uint8)(0xF8) || recBuff[2] != (uint8)(0x1D) || recBuff[3] != (uint8)(0x00))
+        if( recBuff[1] != (uint8)(0xF8) || recBuff[2] != (uint8)(0x1D) || recBuff[3] != (uint8)(0x00) )
         {
             printf("Feedback error (Iteration %d) : read buffer has wrong command bytes\n", i);
             return -1;
         }
 
-        for(j = 0; j < numChannels && j < 16; j++)
+        for( j = 0; j < numChannels && j < 16; j++ )
             getAinVoltCalibrated(caliInfo, 0x00, (uint8)ainResolution, recBuff[12 + j*2] + recBuff[13 + j*2]*256, &valueAIN[j]);
 
         valueDIPort = recBuff[7] + recBuff[9]*256 + (recBuff[10] & 15)*65536 + (recBuff[11] & 7)*1048576;
 
-        if(initialize == 1)
+        if( initialize == 1 )
         {
-            //unsetting digital IO bit masks since we only want to read states now 
-            sendBuff[6] = 0;  //FIOMask 
-            sendBuff[9] = 0;  //EIOMask
-            sendBuff[12] = 0; //CIOMask 
-            sendBuff[14] = 0; //MIOMask 
+            //Unsetting digital IO bit masks since we only want to read states now 
+            sendBuff[6] = 0;   //FIOMask 
+            sendBuff[9] = 0;   //EIOMask
+            sendBuff[12] = 0;  //CIOMask 
+            sendBuff[14] = 0;  //MIOMask 
 
-            //turning off Update bit of DACs
+            //Turning off Update bit of DACs
             sendBuff[17] = sendBuff[17] - 64;  //high bits of DAC0  
             sendBuff[19] = sendBuff[19] - 64;  //high bits of DAC1 
 
@@ -185,12 +181,13 @@ int allIO(HANDLE hDevice, ue9CalibrationInfo *caliInfo)
             initialize = 0;
         }
     }
+
     time = getTickCount() - time;
 
     printf("Milleseconds per iteration = %.3f\n", (double)time / (double)numIterations);
     printf("\nDigital Input (FIO0-7, EIO0-7, CIO0-3, MIO0-2)  = %d\n",valueDIPort);
     printf("\nAIN readings from last iteration:\n");
-    for( j = 0; j < numChannels; j++)
+    for( j = 0; j < numChannels; j++ )
         printf("%.3f\n", valueAIN[j]);
 
     return 0;

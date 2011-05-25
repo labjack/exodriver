@@ -18,11 +18,11 @@ int main(int argc, char **argv)
     ue9TdacCalibrationInfo caliInfo;
 
     //Opening first found UE9 over USB
-    if( (hDevice = openUSBConnection(-1)) == NULL)
+    if( (hDevice = openUSBConnection(-1)) == NULL )
         goto done;
 
     //Getting calibration information from LJTDAC
-    if(getTdacCalibrationInfo(hDevice, &caliInfo, SCLPinNum) < 0)
+    if( getTdacCalibrationInfo(hDevice, &caliInfo, SCLPinNum) < 0 )
         goto close;
 
     LJTDAC_example(hDevice, &caliInfo);
@@ -36,7 +36,7 @@ done:
 
 int checkI2CErrorcode(uint8 errorcode)
 {
-    if(errorcode != 0)
+    if( errorcode != 0 )
     {
         printf("I2C error : received errorcode %d in response\n", errorcode);
         return -1;
@@ -45,21 +45,19 @@ int checkI2CErrorcode(uint8 errorcode)
 }
 
 
-int LJTDAC_example(HANDLE hDevice, ue9TdacCalibrationInfo *caliInfo)
+int LJTDAC_example( HANDLE hDevice, ue9TdacCalibrationInfo *caliInfo )
 {
-    int err;
-    uint8 options, speedAdjust, sdaPinNum, sclPinNum, address, numBytesToSend, numBytesToReceive, errorcode;
+    uint8 options, speedAdjust, sdaPinNum, sclPinNum;
+    uint8 address, numBytesToSend, numBytesToReceive, errorcode;
+    uint8 bytesCommand[5], bytesResponse[64], ackArray[4];
     uint16 binaryVoltage;
-    uint8 bytesCommand[5];
-    uint8 bytesResponse[64];
-    uint8 ackArray[4];
-    int i;
+    int i, err;
 
     err = 0;
 
     //Setting up parts I2C command that will remain the same throughout this example
-    options = 0;             //I2COptions : 0
-    speedAdjust = 0;         //SpeedAdjust : 0 (for max communication speed of about 130 kHz)
+    options = 0;      //I2COptions : 0
+    speedAdjust = 0;  //SpeedAdjust : 0 (for max communication speed of about 130 kHz)
     sdaPinNum = SCLPinNum + 1;  //SDAPinNum : FIO1 connected to pin DIOB
     sclPinNum = SCLPinNum;      //SCLPinNum : FIO0 connected to pin DIOA
 
@@ -73,13 +71,13 @@ int LJTDAC_example(HANDLE hDevice, ue9TdacCalibrationInfo *caliInfo)
     numBytesToReceive = 0;    //NumI2CBytesToReceive : 0 since we are only setting the value of the DAC
     bytesCommand[0] = (uint8)(0x30);  //LJTDAC command byte : h0x30 (DACA)
     getTdacBinVoltCalibrated(caliInfo, 0, 1.2, &binaryVoltage);
-    bytesCommand[1] = (uint8)(binaryVoltage/256);          //value (high)
-    bytesCommand[2] = (uint8)(binaryVoltage & (0x00FF));   //value (low)
+    bytesCommand[1] = (uint8)(binaryVoltage/256);         //value (high)
+    bytesCommand[2] = (uint8)(binaryVoltage & (0x00FF));  //value (low)
 
     //Performing I2C low-level call
     err = I2C(hDevice, options, speedAdjust, sdaPinNum, sclPinNum, address, numBytesToSend, numBytesToReceive, bytesCommand, &errorcode, ackArray, bytesResponse);
 
-    if(checkI2CErrorcode(errorcode) == -1 || err == -1)
+    if( checkI2CErrorcode(errorcode) == -1 || err == -1 )
         return -1;
 
     printf("DACA set to 1.2 volts\n\n");
@@ -93,13 +91,13 @@ int LJTDAC_example(HANDLE hDevice, ue9TdacCalibrationInfo *caliInfo)
     numBytesToReceive = 0;    //NumI2CBytesToReceive : 0 since we are only setting the value of the DAC
     bytesCommand[0] = (uint8)(0x31);  //LJTDAC command byte : h0x31 (DACB)
     getTdacBinVoltCalibrated(caliInfo, 1, 2.3, &binaryVoltage);
-    bytesCommand[1] = (uint8)(binaryVoltage/256);          //value (high)
-    bytesCommand[2] = (uint8)(binaryVoltage & (0x00FF));   //value (low)
+    bytesCommand[1] = (uint8)(binaryVoltage/256);         //value (high)
+    bytesCommand[2] = (uint8)(binaryVoltage & (0x00FF));  //value (low)
 
     //Performing I2C low-level call
     err = I2C(hDevice, options, speedAdjust, sdaPinNum, sclPinNum, address, numBytesToSend, numBytesToReceive, bytesCommand, &errorcode, ackArray, bytesResponse);
 
-    if(checkI2CErrorcode(errorcode) == -1 || err == -1)
+    if( checkI2CErrorcode(errorcode) == -1 || err == -1 )
         return -1;
 
     printf("DACB set to 2.3 volts\n\n");
@@ -108,7 +106,7 @@ int LJTDAC_example(HANDLE hDevice, ue9TdacCalibrationInfo *caliInfo)
     /* More advanced operations. */
 
     /* Display LJTDAC calibration constants.  Code for getting the calibration constants is in the
-    * getLJTDACCalibrationInfo function in the ue9.c file. */
+     * getLJTDACCalibrationInfo function in the ue9.c file. */
     printf("DACA Slope = %.1f bits/volt\n", caliInfo->ccConstants[0]);
     printf("DACA Offset = %.1f bits\n", caliInfo->ccConstants[1]);
     printf("DACB Slope = %.1f bits/volt\n", caliInfo->ccConstants[2]);
@@ -126,15 +124,15 @@ int LJTDAC_example(HANDLE hDevice, ue9TdacCalibrationInfo *caliInfo)
     //Performing I2C low-level call
     err = I2C(hDevice, options, speedAdjust, sdaPinNum, sclPinNum, address, numBytesToSend, numBytesToReceive, bytesCommand, &errorcode, ackArray, bytesResponse);
 
-    if(checkI2CErrorcode(errorcode) == -1 || err == -1)
+    if( checkI2CErrorcode(errorcode) == -1 || err == -1 )
         return -1;
 
     printf("LJTDAC Serial Number = %u\n\n", (bytesResponse[0] + bytesResponse[1]*256 + bytesResponse[2]*65536 + bytesResponse[3]*16777216));
 
 
     /* User memory example.  We will read the memory, update a few elements,
-    * and write the memory. The user memory is just stored as bytes, so almost
-    * any information can be put in there such as integers, doubles, or strings. */
+     * and write the memory. The user memory is just stored as bytes, so almost
+     * any information can be put in there such as integers, doubles, or strings. */
 
     /* Read the user memory */
 
@@ -147,7 +145,7 @@ int LJTDAC_example(HANDLE hDevice, ue9TdacCalibrationInfo *caliInfo)
     //Performing I2C low-level call
     err = I2C(hDevice, options, speedAdjust, sdaPinNum, sclPinNum, address, numBytesToSend, numBytesToReceive, bytesCommand, &errorcode, ackArray, bytesResponse);
 
-    if(checkI2CErrorcode(errorcode) == -1 || err == -1)
+    if( checkI2CErrorcode(errorcode) == -1 || err == -1 )
         return -1;
 
     //Display the first 4 elements.
@@ -155,7 +153,7 @@ int LJTDAC_example(HANDLE hDevice, ue9TdacCalibrationInfo *caliInfo)
 
 
     /* Create 4 new pseudo-random numbers to write.  We will update the first
-    * 4 elements of user memory, but the rest will be unchanged. */
+     * 4 elements of user memory, but the rest will be unchanged. */
 
     //Setting up I2C command
     address = (uint8)(0xA0);  //Address : h0xA0 is the address for EEPROM
@@ -163,7 +161,7 @@ int LJTDAC_example(HANDLE hDevice, ue9TdacCalibrationInfo *caliInfo)
     numBytesToReceive = 0;    //NumI2CBytesToReceive : 0 since we are only writing to memory
     bytesCommand[0] = 0;      //I2CByte0 : Memory Address, starting at address 0 (User Area)
     srand((unsigned int)getTickCount());
-    for(i = 1; i < 5; i++)
+    for( i = 1; i < 5; i++ )
         bytesCommand[i] = (uint8)(255*((float)rand()/RAND_MAX));;  //I2CByte : byte in user memory
 
     printf("Write User Mem [0-3] = %d, %d, %d, %d\n", bytesCommand[1], bytesCommand[2], bytesCommand[3], bytesCommand[4]);
@@ -171,7 +169,7 @@ int LJTDAC_example(HANDLE hDevice, ue9TdacCalibrationInfo *caliInfo)
     //Performing I2C low-level call
     err = I2C(hDevice, options, speedAdjust, sdaPinNum, sclPinNum, address, numBytesToSend, numBytesToReceive, bytesCommand, &errorcode, ackArray, bytesResponse);
 
-    if(checkI2CErrorcode(errorcode) == -1 || err == -1)
+    if( checkI2CErrorcode(errorcode) == -1 || err == -1 )
         return -1;
 
     //Delay for 2 ms to allow the EEPROM to finish writing.
@@ -187,7 +185,7 @@ int LJTDAC_example(HANDLE hDevice, ue9TdacCalibrationInfo *caliInfo)
     //Performing I2C low-level call
     err = I2C(hDevice, options, speedAdjust, sdaPinNum, sclPinNum, address, numBytesToSend, numBytesToReceive, bytesCommand, &errorcode, ackArray, bytesResponse);
 
-    if(checkI2CErrorcode(errorcode) == -1 || err == -1)
+    if( checkI2CErrorcode(errorcode) == -1 || err == -1 )
         return -1;
 
     //Display the first 4 elements.
