@@ -776,7 +776,7 @@ long eAIN(HANDLE Handle, u3CalibrationInfo *CalibrationInfo, long ConfigIO, long
     }
 
     if(ChannelN < 0 || (ChannelN > 15 && ChannelN != 30 && ChannelN != 31 && ChannelN != 32)
-     || (hwver >= 1.30 && hv == 1 && ((ChannelP < 4 && ChannelN != 31)
+     || (hwver >= 1.30 && hv == 1 && ((ChannelP < 4 && ChannelN != 31 && ChannelN != 32)
      || ChannelN < 4)))
     {
         printf("eAIN error: Invalid negative channel\n");
