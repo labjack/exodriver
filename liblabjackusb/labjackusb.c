@@ -287,7 +287,7 @@ static int LJUSB_libusbError(int r)
         printf("errno: %d.\n", errno);
         break;
     default:
-        fprintf(stderr, "LJUSB_libusbError: Unexpected error code: %d.\n", r);
+        fprintf(stderr, "libusb error: Unexpected error code: %d.\n", r);
         printf("errno: %d.\n", errno);
         break;
     }
