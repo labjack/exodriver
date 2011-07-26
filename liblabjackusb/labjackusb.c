@@ -734,7 +734,7 @@ static unsigned long LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, unsigned l
     
     if (r < 0) {
         LJUSB_libusbError(r);
-        return r;
+        return -1;
     }
     
     
