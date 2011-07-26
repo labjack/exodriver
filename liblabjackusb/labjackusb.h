@@ -92,7 +92,7 @@ float LJUSB_GetLibraryVersion(void);
 //Returns the labjackusb library version number
 
 
-unsigned long LJUSB_GetDevCount(unsigned long ProductID);
+unsigned int LJUSB_GetDevCount(unsigned long ProductID);
 //Returns the total number of LabJack USB devices connected.
 //ProductID = The product ID of the devices you want to get the count of.
 

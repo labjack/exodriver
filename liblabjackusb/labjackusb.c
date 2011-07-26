@@ -899,7 +899,7 @@ void LJUSB_CloseDevice(HANDLE hDevice)
 }
 
 
-unsigned long LJUSB_GetDevCount(unsigned long ProductID)
+unsigned int LJUSB_GetDevCount(unsigned long ProductID)
 {
     libusb_device **devs;
     ssize_t cnt;
