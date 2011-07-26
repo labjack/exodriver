@@ -61,10 +61,10 @@ struct LJUSB_FirmwareHardwareVersion
 
 static void LJUSB_U3_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_FirmwareHardwareVersion * fhv)
 {
-    int i = 0, r;
+    unsigned long i = 0, r;
     unsigned long epOut = U3_PIPE_EP1_OUT, epIn = U3_PIPE_EP2_IN;
-    const int COMMAND_LENGTH = 26;
-    const int RESPONSE_LENGTH = 38;
+    const unsigned long COMMAND_LENGTH = 26;
+    const unsigned long RESPONSE_LENGTH = 38;
     BYTE command[COMMAND_LENGTH];
     BYTE response[RESPONSE_LENGTH];
 
@@ -114,10 +114,10 @@ static void LJUSB_U3_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_Firmwa
 
 static void LJUSB_U6_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_FirmwareHardwareVersion * fhv)
 {
-    int i = 0, r;
+    unsigned long i = 0, r;
     unsigned long epOut = U6_PIPE_EP1_OUT, epIn = U6_PIPE_EP2_IN;
-    const int COMMAND_LENGTH = 26;
-    const int RESPONSE_LENGTH = 38;
+    const unsigned long COMMAND_LENGTH = 26;
+    const unsigned long RESPONSE_LENGTH = 38;
     BYTE command[COMMAND_LENGTH];
     BYTE response[RESPONSE_LENGTH];
 
@@ -166,10 +166,10 @@ static void LJUSB_U6_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_Firmwa
 
 static void LJUSB_UE9_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_FirmwareHardwareVersion * fhv)
 {
-    int i = 0, r;
+    unsigned long i = 0, r;
     unsigned long epOut = UE9_PIPE_EP1_OUT, epIn = UE9_PIPE_EP1_IN;
-    const int COMMAND_LENGTH = 38;
-    const int RESPONSE_LENGTH = 38;
+    const unsigned long COMMAND_LENGTH = 38;
+    const unsigned long RESPONSE_LENGTH = 38;
     BYTE command[COMMAND_LENGTH];
     BYTE response[RESPONSE_LENGTH];
 
@@ -216,14 +216,14 @@ static void LJUSB_UE9_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_Firmw
 }
 
 
-static int LJUSB_isNullHandle(HANDLE hDevice)
+static bool LJUSB_isNullHandle(HANDLE hDevice)
 {
     if (hDevice == NULL) {
         // TODO: Consider different errno here and in LJUSB_isHandleValid
         errno = EINVAL;
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 
 
@@ -287,7 +287,7 @@ static int LJUSB_libusbError(int r)
         printf("errno: %d.\n", errno);
         break;
     default:
-        fprintf(stderr, "LJUSB_libusbError: Unexpected error code: %d.\n", r);
+        fprintf(stderr, "libusb error: Unexpected error code: %d.\n", r);
         printf("errno: %d.\n", errno);
         break;
     }
@@ -300,34 +300,34 @@ static bool LJUSB_U3_isMinFirmware(struct LJUSB_FirmwareHardwareVersion * fhv)
 {
     if (fhv->hardwareMajor == U3C_HARDWARE_MAJOR && fhv->hardwareMinor == U3C_HARDWARE_MINOR) {
         if (fhv->firmwareMajor > MIN_U3C_FIRMWARE_MAJOR || (fhv->firmwareMajor == MIN_U3C_FIRMWARE_MAJOR && fhv->firmwareMinor >= MIN_U3C_FIRMWARE_MINOR)) {
-            return 1;
+            return true;
         }
         else {
             fprintf(stderr, "Minimum U3 firmware not met is not met for this kernel.  Please update from firmware %d.%02d to firmware %d.%d or upgrade to kernel %d.%d.%d.\n", fhv->firmwareMajor, fhv->firmwareMinor, MIN_U3C_FIRMWARE_MAJOR, MIN_U3C_FIRMWARE_MINOR, LJ_RECENT_KERNEL_MAJOR, LJ_RECENT_KERNEL_MINOR, LJ_RECENT_KERNEL_REV);
-            return 0;
+            return false;
         }
     }
     else {
         fprintf(stderr, "Minimum U3 hardware version not met for this kernel.  This driver supports only hardware %d.%d and above.  Your hardware version is %d.%d.\n", U3C_HARDWARE_MAJOR, U3C_HARDWARE_MINOR, fhv->hardwareMajor, fhv->hardwareMinor);
         fprintf(stderr, "This hardware version is supported under kernel %d.%d.%d.\n", LJ_RECENT_KERNEL_MAJOR, LJ_RECENT_KERNEL_MINOR, LJ_RECENT_KERNEL_REV);
-        return 0;
+        return false;
     }
 
-    return 0;
+    return false;
 }
 
 
 static bool LJUSB_U6_isMinFirmware(struct LJUSB_FirmwareHardwareVersion * fhv)
 {
     if (fhv->firmwareMajor > MIN_U6_FIRMWARE_MAJOR || (fhv->firmwareMajor == MIN_U6_FIRMWARE_MAJOR && fhv->firmwareMinor >= MIN_U6_FIRMWARE_MINOR)) {
-        return 1;
+        return true;
     }
     else {
         fprintf(stderr, "Minimum U6 firmware not met is not met for this kernel.  Please update from firmware %d.%d to firmware %d.%d or upgrade to kernel %d.%d.%d.\n", fhv->firmwareMajor, fhv->firmwareMinor, MIN_U6_FIRMWARE_MAJOR, MIN_U6_FIRMWARE_MINOR, LJ_RECENT_KERNEL_MAJOR, LJ_RECENT_KERNEL_MINOR, LJ_RECENT_KERNEL_REV);
-        return 0;
+        return false;
     }
 
-    return 0;
+    return false;
 }
 
 
@@ -341,25 +341,25 @@ static bool LJUSB_UE9_isMinFirmware(struct LJUSB_FirmwareHardwareVersion * fhv)
         if (DEBUG) {
             fprintf(stderr, "Minimum UE9 firmware met. Version is %d.%d.\n", fhv->firmwareMajor, fhv->firmwareMinor);
         }
-        return 1;
+        return true;
     }
     else {
         fprintf(stderr, "Minimum UE9 firmware not met is not met for this kernel.  Please update from firmware %d.%d to firmware %d.%d or upgrade to kernel %d.%d.%d.\n", fhv->firmwareMajor, fhv->firmwareMinor, MIN_UE9_FIRMWARE_MAJOR, MIN_UE9_FIRMWARE_MINOR, LJ_RECENT_KERNEL_MAJOR, LJ_RECENT_KERNEL_MINOR, LJ_RECENT_KERNEL_REV);
-        return 0;
+        return false;
     }
 
-    return 0;
+    return false;
 }
 
 
 static bool LJUSB_isRecentKernel(void)
 {
-    int kernelMajor, kernelMinor, kernelRev;
+    unsigned long kernelMajor, kernelMinor, kernelRev;
     char * tok;
     struct utsname u;
     if (uname(&u) != 0) {
         fprintf(stderr, "Error calling uname(2).");
-        return 0;
+        return false;
     }
 
     // There are no known kernel-compatibility problems with Mac OS X.
@@ -371,7 +371,7 @@ static bool LJUSB_isRecentKernel(void)
         if (DEBUG) {
             fprintf(stderr, "LJUSB_recentKernel: returning true on Darwin.\n");
         }
-        return 1;
+        return true;
     }
 
     if (DEBUG) {
@@ -381,19 +381,19 @@ static bool LJUSB_isRecentKernel(void)
     kernelMajor = strtoul(tok, NULL, 10);
     if (DEBUG) {
         fprintf(stderr, "LJUSB_recentKernel: tok: %s\n", tok);
-        fprintf(stderr, "LJUSB_recentKernel: kernelMajor: %d\n", kernelMajor);
+        fprintf(stderr, "LJUSB_recentKernel: kernelMajor: %lu\n", kernelMajor);
     }
     tok = strtok(NULL, ".-");
     kernelMinor = strtoul(tok, NULL, 10);
     if (DEBUG) {
         fprintf(stderr, "LJUSB_recentKernel: tok: %s\n", tok);
-        fprintf(stderr, "LJUSB_recentKernel: kernelMinor: %d\n", kernelMinor);
+        fprintf(stderr, "LJUSB_recentKernel: kernelMinor: %lu\n", kernelMinor);
     }
     tok = strtok(NULL, ".-");
     kernelRev = strtoul(tok, NULL, 10);
     if (DEBUG) {
         fprintf(stderr, "LJUSB_recentKernel: tok: %s\n", tok);
-        fprintf(stderr, "LJUSB_recentKernel: kernelRev: %d\n", kernelRev);
+        fprintf(stderr, "LJUSB_recentKernel: kernelRev: %lu\n", kernelRev);
     }
 
     return (kernelMajor == LJ_RECENT_KERNEL_MAJOR && kernelMinor == LJ_RECENT_KERNEL_MINOR && kernelRev >= LJ_RECENT_KERNEL_REV) ||
@@ -411,7 +411,7 @@ static bool LJUSB_isMinFirmware(HANDLE hDevice, unsigned long ProductID)
         if (DEBUG) {
             fprintf(stderr, "LJUSB_isMinFirmware: LJUSB_isRecentKernel: true\n");
         }
-        return 1;
+        return true;
     }
     if (DEBUG) {
         fprintf(stderr, "LJUSB_isMinFirmware: LJUSB_isRecentKernel: false\n");
@@ -433,12 +433,12 @@ static bool LJUSB_isMinFirmware(HANDLE hDevice, unsigned long ProductID)
         return 1;
     default:
         fprintf(stderr, "Firmware check not supported for product ID %ld\n", ProductID);
-        return 0;
+        return false;
     }
 }
 
 
-void LJUSB_libusb_exit(void)
+static void LJUSB_libusb_exit(void)
 {
     if (isLibUSBInitialized) {
         libusb_exit(ljContext);
@@ -734,7 +734,7 @@ static unsigned long LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, unsigned l
     
     if (r < 0) {
         LJUSB_libusbError(r);
-        return r;
+        return -1;
     }
     
     
@@ -899,7 +899,7 @@ void LJUSB_CloseDevice(HANDLE hDevice)
 }
 
 
-unsigned long LJUSB_GetDevCount(unsigned long ProductID)
+unsigned int LJUSB_GetDevCount(unsigned long ProductID)
 {
     libusb_device **devs;
     ssize_t cnt;
@@ -1053,7 +1053,7 @@ bool LJUSB_IsHandleValid(HANDLE hDevice)
         }
         // TODO: Consider different errno here and in LJUSB_isNullHandle
         errno = EINVAL;
-        return 0;
+        return false;
     }
 
     // If we can call get configuration without getting an error,
@@ -1070,12 +1070,12 @@ bool LJUSB_IsHandleValid(HANDLE hDevice)
         }
         // TODO: Consider different errno here and in LJUSB_isNullHandle
         errno = EINVAL;
-        return 0;
+        return false;
     } else {
         if (DEBUG) {
             fprintf(stderr, "LJUSB_IsHandleValid: returning 1.\n");
         }
-        return 1;
+        return true;
     }
 }
 
@@ -1087,5 +1087,5 @@ bool LJUSB_AbortPipe(HANDLE hDevice, unsigned long Pipe)
 	(void)Pipe;
 
     errno = ENOSYS;
-    return 0;
+    return false;
 }
