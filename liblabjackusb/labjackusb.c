@@ -61,10 +61,10 @@ struct LJUSB_FirmwareHardwareVersion
 
 static void LJUSB_U3_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_FirmwareHardwareVersion * fhv)
 {
-    int i = 0, r;
+    unsigned long i = 0, r;
     unsigned long epOut = U3_PIPE_EP1_OUT, epIn = U3_PIPE_EP2_IN;
-    const int COMMAND_LENGTH = 26;
-    const int RESPONSE_LENGTH = 38;
+    const unsigned long COMMAND_LENGTH = 26;
+    const unsigned long RESPONSE_LENGTH = 38;
     BYTE command[COMMAND_LENGTH];
     BYTE response[RESPONSE_LENGTH];
 
@@ -114,10 +114,10 @@ static void LJUSB_U3_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_Firmwa
 
 static void LJUSB_U6_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_FirmwareHardwareVersion * fhv)
 {
-    int i = 0, r;
+    unsigned long i = 0, r;
     unsigned long epOut = U6_PIPE_EP1_OUT, epIn = U6_PIPE_EP2_IN;
-    const int COMMAND_LENGTH = 26;
-    const int RESPONSE_LENGTH = 38;
+    const unsigned long COMMAND_LENGTH = 26;
+    const unsigned long RESPONSE_LENGTH = 38;
     BYTE command[COMMAND_LENGTH];
     BYTE response[RESPONSE_LENGTH];
 
@@ -166,10 +166,10 @@ static void LJUSB_U6_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_Firmwa
 
 static void LJUSB_UE9_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_FirmwareHardwareVersion * fhv)
 {
-    int i = 0, r;
+    unsigned long i = 0, r;
     unsigned long epOut = UE9_PIPE_EP1_OUT, epIn = UE9_PIPE_EP1_IN;
-    const int COMMAND_LENGTH = 38;
-    const int RESPONSE_LENGTH = 38;
+    const unsigned long COMMAND_LENGTH = 38;
+    const unsigned long RESPONSE_LENGTH = 38;
     BYTE command[COMMAND_LENGTH];
     BYTE response[RESPONSE_LENGTH];
 
