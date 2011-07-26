@@ -41,8 +41,8 @@
 //----------------------------------------------------------------------
 //
 
-#ifndef _LABJACKUSB_H_
-#define _LABJACKUSB_H_
+#ifndef LABJACKUSB_H_
+#define LABJACKUSB_H_
 
 #define LJUSB_LINUX_LIBRARY_VERSION 2.0f
 
@@ -199,4 +199,4 @@ unsigned long LJUSB_BulkWrite(HANDLE hDevice, unsigned char endpoint, BYTE *pBuf
 }
 #endif
 
-#endif // _LABJACKUSB_H_
+#endif // LABJACKUSB_H_
