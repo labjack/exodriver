@@ -284,11 +284,15 @@ static int LJUSB_libusbError(int r)
         break;
     case LIBUSB_ERROR_OTHER:
         fprintf(stderr, "libusb error: LIBUSB_ERROR_OTHER\n");
-        printf("errno: %d.\n", errno);
+        if (errno == 0) {
+            errno = ENOSYS;
+        }
         break;
     default:
         fprintf(stderr, "libusb error: Unexpected error code: %d.\n", r);
-        printf("errno: %d.\n", errno);
+        if (errno == 0) {
+            errno = ENOSYS;
+        }
         break;
     }
 
