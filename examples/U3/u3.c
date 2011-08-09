@@ -203,7 +203,7 @@ long isCalibrationInfoValid(u3CalibrationInfo *caliInfo)
     return 1;
 invalid:
     printf("Error: Invalid calibration info.\n");
-    return -1;
+    return 0;
 }
 
 
@@ -216,7 +216,7 @@ long isTdacCalibrationInfoValid(u3TdacCalibrationInfo *caliInfo)
     return 1;
 invalid:
     printf("Error: Invalid LJTDAC calibration info.\n");
-    return -1;
+    return 0;
 }
 
 
@@ -386,7 +386,7 @@ double FPuint8ArrayToFPDouble(uint8 *buffer, int startIndex)
 
 long getAinVoltCalibrated(u3CalibrationInfo *caliInfo, int dacEnabled, uint8 negChannel, uint16 bytesVolt, double *analogVolt)
 {
-    if(isCalibrationInfoValid(caliInfo) == -1)
+    if(isCalibrationInfoValid(caliInfo) == 0)
         return -1;
 
     if(caliInfo->hardwareVersion >= 1.30)
@@ -426,7 +426,7 @@ long getAinVoltCalibrated(u3CalibrationInfo *caliInfo, int dacEnabled, uint8 neg
 
 long getAinVoltCalibrated_hw130(u3CalibrationInfo *caliInfo, uint8 positiveChannel, uint8 negChannel, uint16 bytesVolt, double *analogVolt)
 {
-    if(isCalibrationInfoValid(caliInfo) == -1)
+    if(isCalibrationInfoValid(caliInfo) == 0)
         return -1;
 
     if(caliInfo->hardwareVersion < 1.30)
@@ -485,7 +485,7 @@ long getDacBinVoltCalibrated8Bit(u3CalibrationInfo *caliInfo, int dacNumber, dou
 {
     double tBytesVolt;
 
-    if(isCalibrationInfoValid(caliInfo) == -1)
+    if(isCalibrationInfoValid(caliInfo) == 0)
         return -1;
 
     if(dacNumber < 0 || dacNumber > 2)
@@ -513,7 +513,7 @@ long getDacBinVoltCalibrated16Bit(u3CalibrationInfo *caliInfo, int dacNumber, do
 {
     double tBytesVolt;
 
-    if(isCalibrationInfoValid(caliInfo) == -1)
+    if(isCalibrationInfoValid(caliInfo) == 0)
         return -1;
 
     if(dacNumber < 0 || dacNumber > 2)
@@ -547,7 +547,7 @@ long getTdacBinVoltCalibrated(u3TdacCalibrationInfo *caliInfo, int dacNumber, do
 {
     uint32 tBytesVolt;
 
-    if(isTdacCalibrationInfoValid(caliInfo) == -1)
+    if(isTdacCalibrationInfoValid(caliInfo) == 0)
         return -1;
 
     if(dacNumber < 0 || dacNumber > 2)
@@ -571,7 +571,7 @@ long getTdacBinVoltCalibrated(u3TdacCalibrationInfo *caliInfo, int dacNumber, do
 
 long getTempKCalibrated(u3CalibrationInfo *caliInfo, uint32 bytesTemp, double *kelvinTemp)
 {
-    if(isCalibrationInfoValid(caliInfo) == -1)
+    if(isCalibrationInfoValid(caliInfo) == 0)
         return -1;
 
     *kelvinTemp = caliInfo->ccConstants[8]*((double)bytesTemp);
@@ -760,7 +760,7 @@ long eAIN(HANDLE Handle, u3CalibrationInfo *CalibrationInfo, long ConfigIO, long
     int hv;
     int isSpecialRange = 0;
 
-    if(isCalibrationInfoValid(CalibrationInfo) != 1)
+    if(isCalibrationInfoValid(CalibrationInfo) == 0)
     {
         printf("eAIN error: calibration information is required");
         return -1;
@@ -875,7 +875,7 @@ long eDAC(HANDLE Handle, u3CalibrationInfo *CalibrationInfo, long ConfigIO, long
     uint16 bytesV;
     long error, sendSize;
 
-    if(isCalibrationInfoValid(CalibrationInfo) != 1)
+    if(isCalibrationInfoValid(CalibrationInfo) == 0)
     {
         printf("eDAC error: calibration information is required");
         return -1;

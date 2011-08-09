@@ -341,7 +341,7 @@ long isCalibrationInfoValid(ue9CalibrationInfo *caliInfo)
     return 1;
 invalid:
   printf("Error: Invalid calibration info.\n");
-  return -1;
+  return 0;
 }
 
 
@@ -354,13 +354,13 @@ long isTdacCalibrationInfoValid(ue9TdacCalibrationInfo *caliInfo)
     return 1;
 invalid:
     printf("Error: Invalid LJTDAC calibration info.\n");
-    return -1;
+    return 0;
 }
 
 
 long getAinVoltCalibrated(ue9CalibrationInfo *caliInfo, uint8 gainBip, uint8 resolution, uint16 bytesVolt, double *analogVolt)
 {
-    if( isCalibrationInfoValid(caliInfo) == -1 )
+    if( isCalibrationInfoValid(caliInfo) == 0 )
         return -1;
 
     if( resolution < 18 )
@@ -398,7 +398,7 @@ long getDacBinVoltCalibrated(ue9CalibrationInfo *caliInfo, int dacNumber, double
 {
     double tBytesVolt;
 
-    if( isCalibrationInfoValid(caliInfo) == -1 )
+    if( isCalibrationInfoValid(caliInfo) == 0 )
         return -1;
 
     if( dacNumber < 0 || dacNumber > 2 )
@@ -428,7 +428,7 @@ long getTdacBinVoltCalibrated(ue9TdacCalibrationInfo *caliInfo, int dacNumber, d
 {
     uint32 tBytesVolt;
 
-    if( isTdacCalibrationInfoValid(caliInfo) == -1 )
+    if( isTdacCalibrationInfoValid(caliInfo) == 0 )
         return -1;
 
     if( dacNumber < 0 || dacNumber > 2 )
@@ -453,7 +453,7 @@ long getTdacBinVoltCalibrated(ue9TdacCalibrationInfo *caliInfo, int dacNumber, d
 
 long getTempKCalibrated(ue9CalibrationInfo *caliInfo, int powerLevel, uint16 bytesTemp, double *kelvinTemp)
 {
-    if( isCalibrationInfoValid(caliInfo) == -1 )
+    if( isCalibrationInfoValid(caliInfo) == 0 )
         return -1;
 
     if( powerLevel == 0 || powerLevel == 1 )
@@ -611,7 +611,7 @@ long eAIN(HANDLE Handle, ue9CalibrationInfo *CalibrationInfo, long ChannelP, lon
     uint8 IOType, Channel, AINM, AINH, ainGain;
     uint16 bytesVT;
 
-    if( isCalibrationInfoValid(CalibrationInfo) != 1 )
+    if( isCalibrationInfoValid(CalibrationInfo) == 0 )
     {
         printf("eAIN error: calibration information is required");
         return -1;
@@ -665,7 +665,7 @@ long eDAC(HANDLE Handle, ue9CalibrationInfo *CalibrationInfo, long Channel, doub
     uint8 IOType, channel;
     uint16 bytesVoltage;
 
-    if( isCalibrationInfoValid(CalibrationInfo) != 1 )
+    if( isCalibrationInfoValid(CalibrationInfo) == 0 )
     {
         printf("eDAC error: calibration information is required");
         return -1;

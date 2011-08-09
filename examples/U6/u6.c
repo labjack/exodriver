@@ -223,7 +223,7 @@ long isCalibrationInfoValid(u6CalibrationInfo *caliInfo)
     return 1;
 invalid:
     printf("Error: Invalid calibration info.\n");
-    return -1;
+    return 0;
 }
 
 
@@ -236,7 +236,7 @@ long isTdacCalibrationInfoValid(u6TdacCalibrationInfo *caliInfo)
     return 1;
 invalid:
     printf("Error: Invalid LJTDAC calibration info.\n");
-    return -1;
+    return 0;
 }
 
 
@@ -407,7 +407,7 @@ long getAinVoltCalibrated(u6CalibrationInfo *caliInfo, int resolutionIndex, int 
     double value = 0;
     int indexAdjust = 0;
 
-    if( isCalibrationInfoValid(caliInfo) == -1 )
+    if( isCalibrationInfoValid(caliInfo) == 0 )
         return -1;
 
     value = (double)bytesVolt;
@@ -448,7 +448,7 @@ long getDacBinVoltCalibrated16Bit(u6CalibrationInfo *caliInfo, int dacNumber, do
 {
     uint32 dBytesVolt;
 
-    if( isCalibrationInfoValid(caliInfo) == -1 )
+    if( isCalibrationInfoValid(caliInfo) == 0 )
         return -1;
 
     if( dacNumber < 0 || dacNumber > 2 )
@@ -487,7 +487,7 @@ long getTdacBinVoltCalibrated(u6TdacCalibrationInfo *caliInfo, int dacNumber, do
 {
     uint32 dBytesVolt;
 
-    if( isTdacCalibrationInfoValid(caliInfo) == -1 )
+    if( isTdacCalibrationInfoValid(caliInfo) == 0 )
         return -1;
 
     if( dacNumber < 0 || dacNumber > 2 )
@@ -660,7 +660,7 @@ long eAIN(HANDLE Handle, u6CalibrationInfo *CalibrationInfo, long ChannelP, long
     uint8 sendDataBuff[4], recDataBuff[5];
     uint32 bytesV;
 
-    if( isCalibrationInfoValid(CalibrationInfo) != 1 )
+    if( isCalibrationInfoValid(CalibrationInfo) == 0 )
     {
         printf("eAIN error: Invalid calibration information.\n");
         return -1;
@@ -763,7 +763,7 @@ long eDAC(HANDLE Handle, u6CalibrationInfo *CalibrationInfo, long Channel, doubl
     uint16 bytesV;
     long sendSize;
 
-    if( isCalibrationInfoValid(CalibrationInfo) != 1 )
+    if( isCalibrationInfoValid(CalibrationInfo) == 0 )
     {
         printf("eDAC error: Invalid calibration information.\n");
         return -1;
