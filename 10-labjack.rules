@@ -1,14 +1,14 @@
 SUBSYSTEM!="usb_device", ACTION!="add", GOTO="labjack_rules_end"
 
 # U3
-SYSFS{idVendor}=="0cd5", SYSFS{idProduct}=="0003", GROUP="adm"
+ATTRS{idVendor}=="0cd5", ATTRS{idProduct}=="0003", GROUP="adm"
 # U6
-SYSFS{idVendor}=="0cd5", SYSFS{idProduct}=="0006", GROUP="adm"
+ATTRS{idVendor}=="0cd5", ATTRS{idProduct}=="0006", GROUP="adm"
 # UE9
-SYSFS{idVendor}=="0cd5", SYSFS{idProduct}=="0009", GROUP="adm"
+ATTRS{idVendor}=="0cd5", ATTRS{idProduct}=="0009", GROUP="adm"
 # U12
-SYSFS{idVendor}=="0cd5", SYSFS{idProduct}=="0001", GROUP="adm"
+ATTRS{idVendor}=="0cd5", ATTRS{idProduct}=="0001", GROUP="adm"
 # SkyMote Bridge
-SYSFS{idVendor}=="0cd5", SYSFS{idProduct}=="0501", GROUP="adm"
+ATTRS{idVendor}=="0cd5", ATTRS{idProduct}=="0501", GROUP="adm"
 
 LABEL="labjack_rules_end"
