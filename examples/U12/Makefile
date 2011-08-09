@@ -16,4 +16,4 @@ u12AISample: $(U12AISAMPLE_OBJ) $(HDRS)
 	$(CC) -o u12AISample $(U12AISAMPLE_OBJ) $(LDFLAGS) $(LIBS)
 
 clean:
-	rm -f *.o u12AISample
+	rm -f *.o *~ u12AISample

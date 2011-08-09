@@ -52,4 +52,4 @@ u6LJTDAC: $(U6LJTDAC_OBJ) $(HDRS)
 	$(CC) -o u6LJTDAC $(U6LJTDAC_OBJ) $(LDFLAGS) $(LIBS)
 
 clean:
-	rm -f *.o u6Feedback u6BasicConfigU6 u6ConfigU6 u6allio u6Stream u6EFunctions u6LJTDAC
+	rm -f *.o *~ u6Feedback u6BasicConfigU6 u6ConfigU6 u6allio u6Stream u6EFunctions u6LJTDAC

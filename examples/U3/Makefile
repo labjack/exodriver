@@ -46,4 +46,4 @@ u3LJTDAC: $(U3LJTDAC_OBJ) $(HDRS)
 	$(CC) -o u3LJTDAC $(U3LJTDAC_OBJ) $(LDFLAGS) $(LIBS)
 
 clean:
-	rm -f *.o u3Feedback u3BasicConfigU3 u3allio u3Stream u3EFunctions u3LJTDAC
+	rm -f *.o *~ u3Feedback u3BasicConfigU3 u3allio u3Stream u3EFunctions u3LJTDAC

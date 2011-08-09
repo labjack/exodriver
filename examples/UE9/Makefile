@@ -70,4 +70,4 @@ ue9LJTDAC: $(UE9LJTDAC_OBJ) $(HDRS)
 	$(CC) -o ue9LJTDAC $(UE9LJTDAC_OBJ) $(LDFLAGS) $(LIBS)
 
 clean:
-	rm -f *.o ue9BasicCommConfig ue9SingleIO ue9ControlConfig ue9Feedback ue9Stream ue9TimerCounter ue9allio ue9EFunctions ue9LJTDAC ue9EthernetExample
+	rm -f *.o *~ ue9BasicCommConfig ue9SingleIO ue9ControlConfig ue9Feedback ue9Stream ue9TimerCounter ue9allio ue9EFunctions ue9LJTDAC ue9EthernetExample

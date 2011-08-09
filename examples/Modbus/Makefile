@@ -25,4 +25,4 @@ writeModbusExample: $(WRITEMODBUS_OBJ)
 	$(CC) -o writeModbusExample $(WRITEMODBUS_OBJ) $(LDFLAGS) $(LIBS)
 
 clean:
-	rm -f *.o testModbusFunctions readModbusExample writeModbusExample
+	rm -f *.o *~ testModbusFunctions readModbusExample writeModbusExample
