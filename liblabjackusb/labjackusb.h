@@ -52,6 +52,9 @@ typedef void * HANDLE;
 typedef unsigned int UINT;
 typedef unsigned char BYTE;
 
+//Vendor ID
+#define LJ_VENDOR_ID      0x0cd5
+
 //Product IDs
 #define UE9_PRODUCT_ID    9
 #define U3_PRODUCT_ID     3

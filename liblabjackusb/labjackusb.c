@@ -23,7 +23,6 @@
 
 #include <libusb-1.0/libusb.h>
 
-#define LJ_VENDOR_ID            0x0cd5
 #define LJ_LIBUSB_TIMEOUT       1000   // Milliseconds to wait on bulk transfers
 
 // With a recent kernel, firmware and hardware checks aren't necessary
