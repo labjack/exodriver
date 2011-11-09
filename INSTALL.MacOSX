@@ -25,7 +25,6 @@ In the liblabjackusb/ directory, run the following commands to compile and
 install the library.
 
     $ cd liblabjackusb/
-    $ ln -s -f Makefile.MacOSX Makefile
     $ make
     $ sudo make install
 
@@ -128,16 +127,15 @@ Exodriver download directory
 
     $ cd path/to/exodriver
     $ cd liblabjackusb/
-    $ ln -s -f Makefile.MacOSX Makefile
 
 Now edit the Makefile in a text editor to comment out (put a # sign in front
-of) this CFLAGS line:
+of) this ARCHFLAGS line:
 
-    #CFLAGS = -fPIC -g -Wall
+    #ARCHFLAGS =
 
-and uncomment (remove the # sign from) this CFLAGS line two lines above it:
+and uncomment (remove the # sign from) this ARCHFLAGS line two lines above it:
 
-    CFLAGS = -fPIC -g -Wall -arch i386 -arch x86_64
+    ARCHFLAGS = -arch i386 -arch x86_64
 
 Now build and install the software
 
