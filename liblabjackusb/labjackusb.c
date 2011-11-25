@@ -44,8 +44,8 @@
 
 #define LJ_DEBUG false
 
-bool gIsLibUSBInitialized = false;
-struct libusb_context *gLJContext = NULL;
+static bool gIsLibUSBInitialized = false;
+static struct libusb_context *gLJContext = NULL;
 
 enum LJUSB_TRANSFER_OPERATION { LJUSB_WRITE, LJUSB_READ, LJUSB_STREAM };
 
