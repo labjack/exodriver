@@ -671,11 +671,7 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
 
     if (LJUSB_IsHandleValid(hDevice) == false) {
         if (LJ_DEBUG) {
-<<<<<<< HEAD
-            fprintf(stderr, "Calling LJUSB_DoTransfer returning -1 because handle is invalid. errno = %d.\n", errno);
-=======
             fprintf(stderr, "Calling LJUSB_DoTransfer returning 0 because handle is invalid. errno = %d.\n", errno);
->>>>>>> upstream/master
         }
         return 0;
     }
@@ -707,19 +703,11 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
         }
     }
 
-<<<<<<< HEAD
-    if (r == LIBUSB_ERROR_TIMEOUT && !isBulk) {
-        // We time out a lot using interrupt transfers, so there's no reason to
-        // cry about it. Just set the errno, and move on.
-        if (LJ_DEBUG) {
-            fprintf(stderr, "LJUSB_DoTransfer: Interrupt transfer timed out. Returning.\n");
-=======
     if (r == LIBUSB_ERROR_TIMEOUT) {
         //Timeout occured but may have received partial data.  Setting errno but 
         //returning the number of bytes transferred which may be > 0.
         if (LJ_DEBUG) {
             fprintf(stderr, "LJUSB_DoTransfer: Transfer timed out. Returning.\n");
->>>>>>> upstream/master
         }
         errno = ETIMEDOUT;
         return transferred;
