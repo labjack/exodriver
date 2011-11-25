@@ -2,7 +2,7 @@
 //
 //  labjackusb.c
 //
-//    Library for accessing a U3, U6 and UE9 over USB.
+//    Library for accessing a U3, U6, UE9 and SkyMote bridge over USB.
 //
 //  support@labjack.com
 //  
@@ -23,7 +23,7 @@
 
 #include <libusb-1.0/libusb.h>
 
-#define LJ_LIBUSB_TIMEOUT       1000   // Milliseconds to wait on bulk transfers
+#define LJ_LIBUSB_TIMEOUT_DEFAULT   1000   // Milliseconds to wait on USB transfers
 
 // With a recent kernel, firmware and hardware checks aren't necessary
 #define LJ_RECENT_KERNEL_MAJOR  2
@@ -44,8 +44,8 @@
 
 #define LJ_DEBUG false
 
-bool isLibUSBInitialized = false;
-struct libusb_context *ljContext = NULL;
+bool gIsLibUSBInitialized = false;
+struct libusb_context *gLJContext = NULL;
 
 enum LJUSB_TRANSFER_OPERATION { LJUSB_WRITE, LJUSB_READ, LJUSB_STREAM };
 
@@ -60,7 +60,7 @@ struct LJUSB_FirmwareHardwareVersion
 
 static void LJUSB_U3_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_FirmwareHardwareVersion * fhv)
 {
-    unsigned long i = 0, r;
+    unsigned long i = 0, r = 0;
     unsigned long epOut = U3_PIPE_EP1_OUT, epIn = U3_PIPE_EP2_IN;
     const unsigned long COMMAND_LENGTH = 26;
     const unsigned long RESPONSE_LENGTH = 38;
@@ -113,7 +113,7 @@ static void LJUSB_U3_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_Firmwa
 
 static void LJUSB_U6_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_FirmwareHardwareVersion * fhv)
 {
-    unsigned long i = 0, r;
+    unsigned long i = 0, r = 0;
     unsigned long epOut = U6_PIPE_EP1_OUT, epIn = U6_PIPE_EP2_IN;
     const unsigned long COMMAND_LENGTH = 26;
     const unsigned long RESPONSE_LENGTH = 38;
@@ -165,7 +165,7 @@ static void LJUSB_U6_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_Firmwa
 
 static void LJUSB_UE9_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_FirmwareHardwareVersion * fhv)
 {
-    unsigned long i = 0, r;
+    unsigned long i = 0, r = 0;
     unsigned long epOut = UE9_PIPE_EP1_OUT, epIn = UE9_PIPE_EP1_IN;
     const unsigned long COMMAND_LENGTH = 38;
     const unsigned long RESPONSE_LENGTH = 38;
@@ -357,9 +357,10 @@ static bool LJUSB_UE9_isMinFirmware(struct LJUSB_FirmwareHardwareVersion * fhv)
 
 static bool LJUSB_isRecentKernel(void)
 {
-    unsigned long kernelMajor, kernelMinor, kernelRev;
-    char * tok;
     struct utsname u;
+    char *tok;
+    unsigned long kernelMajor = 0, kernelMinor = 0, kernelRev = 0;
+
     if (uname(&u) != 0) {
         fprintf(stderr, "Error calling uname(2).");
         return false;
@@ -431,9 +432,9 @@ static bool LJUSB_isMinFirmware(HANDLE hDevice, unsigned long ProductID)
         LJUSB_UE9_FirmwareHardwareVersion(hDevice, &fhv);
         return LJUSB_UE9_isMinFirmware(&fhv);
     case U12_PRODUCT_ID: //Add U12 stuff Mike F.
-        return 1;
+        return true;
     case BRIDGE_PRODUCT_ID: //Add Wireless bridge stuff Mike F.
-        return 1;
+        return true;
     default:
         fprintf(stderr, "Firmware check not supported for product ID %ld\n", ProductID);
         return false;
@@ -443,45 +444,43 @@ static bool LJUSB_isMinFirmware(HANDLE hDevice, unsigned long ProductID)
 
 static void LJUSB_libusb_exit(void)
 {
-    if (isLibUSBInitialized) {
-        libusb_exit(ljContext);
-        ljContext = NULL;
-        isLibUSBInitialized = false;
+    if (gIsLibUSBInitialized) {
+        libusb_exit(gLJContext);
+        gLJContext = NULL;
+        gIsLibUSBInitialized = false;
     }
 }
 
 
 float LJUSB_GetLibraryVersion(void)
 {
-    return LJUSB_LINUX_LIBRARY_VERSION;
+    return LJUSB_LIBRARY_VERSION;
 }
 
 
 HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long ProductID)
 {
-	(void)dwReserved;
-	
-    void * handle = NULL;
+    (void)dwReserved;
+    libusb_device **devs, *dev;
     struct libusb_device_handle *devh = NULL;
-    libusb_device **devs;
-    ssize_t cnt;
+    struct libusb_device_descriptor desc;
+    ssize_t cnt = 0;
     int r = 1;
-    libusb_device *dev;
     unsigned int i = 0;
     unsigned int ljFoundCount = 0;
-    struct libusb_device_descriptor desc;
+    void *handle = NULL;
 
-    if (!isLibUSBInitialized) {
-        r = libusb_init(&ljContext);
+    if (!gIsLibUSBInitialized) {
+        r = libusb_init(&gLJContext);
         if (r < 0) {
             fprintf(stderr, "failed to initialize libusb\n");
             LJUSB_libusbError(r);
             return NULL;
         }
-        isLibUSBInitialized = true;
+        gIsLibUSBInitialized = true;
     }
 
-    cnt = libusb_get_device_list(ljContext, &devs);
+    cnt = libusb_get_device_list(gLJContext, &devs);
     if (cnt < 0) {
         fprintf(stderr, "failed to get device list\n");
         LJUSB_libusbError(cnt);
@@ -503,7 +502,7 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
 
         if (LJ_VENDOR_ID == desc.idVendor && ProductID == desc.idProduct) {
             ljFoundCount++;
-            if (ljFoundCount == DevNum) {            
+            if (ljFoundCount == DevNum) {
                 // Found the one requested
                 r = libusb_open(dev, &devh);
                 if (r < 0) {
@@ -560,28 +559,26 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
 
 
 int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
-{	
-    void * handle = NULL;
+{
+    libusb_device **devs, *dev;
     struct libusb_device_handle *devh = NULL;
-    libusb_device **devs;
-    ssize_t cnt;
-    int r = 1;
-    libusb_device *dev;
-    unsigned int i = 0;
-    unsigned int ljFoundCount = 0;
     struct libusb_device_descriptor desc;
+    ssize_t cnt = 0;
+    int r = 1;
+    unsigned int i = 0, ljFoundCount = 0;
+    void * handle = NULL;
 
-    if (!isLibUSBInitialized) {
-        r = libusb_init(&ljContext);
+    if (!gIsLibUSBInitialized) {
+        r = libusb_init(&gLJContext);
         if (r < 0) {
             fprintf(stderr, "failed to initialize libusb\n");
             LJUSB_libusbError(r);
             return -1;
         }
-        isLibUSBInitialized = true;
+        gIsLibUSBInitialized = true;
     }
 
-    cnt = libusb_get_device_list(ljContext, &devs);
+    cnt = libusb_get_device_list(gLJContext, &devs);
     if (cnt < 0) {
         fprintf(stderr, "failed to get device list\n");
         LJUSB_libusbError(cnt);
@@ -663,16 +660,10 @@ int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
 }
 
 
-static int LJUSB_handleBulkTranferError(int r)
+static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, unsigned long count, unsigned int timeout, bool isBulk)
 {
-    return LJUSB_libusbError(r);
-}
-
-
-static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, unsigned long count, bool isBulk)
-{
-    int r;
-    int transferred;
+    int r = 0;
+    int transferred = 0;
 
     if (LJ_DEBUG) {
         fprintf(stderr, "Calling LJUSB_DoTransfer with endpoint = 0x%x, count = %lu, and isBulk = %d.\n", endpoint, count, isBulk);
@@ -680,9 +671,13 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
 
     if (LJUSB_IsHandleValid(hDevice) == false) {
         if (LJ_DEBUG) {
+<<<<<<< HEAD
             fprintf(stderr, "Calling LJUSB_DoTransfer returning -1 because handle is invalid. errno = %d.\n", errno);
+=======
+            fprintf(stderr, "Calling LJUSB_DoTransfer returning 0 because handle is invalid. errno = %d.\n", errno);
+>>>>>>> upstream/master
         }
-        return -1;
+        return 0;
     }
     
     if (isBulk && endpoint != 1 && endpoint < 0x81 ) {
@@ -690,23 +685,48 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
     }
 
     if (isBulk) {
-        r = libusb_bulk_transfer(hDevice, endpoint, pBuff, count, &transferred, LJ_LIBUSB_TIMEOUT);
+        r = libusb_bulk_transfer(hDevice, endpoint, pBuff, (int)count, &transferred, timeout);
     }
     else {
-        r = libusb_interrupt_transfer(hDevice, endpoint, pBuff, count, &transferred, LJ_LIBUSB_TIMEOUT);
+        if (endpoint == 0) {
+            //HID feature request.
+            r = libusb_control_transfer(hDevice, 0xa1 , 0x01, 0x0300, 0x0000, pBuff, count, timeout);
+            if (r < 0) {
+                LJUSB_libusbError(r);
+                return 0;
+            }
+
+            if (LJ_DEBUG) {
+                fprintf(stderr, "LJUSB_DoTransfer: returning control transferred = %d.\n", r);
+            }
+
+            return r;
+       }
+       else {
+            r = libusb_interrupt_transfer(hDevice, endpoint, pBuff, count, &transferred, timeout);
+        }
     }
 
+<<<<<<< HEAD
     if (r == LIBUSB_ERROR_TIMEOUT && !isBulk) {
         // We time out a lot using interrupt transfers, so there's no reason to
         // cry about it. Just set the errno, and move on.
         if (LJ_DEBUG) {
             fprintf(stderr, "LJUSB_DoTransfer: Interrupt transfer timed out. Returning.\n");
+=======
+    if (r == LIBUSB_ERROR_TIMEOUT) {
+        //Timeout occured but may have received partial data.  Setting errno but 
+        //returning the number of bytes transferred which may be > 0.
+        if (LJ_DEBUG) {
+            fprintf(stderr, "LJUSB_DoTransfer: Transfer timed out. Returning.\n");
+>>>>>>> upstream/master
         }
         errno = ETIMEDOUT;
-        return -1;
+        return transferred;
     }
     else if (r != 0) {
-        return LJUSB_handleBulkTranferError(r);
+        LJUSB_libusbError(r);
+        return 0;
     }
 
     if (LJ_DEBUG) {
@@ -718,18 +738,18 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
 
 
 // Automatically uses the correct endpoint and transfer method (bulk or interrupt)
-static unsigned long LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, unsigned long count, enum LJUSB_TRANSFER_OPERATION operation)
+static unsigned long LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, unsigned long count, unsigned int timeout, enum LJUSB_TRANSFER_OPERATION operation)
 {
-    unsigned char endpoint;
-    bool isBulk;
-    int r;
+    libusb_device *dev;
+    struct libusb_device_descriptor desc;
+    bool isBulk = true;
+    unsigned char endpoint = 0;
+    int r = 0;
     
     if (LJ_DEBUG) {
         fprintf(stderr, "Calling LJUSB_SetupTransfer with count = %lu and operation = %d.\n", count, operation);
     }
-    
-    libusb_device *dev;
-    struct libusb_device_descriptor desc;
+
 
     //First determine the device from handle.
     dev = libusb_get_device(hDevice);
@@ -737,9 +757,8 @@ static unsigned long LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, unsigned l
     
     if (r < 0) {
         LJUSB_libusbError(r);
-        return -1;
+        return 0;
     }
-    
     
     switch (desc.idProduct) {
 
@@ -758,12 +777,12 @@ static unsigned long LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, unsigned l
             break;
         default:
             errno = EINVAL;
-            return -1;
+            return 0;
         }
         break;
     case U3_PRODUCT_ID:
         isBulk = true;
-        switch(operation) {
+        switch (operation) {
         case LJUSB_WRITE:
             endpoint = U3_PIPE_EP1_OUT;
             break;
@@ -775,7 +794,7 @@ static unsigned long LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, unsigned l
             break;
         default:
             errno = EINVAL;
-            return -1;
+            return 0;
         }
         break;
     case U6_PRODUCT_ID:
@@ -792,14 +811,31 @@ static unsigned long LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, unsigned l
             break;
         default:
             errno = EINVAL;
-            return -1;
+            return 0;
+        }
+        break;
+    case BRIDGE_PRODUCT_ID:
+        isBulk = true;
+        switch (operation) {
+        case LJUSB_WRITE:
+            endpoint = BRIDGE_PIPE_EP1_OUT;
+            break;
+        case LJUSB_READ:
+            endpoint = BRIDGE_PIPE_EP2_IN;
+            break;
+        case LJUSB_STREAM:
+            endpoint = BRIDGE_PIPE_EP3_IN;
+            break;
+        default:
+            errno = EINVAL;
+            return 0;
         }
         break;
 
     /* These devices use interrupt transfers */
     case U12_PRODUCT_ID:
         isBulk = false;
-        switch(operation) {
+        switch (operation) {
         case LJUSB_READ:
             endpoint = U12_PIPE_EP1_IN;
             break;
@@ -807,50 +843,35 @@ static unsigned long LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, unsigned l
             endpoint = U12_PIPE_EP2_OUT;
             break;
         case LJUSB_STREAM:
+            endpoint = U12_PIPE_EP0;
+            break;
         default:
             // U12 has no streaming interface
             errno = EINVAL;
-            return -1;
+            return 0;
         }
         break;
-    case BRIDGE_PRODUCT_ID:
-        isBulk = false;
-        switch (operation) {
-        case LJUSB_READ:
-            endpoint = BRIDGE_PIPE_EP1_IN;
-            break;
-        case LJUSB_WRITE:
-            endpoint = BRIDGE_PIPE_EP1_OUT;
-            break;
-        case LJUSB_STREAM:
-        default:
-            // SkyMote has no streaming interface
-            errno = EINVAL;
-            return -1;
-        }
-        break;
-
     default:
         // Error, not a labjack device
         errno = EINVAL;
-        return -1;
+        return 0;
     }
 
-    return LJUSB_DoTransfer(hDevice, endpoint, pBuff, count, isBulk);
+    return LJUSB_DoTransfer(hDevice, endpoint, pBuff, count, timeout, isBulk);
 }
 
 
 // Deprecated: Kept for backwards compatibility
 unsigned long LJUSB_BulkRead(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, unsigned long count)
 {
-    return LJUSB_DoTransfer(hDevice, endpoint, pBuff, count, true);
+    return LJUSB_DoTransfer(hDevice, endpoint, pBuff, count, LJ_LIBUSB_TIMEOUT_DEFAULT, true);
 }
 
 
 // Deprecated: Kept for backwards compatibility
 unsigned long LJUSB_BulkWrite(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, unsigned long count)
 {
-    return LJUSB_DoTransfer(hDevice, endpoint, pBuff, count, true);
+    return LJUSB_DoTransfer(hDevice, endpoint, pBuff, count, LJ_LIBUSB_TIMEOUT_DEFAULT, true);
 }
 
 
@@ -859,7 +880,7 @@ unsigned long LJUSB_Write(HANDLE hDevice, BYTE *pBuff, unsigned long count)
     if (LJ_DEBUG) {
         fprintf(stderr, "LJUSB_Write: calling LJUSB_Write.\n");
     }
-    return LJUSB_SetupTransfer(hDevice, pBuff, count, LJUSB_WRITE);
+    return LJUSB_SetupTransfer(hDevice, pBuff, count, LJ_LIBUSB_TIMEOUT_DEFAULT, LJUSB_WRITE);
 }
 
 
@@ -868,7 +889,7 @@ unsigned long LJUSB_Read(HANDLE hDevice, BYTE *pBuff, unsigned long count)
     if (LJ_DEBUG) {
         fprintf(stderr, "LJUSB_Read: calling LJUSB_Read.\n");
     }
-    return LJUSB_SetupTransfer(hDevice, pBuff, count, LJUSB_READ);
+    return LJUSB_SetupTransfer(hDevice, pBuff, count, LJ_LIBUSB_TIMEOUT_DEFAULT, LJUSB_READ);
 }
 
 
@@ -877,9 +898,33 @@ unsigned long LJUSB_Stream(HANDLE hDevice, BYTE *pBuff, unsigned long count)
     if (LJ_DEBUG) {
         fprintf(stderr, "LJUSB_Stream: calling LJUSB_Stream.\n");
     }
-    return LJUSB_SetupTransfer(hDevice, pBuff, count, LJUSB_STREAM);
+    return LJUSB_SetupTransfer(hDevice, pBuff, count, LJ_LIBUSB_TIMEOUT_DEFAULT, LJUSB_STREAM);
 }
 
+
+unsigned long LJUSB_WriteTO(HANDLE hDevice, BYTE *pBuff, unsigned long count, unsigned int timeout)
+{
+    if (LJ_DEBUG) {
+        fprintf(stderr, "LJUSB_Stream: calling LJUSB_WriteTO.\n");
+    }
+    return LJUSB_SetupTransfer(hDevice, pBuff, count, timeout, LJUSB_WRITE);
+}
+
+unsigned long LJUSB_ReadTO(HANDLE hDevice, BYTE *pBuff, unsigned long count, unsigned int timeout)
+{
+    if (LJ_DEBUG) {
+        fprintf(stderr, "LJUSB_Stream: calling LJUSB_ReadTO.\n");
+    }
+    return LJUSB_SetupTransfer(hDevice, pBuff, count, timeout, LJUSB_READ);
+}
+
+unsigned long LJUSB_StreamTO(HANDLE hDevice, BYTE *pBuff, unsigned long count, unsigned int timeout)
+{
+    if (LJ_DEBUG) {
+        fprintf(stderr, "LJUSB_Stream: calling LJUSB_StreamTO.\n");
+    }
+    return LJUSB_SetupTransfer(hDevice, pBuff, count, timeout, LJUSB_STREAM);
+}
 
 void LJUSB_CloseDevice(HANDLE hDevice)
 {
@@ -905,20 +950,22 @@ void LJUSB_CloseDevice(HANDLE hDevice)
 unsigned int LJUSB_GetDevCount(unsigned long ProductID)
 {
     libusb_device **devs;
-    ssize_t cnt;
+    ssize_t cnt = 0;
     int r = 1;
+    unsigned int i = 0;
+    unsigned int ljFoundCount = 0;
 
-    if (!isLibUSBInitialized) {
-        r = libusb_init(&ljContext);
+    if (!gIsLibUSBInitialized) {
+        r = libusb_init(&gLJContext);
         if (r < 0) {
             fprintf(stderr, "failed to initialize libusb\n");
             LJUSB_libusbError(r);
             return 0;
         }
-        isLibUSBInitialized = true;
+        gIsLibUSBInitialized = true;
     }
 
-    cnt = libusb_get_device_list(ljContext, &devs);
+    cnt = libusb_get_device_list(gLJContext, &devs);
     if (cnt < 0) {
         fprintf(stderr, "failed to get device list\n");
         LJUSB_libusbError(cnt);
@@ -927,8 +974,6 @@ unsigned int LJUSB_GetDevCount(unsigned long ProductID)
     }
 
     libusb_device *dev;
-    unsigned int i = 0;
-    unsigned int ljFoundCount = 0;
 
     // Loop over all USB devices and count the ones with the LabJack
     // vendor ID and the passed in product ID.
@@ -951,37 +996,34 @@ unsigned int LJUSB_GetDevCount(unsigned long ProductID)
 }
 
 
-int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n)
+unsigned int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n)
 {
-    libusb_device **devs;
-    ssize_t cnt;
+    libusb_device **devs, *dev;
+    ssize_t cnt = 0;
     int r = 1;
+    unsigned int i = 0;
+    unsigned int u3ProductCount = 0, u6ProductCount = 0;
+    unsigned int ue9ProductCount = 0, u12ProductCount = 0;
+    unsigned int bridgeProductCount = 0;
+    unsigned int allProductCount = 0;
 
-    if (!isLibUSBInitialized) {
-        r = libusb_init(&ljContext);
+    if (!gIsLibUSBInitialized) {
+        r = libusb_init(&gLJContext);
         if (r < 0) {
             fprintf(stderr, "failed to initialize libusb\n");
             LJUSB_libusbError(r);
             return 0;
         }
-        isLibUSBInitialized = true;
+        gIsLibUSBInitialized = true;
     }
 
-    cnt = libusb_get_device_list(ljContext, &devs);
+    cnt = libusb_get_device_list(gLJContext, &devs);
     if (cnt < 0) {
         fprintf(stderr, "failed to get device list\n");
         LJUSB_libusbError(cnt);
         LJUSB_libusb_exit();
         return 0;
     }
-
-    libusb_device *dev;
-    UINT i = 0;
-    UINT u3ProductCount = 0;
-    UINT u6ProductCount = 0;
-    UINT ue9ProductCount = 0;
-    UINT u12ProductCount = 0;
-    UINT bridgeProductCount = 0;
 
     // Loop over all USB devices and count the ones with the LabJack
     // vendor ID and the passed in product ID.
@@ -1021,27 +1063,32 @@ int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n)
         case 0:
             productCounts[i] = u3ProductCount;
             productIds[i] = U3_PRODUCT_ID;
+            allProductCount += u3ProductCount;
             break;
         case 1:
             productCounts[i] = u6ProductCount;
             productIds[i] = U6_PRODUCT_ID;
+            allProductCount += u6ProductCount;
             break;
         case 2:
             productCounts[i] = ue9ProductCount;
             productIds[i] = UE9_PRODUCT_ID;
+            allProductCount += ue9ProductCount;
             break;
         case 3:
             productCounts[i] = u12ProductCount;
             productIds[i] = U12_PRODUCT_ID;
+            allProductCount += u12ProductCount;
             break;
         case 4:
             productCounts[i] = bridgeProductCount;
             productIds[i] = BRIDGE_PRODUCT_ID;
+            allProductCount += bridgeProductCount;
             break;
         }
     }
 
-    return 0;
+    return allProductCount;
 }
 
 
@@ -1083,11 +1130,77 @@ bool LJUSB_IsHandleValid(HANDLE hDevice)
 }
 
 
+unsigned short LJUSB_GetDeviceDescriptorReleaseNumber(HANDLE hDevice)
+{
+    libusb_device *dev;
+    struct libusb_device_descriptor desc;
+    int r = 0;
+
+    if (LJUSB_IsHandleValid(hDevice) == false) {
+        if (LJ_DEBUG) {
+            fprintf(stderr, "Calling LJUSB_GetDeviceDescriptorReleaseNumber returning 0 because handle is invalid. errno = %d.\n", errno);
+        }
+        return 0;
+    }
+
+    dev = libusb_get_device(hDevice);
+    r = libusb_get_device_descriptor(dev, &desc);
+
+    if (r < 0) {
+        LJUSB_libusbError(r);
+        return 0;
+    }
+
+    return desc.bcdDevice;
+}
+
+unsigned long LJUSB_GetHIDReportDescriptor(HANDLE hDevice, BYTE *pBuff, unsigned long count)
+{
+    libusb_device *dev;
+    struct libusb_device_descriptor desc;
+    int r = 0;
+
+    if (LJUSB_IsHandleValid(hDevice) == false) {
+        if (LJ_DEBUG) {
+            fprintf(stderr, "Calling LJUSB_GetHIDReportDescriptor returning 0 because handle is invalid. errno = %d.\n", errno);
+        }
+        return 0;
+    }
+
+    //Determine the device from handle.
+    dev = libusb_get_device(hDevice);
+    r = libusb_get_device_descriptor(dev, &desc);
+
+    if (r < 0) {
+        LJUSB_libusbError(r);
+        return 0;
+    }
+
+    if (desc.idProduct != U12_PRODUCT_ID) {
+        //Only U12 supported
+        errno = EINVAL;
+        return 0;
+    }
+
+    r = libusb_control_transfer(hDevice, 0x81 , 0x06, 0x2200, 0x0000, pBuff, count, LJ_LIBUSB_TIMEOUT_DEFAULT);
+    if (r < 0) {
+        LJUSB_libusbError(r);
+        return 0;
+    }
+
+    if (LJ_DEBUG) {
+        fprintf(stderr, "LJUSB_GetHIDReportDescriptor: returning control transferred = %d.\n", r);
+    }
+
+    return r;
+}
+
+
 //not supported
 bool LJUSB_AbortPipe(HANDLE hDevice, unsigned long Pipe)
 {
-	(void)hDevice;
-	(void)Pipe;
+    (void)hDevice;
+    (void)Pipe;
 
     errno = ENOSYS;
     return false;

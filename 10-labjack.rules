@@ -9,6 +9,6 @@ ATTRS{idVendor}=="0cd5", ATTRS{idProduct}=="0009", GROUP="adm"
 # U12
 ATTRS{idVendor}=="0cd5", ATTRS{idProduct}=="0001", GROUP="adm"
 # SkyMote Bridge
-ATTRS{idVendor}=="0cd5", ATTRS{idProduct}=="0501", GROUP="adm"
+ATTRS{idVendor}=="0cd5", ATTRS{idProduct}=="03e8", GROUP="adm"
 
 LABEL="labjack_rules_end"
