@@ -10,8 +10,8 @@
 // set. (08/08/2008)
 //-Modified calibration constants structs.  Modified the names and code of the
 // functions that apply the calibration constants. (06/25/2009)
-//-Replaced LJUSB_BulkWrite/Read with LJUSB_write/Read calls.  Added serial 
-// support to openUSBConnectionnow. (05/25/2011)
+//-Replaced LJUSB_BulkWrite/Read with LJUSB_write/Read calls.  Added serial
+// support to openUSBConnection. (05/25/2011)
 #ifndef _UE9_H
 #define _UE9_H
 
@@ -65,7 +65,7 @@ struct UE9_CALIBRATION_INFORMATION {
 typedef struct UE9_CALIBRATION_INFORMATION ue9CalibrationInfo;
 
 //Structure for storing LJTDAC calibration constants
-struct UE9_TDAC_CALIBRATION_INFORMATION{
+struct UE9_TDAC_CALIBRATION_INFORMATION {
     uint8 prodID;
     double ccConstants[4];
     /*
@@ -112,7 +112,7 @@ uint8 extendedChecksum8( uint8 *b);
 HANDLE openUSBConnection( int localID);
 //Opens a UE9 connection over USB.  Returns NULL on failure, or a HANDLE
 //on success.
-//localID = the local ID or serial number of the U6 you want to open
+//localID = the local ID or serial number of the UE9 you want to open
 
 void closeUSBConnection( HANDLE hDevice);
 //Closes a HANDLE to a UE9 device.
@@ -130,7 +130,7 @@ long getCalibrationInfo( HANDLE hDevice,
 
 long getTdacCalibrationInfo( HANDLE hDevice,
                              ue9TdacCalibrationInfo *caliInfo,
-                             uint8 DIOAPinNum);                               
+                             uint8 DIOAPinNum);
 //Gets calibration information from the EEPROM of a LJTick-DAC (LJTDAC).
 //Returns the calibration information in a ue9TdacCalibrationInfo structure.
 //hDevice = handle to a UE9 device
@@ -162,10 +162,10 @@ long getAinVoltCalibrated( ue9CalibrationInfo *caliInfo,
 //(calibrated).  Call getCalibrationInfo first to set up caliInfo.  Returns -1
 //on error, 0 on success.
 //caliInfo = structure where calibrarion information is stored
-//gainBip = the gain option and bipolar setting.  The high bit of the byte is the
-//          bipolar setting and the lower 3 bits is the gain option.  See the
-//          Feedback function in Section 5.3.3 of the UE9 User's Guide for a table
-//          of BipGain values that can be passed.
+//gainBip = the gain option and bipolar setting.  The high bit of the byte is
+//          the bipolar setting and the lower 3 bits is the gain option.  See
+//          the Feedback function in Section 5.3.3 of the UE9 User's Guide for a
+//          table of BipGain values that can be passed.
 //resolution = the resolution of the analog reading
 //bytesVolt = the 2 byte voltage that will be converted to a analog value
 //analogVolt = the converted analog voltage
@@ -214,10 +214,10 @@ long getAinVoltUncalibrated( uint8 gainBip,
                              double *analogVolt);
 //Translates the binary AIN reading from the UE9, to a voltage value
 //(uncalibrated). Returns -1 on error, 0 on success.
-//gainBip = the gain option and bipolar setting.  The high bit of the byte is the
-//          bipolar setting and the lower 3 bits is the gain option.  See the
-//          Feedback function in Section 5.3.3 of the UE9 User's Guide for a table
-//          of BipGain values that can be passed.
+//gainBip = the gain option and bipolar setting.  The high bit of the byte is
+//          the bipolar setting and the lower 3 bits is the gain option.  See
+//          the Feedback function in Section 5.3.3 of the UE9 User's Guide for a
+//          table of BipGain values that can be passed.
 //resolution = the resolution of the analog reading
 //bytesVoltage = the 2 byte voltage that will be converted to a analog value
 //analogVoltage = the converted analog voltage
@@ -254,9 +254,9 @@ long I2C( HANDLE hDevice,
           uint8 *Errorcode,
           uint8 *AckArray,
           uint8 *I2CBytesResponse);
-//This function will perform the I2C low-level function call.  Please refer to section
-//5.3.20 of the UE9 User's Guide for parameter documentation.  Returns -1 on error, 0
-//on success.
+//This function will perform the I2C low-level function call.  Please refer to
+//section 5.3.20 of the UE9 User's Guide for parameter documentation.  Returns
+//-1 on error, 0 on success.
 //hDevice = handle to a UE9 device
 //I2COptions = byte 6 of the command
 //SpeedAdjust = byte 7 of the command
@@ -265,176 +265,193 @@ long I2C( HANDLE hDevice,
 //Address = byte 10 of the command
 //NumI2CBytesToSend = byte 12 of the command
 //NumI2CBytesToReceive = byte 13 of the command
-//*I2CBytesCommand = Array that holds bytes 14 and above of the command.  Needs to be at
-//                   least NumI2CBytesToSend elements in size.
+//*I2CBytesCommand = Array that holds bytes 14 and above of the command.  Needs
+//                   to be at least NumI2CBytesToSend elements in size.
 //*Errorcode = returns byte 6 of the response
-//*AckArray = Array that returns bytes 8 - 11 of the response.  Needs to be at least 4
-//            elements in size.
-//*I2CBytesResponse = Array that returns bytes 12 and above of the response.  Needs to be at
-//                    least NumI2CBytesToReceive elements in size.
+//*AckArray = Array that returns bytes 8 - 11 of the response.  Needs to be at
+//            least 4 elements in size.
+//*I2CBytesResponse = Array that returns bytes 12 and above of the response.
+//                    Needs to be at least NumI2CBytesToReceive elements in
+//                    size.
 
 
-/*   Easy Functions (Similar to the easy functions in the UD driver for Windows) */
+/* Easy Functions (Similar to the easy functions in the Windows UD driver) */
 
 long eAIN( HANDLE Handle,
-          ue9CalibrationInfo *CalibrationInfo,
-          long ChannelP,
-          long ChannelN,
-          double *Voltage,
-          long Range,
-          long Resolution,
-          long Settling,
-          long Binary,
-          long Reserved1,
-          long Reserved2);
-//An "easy" function that returns a reading from one analog input.  Returns 0 for
-//no error, or -1 or >0 value (low-level errorcode) on error.
+           ue9CalibrationInfo *CalibrationInfo,
+           long ChannelP,
+           long ChannelN,
+           double *Voltage,
+           long Range,
+           long Resolution,
+           long Settling,
+           long Binary,
+           long Reserved1,
+           long Reserved2);
+//An "easy" function that returns a reading from one analog input.  Returns 0
+//for no error, or -1 or >0 value (low-level errorcode) on error.
 //Handle = Handle to a UE9 device.
 //CalibrationInfo = Structure where calibration information is stored.
 //ChannelP = The positive AIN channel to acquire.
 //ChannelN = For the UE9, this parameter is ignored.
 //Voltage = Returns the analog input reading, which is generally a voltage.
 //Range = Pass a constant specifying the voltage range.
-//Resolution = Pass 12-17 to specify the resolution of the analog input reading, and 18
-//             for a high-res reading from UE9-Pro.  0-11 coresponds to 12-bit.
-//Settling = Pass 0 for default settling.  This parameter adds extra settling before the
-//           ADC conversion of about Settling times 5 microseconds.
-//Binary = If this is nonzero (True), the Voltage parameter will return the raw binary
-//         value.
+//Resolution = Pass 12-17 to specify the resolution of the analog input reading,
+//             and 18 for a high-res reading from UE9-Pro.  0-11 coresponds to
+//             12-bit.
+//Settling = Pass 0 for default settling.  This parameter adds extra settling
+//           before the ADC conversion of about Settling times 5 microseconds.
+//Binary = If this is nonzero (True), the Voltage parameter will return the raw
+//         binary value.
 //Reserved (1&2) = Pass 0.
 
 long eDAC( HANDLE Handle,
-          ue9CalibrationInfo *CalibrationInfo,
-          long Channel,
-          double Voltage,
-          long Binary,
-          long Reserved1,
-          long Reserved2);
-//An "easy" function that writes a value to one analog output.  Returns 0 for
-//no error, or -1 or >0 value (low-level errorcode) on error.
+           ue9CalibrationInfo *CalibrationInfo,
+           long Channel,
+           double Voltage,
+           long Binary,
+           long Reserved1,
+           long Reserved2);
+//An "easy" function that writes a value to one analog output.  Returns 0 for no
+//error, or -1 or >0 value (low-level errorcode) on error.
 //Handle = Handle to a UE9 device.
-//CalibrationInfo = structure where calibrarion information is stored
+//CalibrationInfo = structure where calibrarion information is stored.
 //Channel = The analog output channel to write to.
 //Voltage = The voltage to write to the analog output.
-//Binary = If this is nonzero (True), the value passed for Voltage should be binary.
+//Binary = If this is nonzero (True), the value passed for Voltage should be
+//         binary.
 //Reserved (1&2) = Pass 0.
 
 long eDI( HANDLE Handle,
-         long Channel,
-         long *State);
-//An "easy" function that reads the state of one digital input.  This function does
-//not automatically configure the specified channel as digital, unless ConfigIO is
-//set as True.  Returns 0 for no error, or -1 or >0 value (low-level errorcode) on error.
+          long Channel,
+          long *State);
+//An "easy" function that reads the state of one digital input.  This function
+//does not automatically configure the specified channel as digital, unless
+//ConfigIO is set as True.  Returns 0 for no error, or -1 or >0 value (low-level
+//errorcode) on error.
 //Handle = Handle to a UE9 device.
 //Channel = The channel to read.  0-22 corresponds to FIO0-MIO2.
 //State = Returns the state of the digital input.  0=False=Low and 1=True=High.
 
 long eDO( HANDLE Handle,
-         long Channel,
-         long State);
+          long Channel,
+          long State);
 //An "easy" function that writes the state of one digital output.  Returns 0 for
 //no error, or -1 or >0 value (low-level errorcode) on error.
 //Handle = Handle to a UE9 device.
 //Channel = The channel to write to.  0-19 corresponds to FIO0-MIO2.
-//State = The state to write to the digital output.  0=False=Low and 1=True=High.
+//State = The state to write to the digital output.  0=False=Low and 
+//        1=True=High.
 
 long eTCConfig( HANDLE Handle,
-               long *aEnableTimers,
-               long *aEnableCounters,
-               long TCPinOffset,
-               long TimerClockBaseIndex,
-               long TimerClockDivisor,
-               long *aTimerModes,
-               double *aTimerValues,
-               long Reserved1,
-               long Reserved2);
-//An "easy" function that configures and initializes all the timers and counters.  Returns
-//0 for no error, or -1 or >0 value (low-level errorcode) on error.
+                long *aEnableTimers,
+                long *aEnableCounters,
+                long TCPinOffset,
+                long TimerClockBaseIndex,
+                long TimerClockDivisor,
+                long *aTimerModes,
+                double *aTimerValues,
+                long Reserved1,
+                long Reserved2);
+//An "easy" function that configures and initializes all the timers and
+//counters.  Returns 0 for no error, or -1 or >0 value (low-level errorcode) on
+//error.
 //Handle = Handle to a UE9 device.
-//aEnableTimers = An array where each element specifies whether that timer is enabled.
-//                Timers must be enabled in order starting from 0, so for instance,
-//                Timer1 cannot be enabled without enabling Timer 0 also.  A nonzero
-//                for an array element specifies to enable that timer.  For the UE9,
-//                this array must always have at least 6 elements.
-//aEnableCounters = An array where each element specifies whether that counter is enabled.
-//                  Counters do not have to be enabled in order starting from 0, so
-//                  Counter1 can be enabled when Counter0 is disabled.  A nonzero value
-//                  for an array element specifies to enable that counter.  For the UE9,
-//                  this array must always have at least 2 elements.
+//aEnableTimers = An array where each element specifies whether that timer is
+//                enabled.  Timers must be enabled in order starting from 0, so
+//                for instance, Timer1 cannot be enabled without enabling
+//                Timer 0 also.  A nonzero for an array element specifies to
+//                enable that timer.  For the UE9 this array must always have at
+//                least 6 elements.
+//aEnableCounters = An array where each element specifies whether that counter
+//                  is enabled.  Counters do not have to be enabled in order
+//                  starting from 0, so Counter1 can be enabled when Counter0 is
+//                  disabled.  A nonzero value for an array element specifies to
+//                  enable that counter.  For the UE9, this array must always
+//                  have at least 2 elements.
 //TCPinOffset = Ignored with the UE9.
-//TimerClockBaseIndex = Pass a constant to set the timer base clock.  The default is
-//                      LJ_tc750KHZ.
+//TimerClockBaseIndex = Pass a constant to set the timer base clock.  The
+//                      default is LJ_tc750KHZ.
 //TimerClockDivisor = Pass a divisor from 0-255 where 0 is a divisor of 256.
-//aTimerModes = An array where each element is a constant specifying the mode for that
-//              timer.  For the UE9, this array must always have at least 6 elements.
-//aTimerValues = An array where each element specifies the initial value for that
-//               timer.  For the UE9, this array must always have at least 6 elements.
-//Reserved (1&2) =  Pass 0.
+//aTimerModes = An array where each element is a constant specifying the mode
+//              for that timer.  For the UE9, this array must always have at
+//              least 6 elements.
+//aTimerValues = An array where each element specifies the initial value for
+//               that timer.  For the UE9, this array must always have at least
+//               6 elements.
+//Reserved (1&2) = Pass 0.
 
 long eTCValues( HANDLE Handle,
-               long *aReadTimers,
-               long *aUpdateResetTimers,
-               long *aReadCounters,
-               long *aResetCounters,
-               double *aTimerValues,
-               double *aCounterValues,
-               long Reserved1,
-               long Reserved2);
-//An "easy" function that updates and reads all the timers and counters.  Returns 0 for
-//no error, or -1 or >0 value (low-level errorcode) on error.
+                long *aReadTimers,
+                long *aUpdateResetTimers,
+                long *aReadCounters,
+                long *aResetCounters,
+                double *aTimerValues,
+                double *aCounterValues,
+                long Reserved1,
+                long Reserved2);
+//An "easy" function that updates and reads all the timers and counters.
+//Returns 0 for no error, or -1 or >0 value (low-level errorcode) on error.
 //Handle = Handle to a UE9 device.
-//aReadTimers = An array where each element specifies whether to read that timer.  A
-//              nonzero value for an array element specifies to read that timer.  For
-//              the UE9, this array must always have at least 6 elements.
-//aUpdateResetTimers = An array where each element specifies whether to update/reset
-//                     that timers.  A nonzero value for an array element specifies to
-//                     update/reset that timer.  For the UE9, this array must always
-//                     have at least 6 elements.
-//aReadCounters = An array where each element specifies whether to read that counter.
-//                A nonzero value for an array element specifies to read that counter.
-//                For the UE9, this array must always have at least 2 elements.
-//aResetCounters = An array where each element specifies whether to reset that counter.
-//                 A nonzero value for an array element specifies to reset that counter.
-//                 For the UE9, this array must always have at least 2 elements.
-//aTimerValues = Input: An array where each element is the new value for that timer.  Each
-//               value is only updated if the appropriate element is set in the
-//               aUpdateResetTimers array.
-//               Output: An array where each element is the value read from that timer if
-//               the appropriate element is set in the aReadTimers array.  If the timer
-//               mode set for the timer is Quadrature Input, the value needs to be converted
-//               from an unsigned 32-bit integer to a signed 32-bit integer (2’s complement).
-//               For the UE9, this array must always have at least 6 elements.
-//aCounterValues = An array where each element is the value read from that counter if the
-//                 appropriate element is set in the aReadTimers array.  For the UE9, this
-//                 array must always have at least 2 elements.
+//aReadTimers = An array where each element specifies whether to read that
+//              timer. A nonzero value for an array element specifies to read
+//              that timer.  For the UE9, this array must always have at least 6
+//              elements.
+//aUpdateResetTimers = An array where each element specifies whether to
+//                     update/reset that timers.  A nonzero value for an array
+//                     element specifies to update/reset that timer.  For the
+//                     UE9, this array must always have at least 6 elements.
+//aReadCounters = An array where each element specifies whether to read that
+//                counter.  A nonzero value for an array element specifies to
+//                read that counter.  For the UE9, this array must always have
+//                at least 2 elements.
+//aResetCounters = An array where each element specifies whether to reset that
+//                 counter.  A nonzero value for an array element specifies to
+//                 reset that counter.  For the UE9, this array must always have
+//                 at least 2 elements.
+//aTimerValues = Input: An array where each element is the new value for that
+//               timer.  Each value is only updated if the appropriate element
+//               is set in the aUpdateResetTimers array.
+//               Output: An array where each element is the value read from that
+//               timer if the appropriate element is set in the aReadTimers
+//               array.  If the timer mode set for the timer is Quadrature
+//               Input, the value needs to be converted from an unsigned 32-bit
+//               integer to a signed 32-bit integer (2’s complement).  For the
+//               UE9, this array must always have at least 6 elements.
+//aCounterValues = An array where each element is the value read from that
+//                 counter if the appropriate element is set in the aReadTimers
+//                 array.  For the UE9, this array must always have at least 2
+//                 elements.
 //Reserved (1&2) = Pass 0.
 
 
 /* Easy Function Helpers */
 
 long ehSingleIO( HANDLE hDevice,
-                uint8 inIOType,
-                uint8 inChannel,
-                uint8 inDirBipGainDACL,
-                uint8 inStateResDACH,
-                uint8 inSettlingTime,
-                uint8 *outIOType,
-                uint8 *outChannel,
-                uint8 *outDirAINL,
-                uint8 *outStateAINM,
-                uint8 *outAINH);
-//Used by the eAIN and eDAC easy functions.  This function takes the SingleIO low-level command
-//and response bytes (not including checksum and command bytes) as its parameter and performs a
-//SingleIO call with the UE9.  Returns -1 on error, 0 on success.
+                 uint8 inIOType,
+                 uint8 inChannel,
+                 uint8 inDirBipGainDACL,
+                 uint8 inStateResDACH,
+                 uint8 inSettlingTime,
+                 uint8 *outIOType,
+                 uint8 *outChannel,
+                 uint8 *outDirAINL,
+                 uint8 *outStateAINM,
+                 uint8 *outAINH);
+//Used by the eAIN and eDAC easy functions.  This function takes the SingleIO
+//low-level command and response bytes (not including checksum and command
+//bytes) as its parameter and performs a SingleIO call with the UE9.  Returns -1
+//on error, 0 on success.
 
 
 long ehDIO_Feedback( HANDLE hDevice,
                      uint8 channel,
                      uint8 direction,
                      uint8 *state);
-//Used by the eDI and eDO easy funtions.  This function takes the same parameters as eDI and
-//eDO (as bytes), with the additional parameter of channel, and will perform the Feedback
-//low-level function call.  Returns -1 on error, 0 on success.
+//Used by the eDI and eDO easy funtions.  This function takes the same
+//parameters as eDI and eDO (as bytes), with the additional parameter of
+//channel, and will perform the Feedback low-level function call.  Returns -1 on
+//error, 0 on success.
 
 
 long ehTimerCounter( HANDLE hDevice,
@@ -447,10 +464,10 @@ long ehTimerCounter( HANDLE hDevice,
                      uint8 *inCounterMode,
                      uint32 *outTimer,
                      uint32 *outCounter);
-//Used by the eTCConfig and eTCValues easy functions.  This function takes the TimerCounter
-//low-level command and response bytes (not including checksum and command bytes) as its parameter
-//and performs a TimerCounter call with the UE9.  Returns -1 or errorcode (>1 value) on error, 0
-//on success.
+//Used by the eTCConfig and eTCValues easy functions.  This function takes the
+//TimerCounter low-level command and response bytes (not including checksum and
+//command bytes) as its parameter and performs a TimerCounter call with the UE9.
+//Returns -1 or errorcode (>1 value) on error, 0 on success.
 
 
 /* Easy Functions Constants */
