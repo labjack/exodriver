@@ -139,7 +139,7 @@ $ sudo cp 10-labjack.rules /etc/udev/rules.d/.
 $ sudo udevadm control --reload-rules
 $ cd
 $ git clone git://github.com/labjack/LabJackPython.git
-$ cd LabJackPython/src/
+$ cd LabJackPython/
 $ sudo python setup.py install
 $ python
 >>> import u3
