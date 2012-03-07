@@ -39,9 +39,11 @@ success ()
 	let e=e+$NO_RULES_ERR
 	fi
 	if [ $NEED_RESTART -eq $TRUE ]; then
-		echo "Please restart your computer now for the device rule changes to take effect."
+		echo "Please manually restart the device rules or restart your computer now."
 	elif [ $NEED_RELOG -eq $TRUE ]; then
-		echo "Please log off and log back in for the group changes to take effect."
+		echo "Please log off and log back in for the group changes to take effect. To confirm the group changes have taken effect, enter the command:"
+		echo "  $ groups"
+		echo "and make sure $GROUP is in the list. (You probably have to log out of your entire account, not just your shell.)"
 	fi
 	exit $e
 }
@@ -129,6 +131,18 @@ for g in `id -nG $user`; do
 done
 
 if [ $in_group -eq $TRUE ]; then
+	# Make sure the user is logged into the labjack group
+	current_groups=1
+	for g in `groups`; do
+		if [ "$g" == "$GROUP" ]; then
+			current_groups=$TRUE
+			break
+		fi
+	done
+	if [ $current_groups -ne $TRUE ]; then
+		NEED_RELOG=$TRUE
+	fi
+
 	success
 fi
 
