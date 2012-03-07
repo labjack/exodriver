@@ -14,12 +14,12 @@ LIBFLAGS = -lusb-1.0 -lc
 ifeq ($(UNAME),Darwin)
 	#Mac OS X operating system macros
 	TARGET = liblabjackusb.dylib
-	# Build for multiple architectures
-	#ARCHFLAGS = -arch i386 -arch x86_64 -arch ppc
-	# Build for 32- and 64-bit Intel architectures
-	#ARCHFLAGS = -arch i386 -arch x86_64
 	# Build for only the host architecture
 	ARCHFLAGS =
+	# Build for 32- and 64-bit Intel architectures
+	#ARCHFLAGS = -arch i386 -arch x86_64
+	# Build for multiple architectures
+	#ARCHFLAGS = -arch i386 -arch x86_64 -arch ppc
 	COMPILE = libtool -dynamic -o $(TARGET) -install_name $(TARGET) -current_version $(VERSION) -compatibility_version $(VERSION) labjackusb.o $(LIBFLAGS)
 else
 	#Linux operating system macros
