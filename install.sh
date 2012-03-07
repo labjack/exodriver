@@ -5,7 +5,7 @@ OLD_RULES=10-labjack.rules
 RULES_DEST_PRIMARY=/lib/udev/rules.d
 RULES_DEST_ALTERNATE=/etc/udev/rules.d
 GROUP=labjack
-SUPPORT_EMAIL=support@labjack.com
+SUPPORT_EMAIL=labjacksupport@gmail.com
 TRUE=0
 # Assume these are unneeded until otherwise
 NEED_RECONNECT=1
