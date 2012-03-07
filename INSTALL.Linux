@@ -40,8 +40,12 @@ In the exodriver/ directory, run the following command:
 
     $ sudo ./install.sh
 
-This script will attempt to build, install, and make any necessary
-system configurations.
+This script will attempt to build, install, and make any necessary system
+configurations so that the user that runs it will be able to use LabJack
+devices.
+
+For information on allowing multiple users to use LabJack devices, see the
+"Permissions" section under "liblabjackusb Library Manual Installation".
 
 For more information, read the section titled liblabjackusb Library Manual
 Installation later in this file.
@@ -117,8 +121,8 @@ install the library.
 Programs that use the liblabjackusb will need to access the USB device bus
 at /dev/bus/usb/, typically with root permission.  On Debian-based
 distributions, we provide udev rules that allow members of the "labjack" group
-to access the LabJack.  To install the udev rules, run the following commands
-in the root directory of this package.
+to access LabJack devices.  To install the udev rules, run the following
+commands in the root directory of this package.
 
     $ sudo cp 50-labjack.rules /lib/udev/rules.d
     $ sudo udevadm control --reload-rules
@@ -134,14 +138,27 @@ computer. On a Fedora machine run:
 
     $ sudo /etc/init.d/udev-post reload
 
-Also be sure to add yourself to the "labjack" group. Type:
+Permissions
 
-    $ groups
+Be sure to add any users that need to use LabJack devices to the "labjack"
+group. If a user is not in the labjack group, they will need to execute
+programs that use Exodriver with altered permissions. For example, they will
+need to run `sudo ./labjack_program` rather than `./labjack_program`.
 
-to list what groups you are a member of. Add yourself to the labjack group by
-running:
+To check if the user with username USERNAME is in the labjack group, type:
+
+    $ groups USERNAME
+
+For this command, you can leave USERNAME blank if you are checking what groups
+the current user is in.
+
+If "labjack" does not appear in the output, you need to add yourself to the
+labjack group, as follows.
+
+To add a user with username USERNAME to the labjack group, run the following
+command:
 
     $ sudo usermod -a -G labjack USERNAME
 
-Log out and log back in for the new group to take effect. Re-run "groups" to
-double check.
+For every user that is added to the labjack group, they must log out and log
+back in for the group changes to take effect. Re-run "groups" to double check.
