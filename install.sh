@@ -5,7 +5,7 @@ OLD_RULES=10-labjack.rules
 RULES_DEST_PRIMARY=/lib/udev/rules.d
 RULES_DEST_ALTERNATE=/etc/udev/rules.d
 GROUP=labjack
-SUPPORT_EMAIL=labjacksupport@gmail.com
+SUPPORT_EMAIL=support@labjack.com
 TRUE=0
 # Assume these are unneeded until otherwise
 NEED_RECONNECT=1
@@ -36,7 +36,7 @@ success ()
 	if [ $NO_RULES -eq $TRUE ]; then
 		echo "No udev rules directory found. Searched for $RULES_DEST_PRIMARY, $RULES_DEST_ALTERNATE."
 		echo "Please copy $RULES to your device rules directory and reload the rules or contact LabJack support for assistence: <$SUPPORT_EMAIL>"
-	let e=e+$NO_RULES_ERR
+		let e=e+$NO_RULES_ERR
 	fi
 	if [ $NEED_RESTART -eq $TRUE ]; then
 		echo "Please manually restart the device rules or restart your computer now."
@@ -133,7 +133,7 @@ done
 if [ $in_group -eq $TRUE ]; then
 	# Make sure the user is logged into the labjack group
 	current_groups=1
-	for g in `groups`; do
+	for g in `groups $user`; do
 		if [ "$g" == "$GROUP" ]; then
 			current_groups=$TRUE
 			break
