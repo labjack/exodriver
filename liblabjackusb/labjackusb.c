@@ -44,12 +44,12 @@
 
 #define LJ_DEBUG false
 
-bool gIsLibUSBInitialized = false;
-struct libusb_context *gLJContext = NULL;
+static bool gIsLibUSBInitialized = false;
+static struct libusb_context *gLJContext = NULL;
 
 enum LJUSB_TRANSFER_OPERATION { LJUSB_WRITE, LJUSB_READ, LJUSB_STREAM };
 
-struct LJUSB_FirmwareHardwareVersion 
+struct LJUSB_FirmwareHardwareVersion
 {
     unsigned char firmwareMajor;
     unsigned char firmwareMinor;
@@ -358,7 +358,7 @@ static bool LJUSB_UE9_isMinFirmware(struct LJUSB_FirmwareHardwareVersion * fhv)
 static bool LJUSB_isRecentKernel(void)
 {
     struct utsname u;
-    char *tok;
+    char *tok = NULL;
     unsigned long kernelMajor = 0, kernelMinor = 0, kernelRev = 0;
 
     if (uname(&u) != 0) {
@@ -461,7 +461,7 @@ float LJUSB_GetLibraryVersion(void)
 HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long ProductID)
 {
     (void)dwReserved;
-    libusb_device **devs, *dev;
+    libusb_device **devs = NULL, *dev = NULL;
     struct libusb_device_handle *devh = NULL;
     struct libusb_device_descriptor desc;
     ssize_t cnt = 0;
@@ -560,7 +560,7 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
 
 int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
 {
-    libusb_device **devs, *dev;
+    libusb_device **devs = NULL, *dev = NULL;
     struct libusb_device_handle *devh = NULL;
     struct libusb_device_descriptor desc;
     ssize_t cnt = 0;
@@ -728,7 +728,7 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
 // Automatically uses the correct endpoint and transfer method (bulk or interrupt)
 static unsigned long LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, unsigned long count, unsigned int timeout, enum LJUSB_TRANSFER_OPERATION operation)
 {
-    libusb_device *dev;
+    libusb_device *dev = NULL;
     struct libusb_device_descriptor desc;
     bool isBulk = true;
     unsigned char endpoint = 0;
@@ -937,7 +937,7 @@ void LJUSB_CloseDevice(HANDLE hDevice)
 
 unsigned int LJUSB_GetDevCount(unsigned long ProductID)
 {
-    libusb_device **devs;
+    libusb_device **devs = NULL;
     ssize_t cnt = 0;
     int r = 1;
     unsigned int i = 0;
@@ -961,7 +961,7 @@ unsigned int LJUSB_GetDevCount(unsigned long ProductID)
         return 0;
     }
 
-    libusb_device *dev;
+    libusb_device *dev = NULL;
 
     // Loop over all USB devices and count the ones with the LabJack
     // vendor ID and the passed in product ID.
@@ -986,7 +986,7 @@ unsigned int LJUSB_GetDevCount(unsigned long ProductID)
 
 unsigned int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n)
 {
-    libusb_device **devs, *dev;
+    libusb_device **devs = NULL, *dev = NULL;
     ssize_t cnt = 0;
     int r = 1;
     unsigned int i = 0;
@@ -1101,7 +1101,7 @@ bool LJUSB_IsHandleValid(HANDLE hDevice)
     // r = libusb_get_configuration(hDevice, &config);
     // to the actual control tranfser, from the libusb source
     r = libusb_control_transfer(hDevice, LIBUSB_ENDPOINT_IN,
-        LIBUSB_REQUEST_GET_CONFIGURATION, 0, 0, &config, 1, 1000);
+        LIBUSB_REQUEST_GET_CONFIGURATION, 0, 0, &config, 1, LJ_LIBUSB_TIMEOUT_DEFAULT);
     if (r < 0) {
         if (LJ_DEBUG) {
             fprintf(stderr, "LJUSB_IsHandleValid: returning 0. Return value from libusb_get_configuration was: %d\n", r);
@@ -1120,7 +1120,7 @@ bool LJUSB_IsHandleValid(HANDLE hDevice)
 
 unsigned short LJUSB_GetDeviceDescriptorReleaseNumber(HANDLE hDevice)
 {
-    libusb_device *dev;
+    libusb_device *dev = NULL;
     struct libusb_device_descriptor desc;
     int r = 0;
 
@@ -1144,7 +1144,7 @@ unsigned short LJUSB_GetDeviceDescriptorReleaseNumber(HANDLE hDevice)
 
 unsigned long LJUSB_GetHIDReportDescriptor(HANDLE hDevice, BYTE *pBuff, unsigned long count)
 {
-    libusb_device *dev;
+    libusb_device *dev = NULL;
     struct libusb_device_descriptor desc;
     int r = 0;
 
@@ -1170,7 +1170,7 @@ unsigned long LJUSB_GetHIDReportDescriptor(HANDLE hDevice, BYTE *pBuff, unsigned
         return 0;
     }
 
-    r = libusb_control_transfer(hDevice, 0x81 , 0x06, 0x2200, 0x0000, pBuff, count, LJ_LIBUSB_TIMEOUT_DEFAULT);
+    r = libusb_control_transfer(hDevice, 0x81, 0x06, 0x2200, 0x0000, pBuff, count, LJ_LIBUSB_TIMEOUT_DEFAULT);
     if (r < 0) {
         LJUSB_libusbError(r);
         return 0;
