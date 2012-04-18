@@ -1,5 +1,5 @@
 //Author: LabJack
-//June 25, 2009
+//December 27, 2011
 //Header for U3 example helper functions.
 //
 //History
@@ -11,9 +11,11 @@
 //-fixed bug in eAIN for positive channel 30 - temp sensor (04/25/2008)
 //-Modified calibration constants structs.  Modified the names and code of the
 // functions that apply the calibration constants. (06/25/2009)
+//-Replaced LJUSB_BulkWrite/Read with LJUSB_write/Read calls.  Added serial
+// number support to openUSBConnection. (12/27/2011)
 
-#ifndef _U3_H
-#define _U3_H
+#ifndef U3_H_
+#define U3_H_
 
 #include <sys/time.h>
 #include <stdio.h>
@@ -61,7 +63,7 @@ struct U3_CALIBRATION_INFORMATION {
 typedef struct U3_CALIBRATION_INFORMATION u3CalibrationInfo;
 
 //Structure for storing LJTDAC calibration constants
-struct U3_TDAC_CALIBRATION_INFORMATION{
+struct U3_TDAC_CALIBRATION_INFORMATION {
     uint8 prodID;
     double ccConstants[4];
     /*
@@ -107,8 +109,9 @@ uint8 extendedChecksum8( uint8 *b);
 //b = data packet for extended command
 
 HANDLE openUSBConnection( int localID);
-//Opens a U3 with the given localID.  Returns NULL on failure, or a HANDLE on
+//Opens a U3 connection over USB.  Returns NULL on failure, or a HANDLE on
 //success.
+//localID = the local ID or serial number of the U3 you want to open
 
 void closeUSBConnection( HANDLE hDevice);
 //Closes a HANDLE to a U3 device.
@@ -158,8 +161,8 @@ long getAinVoltCalibrated( u3CalibrationInfo *caliInfo,
 //Translates the binary AIN reading from the U3, to a voltage value
 //(calibrated) in Volts.  Call getCalibrationInfo first to set up caliInfo.
 //Returns -1 on error, 0 on success.
-//This function is for U3 hardware versions 1.20 and 1.21.  Function will also work
-//for hardware version 1.30 U3-LV, but not U3-HV.
+//This function is for U3 hardware versions 1.20 and 1.21.  Function will also
+//work for hardware version 1.30 U3-LV, but not U3-HV.
 //caliInfo = structure where calibrarion information is stored
 //dac1Enabled = If this is nonzero (True), then it is indicated that DAC1 is
 //             enabled and analog voltage will be calculated with Vreg.  If
@@ -353,7 +356,7 @@ long I2C( HANDLE hDevice,
 //                    size.
 
 
-/* Easy Functions (Similar to the easy functions in the UD driver for Windows) */
+/* Easy Functions (Similar to the easy functions in the Windows UD driver) */
 
 long eAIN( HANDLE Handle,
            u3CalibrationInfo *CalibrationInfo,
