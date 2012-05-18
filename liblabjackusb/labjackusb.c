@@ -299,7 +299,7 @@ static int LJUSB_libusbError(int r)
 }
 
 
-static bool LJUSB_U3_isMinFirmware(struct LJUSB_FirmwareHardwareVersion * fhv)
+static bool LJUSB_U3_isMinFirmware(const struct LJUSB_FirmwareHardwareVersion * fhv)
 {
     if (fhv->hardwareMajor == U3C_HARDWARE_MAJOR && fhv->hardwareMinor == U3C_HARDWARE_MINOR) {
         if (fhv->firmwareMajor > MIN_U3C_FIRMWARE_MAJOR || (fhv->firmwareMajor == MIN_U3C_FIRMWARE_MAJOR && fhv->firmwareMinor >= MIN_U3C_FIRMWARE_MINOR)) {
@@ -320,7 +320,7 @@ static bool LJUSB_U3_isMinFirmware(struct LJUSB_FirmwareHardwareVersion * fhv)
 }
 
 
-static bool LJUSB_U6_isMinFirmware(struct LJUSB_FirmwareHardwareVersion * fhv)
+static bool LJUSB_U6_isMinFirmware(const struct LJUSB_FirmwareHardwareVersion * fhv)
 {
     if (fhv->firmwareMajor > MIN_U6_FIRMWARE_MAJOR || (fhv->firmwareMajor == MIN_U6_FIRMWARE_MAJOR && fhv->firmwareMinor >= MIN_U6_FIRMWARE_MINOR)) {
         return true;
@@ -334,7 +334,7 @@ static bool LJUSB_U6_isMinFirmware(struct LJUSB_FirmwareHardwareVersion * fhv)
 }
 
 
-static bool LJUSB_UE9_isMinFirmware(struct LJUSB_FirmwareHardwareVersion * fhv)
+static bool LJUSB_UE9_isMinFirmware(const struct LJUSB_FirmwareHardwareVersion * fhv)
 {
     if (LJ_DEBUG) {
         fprintf(stderr, "In LJUSB_UE9_isMinFirmware\n");
