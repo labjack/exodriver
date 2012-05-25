@@ -218,7 +218,7 @@ static void LJUSB_UE9_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_Firmw
 static bool LJUSB_isNullHandle(HANDLE hDevice)
 {
     if (hDevice == NULL) {
-        // TODO: Consider different errno here and in LJUSB_isHandleValid
+        // TODO: Consider different errno here
         errno = EINVAL;
         return true;
     }
@@ -669,13 +669,13 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
         fprintf(stderr, "Calling LJUSB_DoTransfer with endpoint = 0x%x, count = %lu, and isBulk = %d.\n", endpoint, count, isBulk);
     }
 
-    if (LJUSB_IsHandleValid(hDevice) == false) {
+    if (LJUSB_isNullHandle(hDevice)) {
         if (LJ_DEBUG) {
-            fprintf(stderr, "Calling LJUSB_DoTransfer returning 0 because handle is invalid. errno = %d.\n", errno);
+            fprintf(stderr, "LJUSB_DoTransfer: returning 0. hDevice is NULL.\n");
         }
         return 0;
     }
-    
+
     if (isBulk && endpoint != 1 && endpoint < 0x81 ) {
         fprintf(stderr, "LJUSB_DoTransfer warning: Got endpoint = %d, however this not a known endpoint. Please verify you are using the header file provided in /usr/local/include/labjackusb.h and not an older header file.\n", endpoint);
     }
@@ -697,8 +697,8 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
             }
 
             return r;
-       }
-       else {
+        }
+        else {
             r = libusb_interrupt_transfer(hDevice, endpoint, pBuff, count, &transferred, timeout);
         }
     }
@@ -738,6 +738,12 @@ static unsigned long LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, unsigned l
         fprintf(stderr, "Calling LJUSB_SetupTransfer with count = %lu and operation = %d.\n", count, operation);
     }
 
+    if (LJUSB_isNullHandle(hDevice)) {
+        if (LJ_DEBUG) {
+            fprintf(stderr, "LJUSB_SetupTransfer: returning 0. hDevice is NULL.\n");
+        }
+        return 0;
+    }
 
     //First determine the device from handle.
     dev = libusb_get_device(hDevice);
@@ -898,6 +904,7 @@ unsigned long LJUSB_WriteTO(HANDLE hDevice, BYTE *pBuff, unsigned long count, un
     return LJUSB_SetupTransfer(hDevice, pBuff, count, timeout, LJUSB_WRITE);
 }
 
+
 unsigned long LJUSB_ReadTO(HANDLE hDevice, BYTE *pBuff, unsigned long count, unsigned int timeout)
 {
     if (LJ_DEBUG) {
@@ -906,6 +913,7 @@ unsigned long LJUSB_ReadTO(HANDLE hDevice, BYTE *pBuff, unsigned long count, uns
     return LJUSB_SetupTransfer(hDevice, pBuff, count, timeout, LJUSB_READ);
 }
 
+
 unsigned long LJUSB_StreamTO(HANDLE hDevice, BYTE *pBuff, unsigned long count, unsigned int timeout)
 {
     if (LJ_DEBUG) {
@@ -913,6 +921,7 @@ unsigned long LJUSB_StreamTO(HANDLE hDevice, BYTE *pBuff, unsigned long count, u
     }
     return LJUSB_SetupTransfer(hDevice, pBuff, count, timeout, LJUSB_STREAM);
 }
+
 
 void LJUSB_CloseDevice(HANDLE hDevice)
 {
@@ -1087,10 +1096,8 @@ bool LJUSB_IsHandleValid(HANDLE hDevice)
 
     if (LJUSB_isNullHandle(hDevice)) {
         if (LJ_DEBUG) {
-            fprintf(stderr, "LJUSB_IsHandleValid: returning 0. hDevice is NULL.\n");
+            fprintf(stderr, "LJUSB_IsHandleValid: returning false. hDevice is NULL.\n");
         }
-        // TODO: Consider different errno here and in LJUSB_isNullHandle
-        errno = EINVAL;
         return false;
     }
 
@@ -1104,14 +1111,13 @@ bool LJUSB_IsHandleValid(HANDLE hDevice)
         LIBUSB_REQUEST_GET_CONFIGURATION, 0, 0, &config, 1, LJ_LIBUSB_TIMEOUT_DEFAULT);
     if (r < 0) {
         if (LJ_DEBUG) {
-            fprintf(stderr, "LJUSB_IsHandleValid: returning 0. Return value from libusb_get_configuration was: %d\n", r);
+            fprintf(stderr, "LJUSB_IsHandleValid: returning false. Return value from libusb_get_configuration was: %d\n", r);
         }
-        // TODO: Consider different errno here and in LJUSB_isNullHandle
-        errno = EINVAL;
+        LJUSB_libusbError(r);
         return false;
     } else {
         if (LJ_DEBUG) {
-            fprintf(stderr, "LJUSB_IsHandleValid: returning 1.\n");
+            fprintf(stderr, "LJUSB_IsHandleValid: returning true.\n");
         }
         return true;
     }
@@ -1124,9 +1130,9 @@ unsigned short LJUSB_GetDeviceDescriptorReleaseNumber(HANDLE hDevice)
     struct libusb_device_descriptor desc;
     int r = 0;
 
-    if (LJUSB_IsHandleValid(hDevice) == false) {
+    if (LJUSB_isNullHandle(hDevice)) {
         if (LJ_DEBUG) {
-            fprintf(stderr, "Calling LJUSB_GetDeviceDescriptorReleaseNumber returning 0 because handle is invalid. errno = %d.\n", errno);
+            fprintf(stderr, "LJUSB_GetDeviceDescriptorReleaseNumber: returning 0. hDevice is NULL.\n");
         }
         return 0;
     }
@@ -1142,15 +1148,16 @@ unsigned short LJUSB_GetDeviceDescriptorReleaseNumber(HANDLE hDevice)
     return desc.bcdDevice;
 }
 
+
 unsigned long LJUSB_GetHIDReportDescriptor(HANDLE hDevice, BYTE *pBuff, unsigned long count)
 {
     libusb_device *dev = NULL;
     struct libusb_device_descriptor desc;
     int r = 0;
 
-    if (LJUSB_IsHandleValid(hDevice) == false) {
+    if (LJUSB_isNullHandle(hDevice)) {
         if (LJ_DEBUG) {
-            fprintf(stderr, "Calling LJUSB_GetHIDReportDescriptor returning 0 because handle is invalid. errno = %d.\n", errno);
+            fprintf(stderr, "LJUSB_GetHIDReportDescriptor: returning 0. hDevice is NULL.\n");
         }
         return 0;
     }
