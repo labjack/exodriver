@@ -49,7 +49,7 @@
 //       - Changed LJUSB_Write/Read/Stream to return 0 on error instead of -1
 //       - Changed LJUSB_GetDevCounts return data type unsigned int
 //       - Changed LJUSB_GetDevCounts to return all products counted instead
-//        .of 0
+//         of 0
 //       - Added LJUSB_WriteTO, LJUSB_ReadTO and LJUSB_StreamTO functions
 //       - Added LJUSB_GetDeviceDescriptorReleaseNumber function
 //       - Added LJUSB_GetHIDReportDescriptor function for U12
