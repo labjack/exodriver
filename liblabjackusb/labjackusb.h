@@ -40,18 +40,24 @@
 //       - Setting errno more often when libusb errors occur
 //       - Changed guard define to LABJACKUSB_H_
 //       - Changed LJUSB_GetDevCount return data type to unsigned int
+//       - Moved LJ_VENDOR_ID to the header file so it's public
 //
 //  2.05 - Updated Wireless bridge support for bulk transfers
 //       - Updated Wireless bridge product ID to 1000
 //       - Fixed some compiler warnings
-//       - Changed LJUSB_LINUX_LIBRARY_VERSION define to LJUSB_LIBRARY_VERSION
+//       - Renamed LJUSB_LINUX_LIBRARY_VERSION define to LJUSB_LIBRARY_VERSION
 //       - Changed LJUSB_Write/Read/Stream to return 0 on error instead of -1
 //       - Changed LJUSB_GetDevCounts return data type unsigned int
-//       - Changed LJUSB_GetDevCounts to return all products counted instead.of 0
+//       - Changed LJUSB_GetDevCounts to return all products counted instead
+//        .of 0
 //       - Added LJUSB_WriteTO, LJUSB_ReadTO and LJUSB_StreamTO functions
 //       - Added LJUSB_GetDeviceDescriptorReleaseNumber function
 //       - Added LJUSB_GetHIDReportDescriptor function for U12
-//       - Now using minor versions properly in LJUSB_LIBRARY_VERSION define.
+//       - Now using minor versions properly in LJUSB_LIBRARY_VERSION define
+//       - Renamed DEBUG define to LJ_DEBUG in source
+//       - Made global variables static
+//       - Replaced LJUSB_IsHandleValid checks with LJUSB_isNullHandle to
+//         improve LJUSB_Write/Read/Stream speeds
 //-----------------------------------------------------------------------------
 //
 
