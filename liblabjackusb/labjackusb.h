@@ -58,6 +58,7 @@
 //       - Made global variables static
 //       - Replaced LJUSB_IsHandleValid checks with LJUSB_isNullHandle to
 //         improve LJUSB_Write/Read/Stream speeds
+//       - Initial T7 support (May move to 2.06 on final release)
 //-----------------------------------------------------------------------------
 //
 
@@ -81,6 +82,7 @@ typedef unsigned char BYTE;
 #define U6_PRODUCT_ID          6
 #define U12_PRODUCT_ID         1
 #define BRIDGE_PRODUCT_ID      1000
+#define T7_PRODUCT_ID          17
 #define UNUSED_PRODUCT_ID      -1
 
 //UE9 pipes to read/write through
@@ -108,6 +110,11 @@ typedef unsigned char BYTE;
 #define BRIDGE_PIPE_EP2_IN     0x82
 #define BRIDGE_PIPE_EP3_IN     0x83  //Spontaneous Endpoint
 
+//T7 pipes to read/write through
+#define T7_PIPE_EP1_OUT        1
+#define T7_PIPE_EP2_IN         0x82
+#define T7_PIPE_EP3_IN         0x83  //Stream Endpoint
+
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -129,14 +136,15 @@ unsigned int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n);
 //   uint productCounts[10], productIds[10];
 //   r = LJUSB_GetDevCounts(productCounts, productIds, 10);
 // would return arrays that may look like
-//   {1, 2, 3, 4, 5, 0, 0, 0, 0, 0}
-//   {3, 6, 9, 1, 1000, 0, 0, 0, 0, 0}
+//   {1, 2, 3, 4, 5, 6, 0, 0, 0, 0}
+//   {3, 6, 9, 1, 1000, 17, 0, 0, 0, 0}
 // which means there are
 //   1 U3
 //   2 U6s
 //   3 UE9s
 //   4 U12s
 //   5 SkyMote Bridges
+//   6 T7s
 // connected.
 
 int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices);
@@ -163,6 +171,13 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
 // ProductID = The product ID of the LabJack USB device.  Currently the U3, U6,
 //             and UE9 are supported.
 
+bool LJUSB_ResetConnection(HANDLE hDevice);
+// Performs a USB port reset to reinitialize a device.
+// Returns true on success, or false on error and errno is set.
+// If this function fails, hDevice is no longer valid (you should close it)
+// and you should re-open the device.
+// hDevice = The handle for your device
+
 unsigned long LJUSB_Write(HANDLE hDevice, BYTE *pBuff, unsigned long count);
 // Writes to a device with a 1 second timeout.  If the timeout time elapses and
 // no data is transferred the USB request is aborted and the call returns.
@@ -170,7 +185,7 @@ unsigned long LJUSB_Write(HANDLE hDevice, BYTE *pBuff, unsigned long count);
 // hDevice = The handle for your device
 // pBuff = The buffer to be written to the device.
 // count = The number of bytes to write.
-// This function replaces the deprecated LJUSB_BulkWrite, which required the 
+// This function replaces the deprecated LJUSB_BulkWrite, which required the
 // endpoint.
 
 unsigned long LJUSB_Read(HANDLE hDevice, BYTE *pBuff, unsigned long count);
@@ -180,7 +195,7 @@ unsigned long LJUSB_Read(HANDLE hDevice, BYTE *pBuff, unsigned long count);
 // hDevice = The handle for your device
 // pBuff = The buffer to filled in with bytes from the device.
 // count = The number of bytes expected to be read.
-// This function replaces the deprecated LJUSB_BulkRead, which required the 
+// This function replaces the deprecated LJUSB_BulkRead, which required the
 // endpoint.
 
 unsigned long LJUSB_Stream(HANDLE hDevice, BYTE *pBuff, unsigned long count);
@@ -191,7 +206,7 @@ unsigned long LJUSB_Stream(HANDLE hDevice, BYTE *pBuff, unsigned long count);
 // hDevice = The handle for your device
 // pBuff = The buffer to filled in with bytes from the device.
 // count = The number of bytes expected to be read.
-// This function replaces the deprecated LJUSB_BulkRead, which required the 
+// This function replaces the deprecated LJUSB_BulkRead, which required the
 // (stream) endpoint.
 
 unsigned long LJUSB_WriteTO(HANDLE hDevice, BYTE *pBuff, unsigned long count, unsigned int timeout);
