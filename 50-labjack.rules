@@ -1,0 +1,6 @@
+SUBSYSTEM!="usb_device", ACTION!="add", GOTO="labjack_rules_end"
+
+# LabJack Vendor ID
+ATTRS{idVendor}=="0cd5", GROUP="labjack"
+
+LABEL="labjack_rules_end"

@@ -5,6 +5,8 @@ Linux Requirements
 ------------------
 
 1. GNU C compiler (gcc).
+    Run the following shell command to get it, if needed:
+      $ sudo apt-get install build-essential
 
 2. The libusb-1.0 library.  Download it here:
     http://sourceforge.net/projects/libusb/
@@ -30,47 +32,24 @@ For Ubuntu 10.04, see the section titled
 
 later in this document.
 
-liblabjackusb Library Installation
-----------------------------------
 
-In the liblabjackusb/ directory, run the following commands to compile and
-install the library.
+liblabjackusb Library Script Installation
+-----------------------------------------
 
-    $ cd liblabjackusb/
-    $ make
-    $ sudo make install
+In the exodriver/ directory, run the following command:
 
-Programs that use the liblabjackusb will need to access the USB device bus
-at /dev/bus/usb/, typically with root permission.  On Debian-based
-distributions, we provide udev rules that allow members of the "adm" group
-to access the LabJack.  To install the udev rules, run the following commands
-in the root directory of this package.
+    $ sudo ./install.sh
 
-    $ sudo cp 10-labjack.rules /etc/udev/rules.d
-    $ sudo udevadm control --reload-rules
+This script will attempt to build, install, and make any necessary system
+configurations so that the user that runs it will be able to use LabJack
+devices.
 
-Older vesions of udevadm (e.g., the version included in Ubuntu 8.04) use an
-underscore instead of a dash: "--reload_rules" instead of "--reload-rules"
+For information on allowing multiple users to use LabJack devices, see the
+"Permissions" section under "liblabjackusb Library Manual Installation".
 
-    $ sudo udevadm control --reload_rules
+For more information, read the section titled liblabjackusb Library Manual
+Installation later in this file.
 
-On Debian-based distributions, the above two commands are sufficient. If
-your distribution does not have udevadm, restart udev or restart your
-computer. On a Fedora machine run:
-
-    $ sudo /etc/init.d/udev-post reload
-
-Also be sure to add yourself to the "adm" group. Type:
-
-    $ groups
-
-to list what groups you are a member of. Add yourself to the adm group by
-running:
-
-    $ sudo usermod -a -G adm USERNAME
-
-Log out and log back in for the new group to take effect. Re-run "groups" to
-double check.
 
 Compiling and Running the Example Programs
 ------------------------------------------
@@ -87,6 +66,7 @@ directory.  To compile the programs go to your device's directory and run
 Run one of example programs like this:
 
     $ ./u6BasicConfigU6
+
 
 Uninstalling the Old U3 and UE9 Driver
 --------------------------------------
@@ -110,44 +90,75 @@ These commands remove the udev rules we provided on the forums:
     $ sudo udevadm control --reload-rules
 
 
+LabJackPython and the Exodriver on Ubuntu 10.04
+-----------------------------------------------
 
-Up and running with LabJackPython and the Exodriver on Ubuntu 10.04
--------------------------------------------------------------------
-
-As we detailed in May 2010:
+As we detailed in May 2010, check out the following links for info on
+getting LabJackPython up and running:
 
 http://labjack.com/blog/running-labjackpython-and-exodriver-ubuntu-1004
 
-Ubuntu 10.04 comes with a binary release of libusb-1.0, so building the 
-Exodriver is easier than ever. Install the dependencies with apt-get, 
-checkout the Exodriver source code, and build it. Here are the complete 
-steps, along with a handful of steps at the end that build LabJackPython:
-
 http://labjack.com/support/labjackpython
 
-which is our Python module that works well with the Exodriver:
-
-$ sudo apt-get install build-essential
-$ sudo apt-get install libusb-1.0-0-dev
-$ sudo apt-get install git-core
-$ git clone git://github.com/labjack/exodriver.git
-$ cd exodriver/liblabjackusb/
-$ make
-$ sudo make install
-$ cd ..
-$ sudo cp 10-labjack.rules /etc/udev/rules.d/.
-$ sudo udevadm control --reload-rules
-$ cd
-$ git clone git://github.com/labjack/LabJackPython.git
-$ cd LabJackPython/
-$ sudo python setup.py install
-$ python
->>> import u3
->>> d = u3.U3()
->>> d.configU3()
 
 Machines Using VirtualBox
 -------------------------
 Customers using Oracle's VirtualBox software should add themselves to the
 vboxusers group, either through their distribution's GUI interface or through
 the command: sudo usermod -a -G vboxusers USERNAME
+
+
+liblabjackusb Library Manual Installation
+-----------------------------------------
+
+In the liblabjackusb/ directory, run the following commands to compile and
+install the library.
+
+    $ cd liblabjackusb/
+    $ make
+    $ sudo make install
+
+Programs that use the liblabjackusb will need to access the USB device bus
+at /dev/bus/usb/, typically with root permission.  On Debian-based
+distributions, we provide udev rules that allow members of the "labjack" group
+to access LabJack devices.  To install the udev rules, run the following
+commands in the root directory of this package.
+
+    $ sudo cp 50-labjack.rules /lib/udev/rules.d
+    $ sudo udevadm control --reload-rules
+
+Older vesions of udevadm (e.g., the version included in Ubuntu 8.04) use an
+underscore instead of a dash: "--reload_rules" instead of "--reload-rules"
+
+    $ sudo udevadm control --reload_rules
+
+On Debian-based distributions, the above two commands are sufficient. If
+your distribution does not have udevadm, restart udev or restart your
+computer. On a Fedora machine run:
+
+    $ sudo /etc/init.d/udev-post reload
+
+Permissions
+
+Be sure to add any users that need to use LabJack devices to the "labjack"
+group. If a user is not in the labjack group, they will need to execute
+programs that use Exodriver with altered permissions. For example, they will
+need to run `sudo ./labjack_program` rather than `./labjack_program`.
+
+To check if the user with username USERNAME is in the labjack group, type:
+
+    $ groups USERNAME
+
+For this command, you can leave USERNAME blank if you are checking what groups
+the current user is in.
+
+If "labjack" does not appear in the output, you need to add yourself to the
+labjack group, as follows.
+
+To add a user with username USERNAME to the labjack group, run the following
+command:
+
+    $ sudo usermod -a -G labjack USERNAME
+
+For every user that is added to the labjack group, they must log out and log
+back in for the group changes to take effect. Re-run "groups" to double check.

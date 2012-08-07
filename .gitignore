@@ -1,5 +1,6 @@
 *.o
 *.dylib
+*.so*
 *~
 .DS_Store
 readModbusExample
@@ -33,5 +34,16 @@ ue9LJTDAC
 ue9SingleIO
 ue9Stream
 ue9TimerCounter
+ue9allio
+readModbusExample
+testModbusFunctions
 writeModbusExample
+u12AISample
+u3BasicConfigU3
+u3EFunctions
+u6BasicConfigU6
+u6EFunctions
+ue9BasicCommConfig
+ue9EFunctions
+ue9EthernetExample
 

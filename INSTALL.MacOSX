@@ -18,15 +18,17 @@ on Tiger or Panther.
 with the current liblabjackusb library. See the "Uninstalling the Old U3 and
 UE9 Driver" section for more information.
 
-liblabjackusb Library Installation
-----------------------------------
 
-In the liblabjackusb/ directory, run the following commands to compile and
-install the library.
+liblabjackusb Library Script Installation
+-----------------------------------------
 
-    $ cd liblabjackusb/
-    $ make
-    $ sudo make install
+In the exodriver/ directory, run the following command:
+
+    $ sudo ./install.sh
+
+This script will attempt to build, install, and make any necessary
+system configurations.
+
 
 Compiling and Running the Example Programs
 ------------------------------------------
@@ -43,6 +45,7 @@ directory.  To compile the programs go to your device's directory and run
 Run one of example programs like this:
 
     $ ./u6BasicConfigU6
+
 
 Uninstalling the Old U3 and UE9 Driver
 --------------------------------------
@@ -69,6 +72,7 @@ Version 1.0.8 is the latest as of July 2010. Build it in the standard way:
     $ ./configure
     $ make
     $ sudo make install
+
 
 Optional: Build a combined 32-/64-bit Exodriver on Mac OS X
 -----------------------------------------------------------
@@ -133,7 +137,7 @@ of) this ARCHFLAGS line:
 
     #ARCHFLAGS =
 
-and uncomment (remove the # sign from) this ARCHFLAGS line two lines above it:
+and uncomment (remove the # sign from) this ARCHFLAGS line two lines below it:
 
     ARCHFLAGS = -arch i386 -arch x86_64
 
