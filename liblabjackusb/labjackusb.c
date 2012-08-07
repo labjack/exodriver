@@ -662,21 +662,23 @@ int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
 
 bool LJUSB_ResetConnection(HANDLE hDevice)
 {
-    if (LJUSB_isNullHandle(hDevice)) {
+    int r;
+
+	if (LJUSB_isNullHandle(hDevice)) {
         if (LJ_DEBUG) {
             fprintf(stderr, "LJUSB_ResetConnection: returning 0. hDevice is NULL.\n");
         }
         return 0;
     }
 
-       int r = libusb_reset_device(hDevice);
-       if (r != 0)
-       {
-           LJUSB_libusbError(r);
-           return 0;
-       }
+    r = libusb_reset_device(hDevice);
+    if (r != 0)
+    {
+        LJUSB_libusbError(r);
+        return 0;
+    }
 
-       return 1; //Success
+    return 1; //Success
 }
 
 
