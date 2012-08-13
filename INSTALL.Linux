@@ -1,14 +1,35 @@
 Exodriver (liblabjackusb) Library Installation Instructions
 ============================================================
 
+
+Table of Contents
+-----------------
+
+    Linux Requirements
+
+    About These Instructions
+
+    liblabjackusb Library Script Installation
+
+    Compiling and Running the Example Programs
+
+    Machines Using VirtualBox
+
+    liblabjackusb Library Manual Installation
+
+    LabJackPython and the Exodriver on Ubuntu 10.04
+
+    Uninstalling the Old U3 and UE9 Driver
+
+
 Linux Requirements
 ------------------
 
 1. GNU C compiler (gcc).
-    Run the following shell command to get it, if needed:
+    For example in Ubuntu, run the following shell command to get it if needed:
       $ sudo apt-get install build-essential
 
-2. The libusb-1.0 library.  Download it here:
+2. The libusb-1.0 library and development files.  Download the source here:
     http://sourceforge.net/projects/libusb/
 
 3. Linux kernel 2.6.28 or higher.  To use older 2.6.x kernels, you must upgrade
@@ -16,21 +37,22 @@ your firmware.  These are the required firmware versions when using older
 2.6 kernels:
 
    * U3 with hardware version 1.30 or higher - Firmware 1.18 and higher
-   * U3 with hardware version less than 1.30 - Only kernel 2.6.28 and higher 
+   * U3 with hardware version less than 1.30 - Only kernel 2.6.28 and higher
      supported.  Unsupported on older kernels.
    * U6 - Firmware 0.81 and greater
    * UE9 - Comm Firmware 1.49 and greater
 
 4. Uninstall any old U3 and UE9 kernel-module based drivers. The old driver
-and custom kernel modules conflict with the current liblabjackusb library. 
+and custom kernel modules conflict with the current liblabjackusb library.
 See the "Uninstalling the Old U3 and UE9 Driver" section for more
 information.
 
-For Ubuntu 10.04, see the section titled
 
-    Up and running with LabJackPython and the Exodriver on Ubuntu 10.04
-
-later in this document.
+About These Instructions
+------------------------
+All lines that start with a dollar sign ($) are commands and need to be run
+from a terminal.  For example, the Terminal application in Ubuntu version 10.04
+is usually accessed through Applications -> Accessories -> Terminal.
 
 
 liblabjackusb Library Script Installation
@@ -58,7 +80,7 @@ The example code/programs use the liblabjackusb library and the labjackusb.h
 header files in the liblabjackusb/ directory.
 
 The examples are located in the U3, U6, and UE9 subdirectories in the examples/
-directory.  To compile the programs go to your device's directory and run 
+directory.  To compile the programs go to your device's directory and run
 
     $ cd examples/U6/
     $ make
@@ -66,39 +88,6 @@ directory.  To compile the programs go to your device's directory and run
 Run one of example programs like this:
 
     $ ./u6BasicConfigU6
-
-
-Uninstalling the Old U3 and UE9 Driver
---------------------------------------
-
-The old U3 and UE9 driver used custom kernel modules, and will conflict with
-with the current liblabjackusb library.  To uninstall the old driver please
-unload and delete the U3 and/or UE9 kernel modules, delete the liblabjackusb.so
-library and remove any scripts or udev rules you may have been using to load
-the kernel module's device nodes.  The following commands, or similar depending
-on the directories you copied files to, should help prepare your system for the
-new liblabjackusb 2.0 library:
-
-    $ rmmod labjacku3
-    $ rm labjacku3.ko /lib/modules/`uname -r`/kernel/drivers/usb/misc/labjacku3.ko
-    $ depmod -a
-    $ rm /usr/lib/liblabjackusb.so
-
-These commands remove the udev rules we provided on the forums:
-
-    $ rm /etc/udev/rules.d/10-labjack.rules
-    $ sudo udevadm control --reload-rules
-
-
-LabJackPython and the Exodriver on Ubuntu 10.04
------------------------------------------------
-
-As we detailed in May 2010, check out the following links for info on
-getting LabJackPython up and running:
-
-http://labjack.com/blog/running-labjackpython-and-exodriver-ubuntu-1004
-
-http://labjack.com/support/labjackpython
 
 
 Machines Using VirtualBox
@@ -110,6 +99,8 @@ the command: sudo usermod -a -G vboxusers USERNAME
 
 liblabjackusb Library Manual Installation
 -----------------------------------------
+For Ubuntu 10.04, see the section titled "Up and running with LabJackPython
+and the Exodriver on Ubuntu 10.04" later in this document.
 
 In the liblabjackusb/ directory, run the following commands to compile and
 install the library.
@@ -121,14 +112,19 @@ install the library.
 Programs that use the liblabjackusb will need to access the USB device bus
 at /dev/bus/usb/, typically with root permission.  On Debian-based
 distributions, we provide udev rules that allow members of the "labjack" group
-to access LabJack devices.  To install the udev rules, run the following
-commands in the root directory of this package.
+to access LabJack devices.  First remove the old udev rules if you installed
+a version of Exodriver before August 13th, 2012:
+
+    $ sudo rm /lib/udev/rules.d/10-labjack.rules
+
+To install the current udev rules, run the following commands from the root
+directory of this package.
 
     $ sudo cp 50-labjack.rules /lib/udev/rules.d
     $ sudo udevadm control --reload-rules
 
 Older vesions of udevadm (e.g., the version included in Ubuntu 8.04) use an
-underscore instead of a dash: "--reload_rules" instead of "--reload-rules"
+underscore instead of a dash: "--reload_rules" instead of "--reload-rules":
 
     $ sudo udevadm control --reload_rules
 
@@ -162,3 +158,60 @@ command:
 
 For every user that is added to the labjack group, they must log out and log
 back in for the group changes to take effect. Re-run "groups" to double check.
+
+
+LabJackPython and the Exodriver on Ubuntu 10.04
+-----------------------------------------------
+
+As we detailed in May 2010 (updated with the "liblabjackusb Library Manual
+Installation" section's steps):
+
+http://labjack.com/blog/running-labjackpython-and-exodriver-ubuntu-1004
+
+Ubuntu 10.04 comes with a binary release of libusb-1.0, so building the
+Exodriver is easier than ever. Install the dependencies with apt-get,
+checkout the Exodriver source code, and build it. Here are the complete
+steps, along with a handful of steps at the end that build LabJackPython
+(http://labjack.com/support/labjackpython) which is our Python module
+that works well with the Exodriver:
+
+	$ sudo apt-get install build-essential
+	$ sudo apt-get install libusb-1.0-0-dev
+	$ sudo apt-get install git-core
+	$ git clone git://github.com/labjack/exodriver.git
+	$ cd exodriver/
+	$ sudo ./install.sh
+
+Follow the script's instructions, which may require you to log off and
+log back on your current user.  Continue for the LabJackPython steps:
+
+	$ cd
+	$ git clone git://github.com/labjack/LabJackPython.git
+	$ cd LabJackPython/src/
+	$ sudo python setup.py install
+	$ python
+	>>> import u3
+	>>> d = u3.U3()
+	>>> d.configU3()
+
+
+Uninstalling the Old U3 and UE9 Driver
+--------------------------------------
+
+The old U3 and UE9 driver used custom kernel modules, and will conflict with
+with the current liblabjackusb library.  To uninstall the old driver please
+unload and delete the U3 and/or UE9 kernel modules, delete the liblabjackusb.so
+library and remove any scripts or udev rules you may have been using to load
+the kernel module's device nodes.  The following commands, or similar depending
+on the directories you copied files to, should help prepare your system for the
+new liblabjackusb 2.0 library:
+
+    $ rmmod labjacku3
+    $ rm labjacku3.ko /lib/modules/`uname -r`/kernel/drivers/usb/misc/labjacku3.ko
+    $ depmod -a
+    $ rm /usr/lib/liblabjackusb.so
+
+These commands remove the udev rules we provided on the forums:
+
+    $ rm /etc/udev/rules.d/10-labjack.rules
+    $ sudo udevadm control --reload-rules

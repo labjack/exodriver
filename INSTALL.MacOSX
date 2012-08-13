@@ -1,17 +1,60 @@
 Exodriver (liblabjackusb) Library Installation Instructions
 ============================================================
 
+
+Table of Contents
+-----------------
+
+    Installation From Installer
+
+    Installation from Source Code
+
+        Mac OS X Requirements
+
+        About These Instructions
+
+        Installing libusb-1.0
+
+        liblabjackusb Library Script Installation
+
+        Compiling and Running the Example Programs
+
+        Optional: Build a combined 32-/64-bit Exodriver on Mac OS X
+
+        Uninstalling the Old U3 and UE9 Driver
+
+
+Installation From Installer
+============================
+
+First, download the installer online here:
+
+	http://labjack.com/support/linux-and-mac-os-x-drivers
+
+Next, unzip the downloaded file (if not done automatically) and run the
+Exodriver_NativeUSB_Setup.pkg package installer.  Follow the instructions
+from the installer to install the Exodriver and required libusb-1.0 libraries.
+
+Note that the installed libraries are both 32 and 64-bit binaries.  The
+installer does not have the source code installation requirements mentioned
+below.
+
+To install the latest Exodriver from source code instead, use the instructions
+in the "Installation from Source Code" section below.
+
+
+Installation from Source Code
+==============================
+
 Mac OS X Requirements
 ---------------------
 
 1. XCode developer tools
 
-2. The libusb-1.0 library.  Download it here:
-    http://sourceforge.net/projects/libusb/
-and see the instructions under "Installing libusb-1.0"
+2. The libusb-1.0 library.  See the "Installing libusb-1.0" for the libusb-1.0
+download and installation instructions.
 
-
-3. Mac OS X 10.5 Leopard or 10.6 Snow Leopard. We haven't tested the library 
+3. Mac OS X 10.5 Leopard or 10.6 Snow Leopard. We haven't tested the library
 on Tiger or Panther.
 
 4. Uninstall any MacOSX_C_NativeUSB based drivers. The old driver conflicts
@@ -19,15 +62,55 @@ with the current liblabjackusb library. See the "Uninstalling the Old U3 and
 UE9 Driver" section for more information.
 
 
-liblabjackusb Library Script Installation
------------------------------------------
+About These Instructions
+------------------------
+All lines that start with a dollar sign ($) are commands and need to be run
+from a terminal. For example, the Terminal application is usually located in
+the Applications folder.
 
-In the exodriver/ directory, run the following command:
+
+Installing libusb-1.0
+---------------------
+
+Mac OS X requires libusb-1.0 to be built from the source. Download the source
+from SourceForge:
+
+http://sourceforge.net/projects/libusb/files/libusb-1.0/
+
+Version 1.0.9 is the latest as of April 2012. From the directory containing
+the libusb source download, build it in the standard way:
+
+    $ tar xvfj libusb-1.0.9.tar.bz2
+    $ cd libusb-1.0.9/
+    $ ./configure
+    $ make
+    $ sudo make install
+
+For building a combined 32/64-bit libusb-1.0 library, refer to the
+"Optional: Build a combined 32-/64-bit Exodriver on Mac OS X" section.
+
+
+liblabjackusb Library Script Installation
+-----------------------------------
+
+First, go to the Exodriver directory.
+
+To install by script, run the following command:
 
     $ sudo ./install.sh
 
 This script will attempt to build, install, and make any necessary
 system configurations.
+
+Alternatively, without using the script go to the liblabjackusb/
+directory and run the following commands:
+
+	$ cd liblabjackusb/
+	$ make
+	$ sudo make install
+
+For building a combined 32/64-bit liblabjackusb library, refer to the
+"Optional: Build a combined 32-/64-bit Exodriver on Mac OS X" section.
 
 
 Compiling and Running the Example Programs
@@ -37,7 +120,7 @@ The example code/programs use the liblabjackusb library and the labjackusb.h
 header files in the liblabjackusb/ directory.
 
 The examples are located in the U3, U6, and UE9 subdirectories in the examples/
-directory.  To compile the programs go to your device's directory and run 
+directory.  To compile the programs go to your device's directory and run
 
     $ cd examples/U6/
     $ make
@@ -45,33 +128,6 @@ directory.  To compile the programs go to your device's directory and run
 Run one of example programs like this:
 
     $ ./u6BasicConfigU6
-
-
-Uninstalling the Old U3 and UE9 Driver
---------------------------------------
-
-The old U3 and UE9 driver used custom kernel modules, and will conflict with
-with the current liblabjackusb library.  To uninstall the old driver, delete the
-liblabjackusb.dylib:
-
-    $ sudo rm -f /usr/lib/liblabjackusb.dylib
-
-
-Installing libusb-1.0
----------------------
-
-Mac OS X requires libusb-1.0 to be built from the source (like many Linux 
-distributions). Download the source from SourceForge:
-
-http://sourceforge.net/projects/libusb/files/libusb-1.0/
-
-Version 1.0.8 is the latest as of July 2010. Build it in the standard way:
-
-    $ tar xvfj libusb-1.0.8.tar.bz2 
-    $ cd libusb-1.0.8/
-    $ ./configure
-    $ make
-    $ sudo make install
 
 
 Optional: Build a combined 32-/64-bit Exodriver on Mac OS X
@@ -90,7 +146,7 @@ happened: When following the instructions in the Quickstart, the compiler built
 a copy of the Exodriver for its native architecture. On modern Mac OS X
 systems, that's x86_64 (64-bit). Verify this by running:
 
-    $ file /usr/local/lib/liblabjackusb.dylib 
+    $ file /usr/local/lib/liblabjackusb.dylib
     /usr/local/lib/liblabjackusb.dylib: Mach-O 64-bit dynamically linked shared library x86_64
 
 Normally, this is what you want. The programs you will use to call the
@@ -112,8 +168,8 @@ When you must load the Exodriver from a 32-bit process, you must compile
 libusb-1.0 and the Exodriver to be combined 32-/64-bit libraries. Start with
 libusb-1.0:
 
-    $ tar xvfj libusb-1.0.8.tar.bz2 
-    $ cd libusb-1.0.8/
+    $ tar xvfj libusb-1.0.9.tar.bz2
+    $ cd libusb-1.0.9/
     $ export CFLAGS="-arch i386 -arch x86_64"
     $ ./configure --disable-dependency-tracking
     $ make
@@ -149,10 +205,20 @@ Now build and install the software
 
 Verify that it worked by running:
 
-    $ file /usr/local/lib/liblabjackusb.dylib 
+    $ file /usr/local/lib/liblabjackusb.dylib
     /usr/local/lib/liblabjackusb.dylib: Mach-O universal binary with 2 architectures
     /usr/local/lib/liblabjackusb.dylib (for architecture i386): Mach-O dynamically linked shared library i386
     /usr/local/lib/liblabjackusb.dylib (for architecture x86_64):   Mach-O 64-bit dynamically linked shared library x86_64
 
 Because libusb-1.0 and the Exodriver are built for the i386 architecture,
 32-bit applications can load them.
+
+
+Uninstalling the Old U3 and UE9 Driver
+--------------------------------------
+
+The old U3 and UE9 driver, previous to the libusb 1.0 requirement, used custom
+kernel modules, and will conflict with with the current liblabjackusb library.
+To uninstall the old driver, delete the liblabjackusb.dylib:
+
+    $ sudo rm -f /usr/lib/liblabjackusb.dylib
