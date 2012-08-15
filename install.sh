@@ -4,7 +4,7 @@ RULES=50-labjack.rules
 OLD_RULES=10-labjack.rules
 RULES_DEST_PRIMARY=/lib/udev/rules.d
 RULES_DEST_ALTERNATE=/etc/udev/rules.d
-GROUP=labjack
+GROUP=adm
 SUPPORT_EMAIL=support@labjack.com
 TRUE=0
 # Assume these are unneeded until otherwise
@@ -131,7 +131,7 @@ for g in `id -nG $user`; do
 done
 
 if [ $in_group -eq $TRUE ]; then
-	# Make sure the user is logged into the labjack group
+	# Make sure the user is logged into the adm group
 	current_groups=1
 	for g in `groups $user`; do
 		if [ "$g" == "$GROUP" ]; then

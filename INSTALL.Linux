@@ -111,7 +111,7 @@ install the library.
 
 Programs that use the liblabjackusb will need to access the USB device bus
 at /dev/bus/usb/, typically with root permission.  On Debian-based
-distributions, we provide udev rules that allow members of the "labjack" group
+distributions, we provide udev rules that allow members of the "adm" group
 to access LabJack devices.  First remove the old udev rules if you installed
 a version of Exodriver before August 13th, 2012:
 
@@ -136,27 +136,27 @@ computer. On a Fedora machine run:
 
 Permissions
 
-Be sure to add any users that need to use LabJack devices to the "labjack"
-group. If a user is not in the labjack group, they will need to execute
+Be sure to add any users that need to use LabJack devices to the "adm"
+group. If a user is not in the adm group, they will need to execute
 programs that use Exodriver with altered permissions. For example, they will
 need to run `sudo ./labjack_program` rather than `./labjack_program`.
 
-To check if the user with username USERNAME is in the labjack group, type:
+To check if the user with username USERNAME is in the adm group, type:
 
     $ groups USERNAME
 
 For this command, you can leave USERNAME blank if you are checking what groups
 the current user is in.
 
-If "labjack" does not appear in the output, you need to add yourself to the
-labjack group, as follows.
+If "adm" does not appear in the output, you need to add yourself to the
+adm group, as follows.
 
-To add a user with username USERNAME to the labjack group, run the following
+To add a user with username USERNAME to the adm group, run the following
 command:
 
-    $ sudo usermod -a -G labjack USERNAME
+    $ sudo usermod -a -G adm USERNAME
 
-For every user that is added to the labjack group, they must log out and log
+For every user that is added to the adm group, they must log out and log
 back in for the group changes to take effect. Re-run "groups" to double check.
 
 
@@ -181,10 +181,6 @@ that works well with the Exodriver:
 	$ git clone git://github.com/labjack/exodriver.git
 	$ cd exodriver/
 	$ sudo ./install.sh
-
-Follow the script's instructions, which may require you to log off and
-log back on your current user.  Continue for the LabJackPython steps:
-
 	$ cd
 	$ git clone git://github.com/labjack/LabJackPython.git
 	$ cd LabJackPython/src/
