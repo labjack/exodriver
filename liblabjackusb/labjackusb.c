@@ -2,11 +2,12 @@
 //
 //  labjackusb.c
 //
-//    Library for accessing a U3, U6, UE9 and SkyMote bridge over USB.
+//    Library for accessing a U3, U6, UE9, SkyMote bridge, T7 and digit over
+//    USB.
 //
 //  support@labjack.com
 //
-//----------------------------------------------------------------------
+//---------------------------------------------------------------------------
 //
 
 #include "labjackusb.h"
@@ -435,6 +436,10 @@ static bool LJUSB_isMinFirmware(HANDLE hDevice, unsigned long ProductID)
         return true;
     case BRIDGE_PRODUCT_ID: //Add Wireless bridge stuff Mike F.
         return true;
+    case T7_PRODUCT_ID:
+        return true;
+    case DIGIT_PRODUCT_ID:
+        return true;
     default:
         fprintf(stderr, "Firmware check not supported for product ID %ld\n", ProductID);
         return false;
@@ -544,7 +549,7 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
     libusb_free_device_list(devs, 1);
 
     if (handle != NULL) {
-        //We foud a device, now check if it meets the minimum firmware requirement
+        //We found a device, now check if it meets the minimum firmware requirement
         if (!LJUSB_isMinFirmware(handle, ProductID)) {
             //Does not meet the requirement.  Close device and return an invalid handle.
             LJUSB_CloseDevice(handle);
@@ -864,6 +869,22 @@ static unsigned long LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, unsigned l
             return 0;
         }
         break;
+    case DIGIT_PRODUCT_ID:
+        isBulk = true;
+        switch (operation) {
+        case LJUSB_WRITE:
+            endpoint = DIGIT_PIPE_EP1_OUT;
+            break;
+        case LJUSB_READ:
+            endpoint = DIGIT_PIPE_EP2_IN;
+            break;
+        case LJUSB_STREAM:
+        default:
+            //No streaming interface
+            errno = EINVAL;
+            return 0;
+        }
+        break;
 
     /* These devices use interrupt transfers */
     case U12_PRODUCT_ID:
@@ -879,7 +900,6 @@ static unsigned long LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, unsigned l
             endpoint = U12_PIPE_EP0;
             break;
         default:
-            // U12 has no streaming interface
             errno = EINVAL;
             return 0;
         }
@@ -1041,7 +1061,7 @@ unsigned int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n)
     unsigned int u3ProductCount = 0, u6ProductCount = 0;
     unsigned int ue9ProductCount = 0, u12ProductCount = 0;
     unsigned int bridgeProductCount = 0, t7ProductCount = 0;
-    unsigned int allProductCount = 0;
+    unsigned int digitProductCount = 0, allProductCount = 0;
 
     if (!gIsLibUSBInitialized) {
         r = libusb_init(&gLJContext);
@@ -1092,6 +1112,9 @@ unsigned int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n)
             case T7_PRODUCT_ID:
                 t7ProductCount++;
                 break;
+            case DIGIT_PRODUCT_ID:
+                digitProductCount++;
+                break;
             }
         }
     }
@@ -1128,6 +1151,11 @@ unsigned int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n)
             productCounts[i] = t7ProductCount;
             productIds[i] = T7_PRODUCT_ID;
             allProductCount += t7ProductCount;
+            break;
+        case 6:
+            productCounts[i] = digitProductCount;
+            productIds[i] = DIGIT_PRODUCT_ID;
+            allProductCount += digitProductCount;
             break;
         }
     }

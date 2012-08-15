@@ -58,7 +58,8 @@
 //       - Made global variables static
 //       - Replaced LJUSB_IsHandleValid checks with LJUSB_isNullHandle to
 //         improve LJUSB_Write/Read/Stream speeds
-//       - Initial T7 support (May move to 2.06 on final release)
+//       - Initial T7 support
+//       - Initial Digit support
 //-----------------------------------------------------------------------------
 //
 
@@ -83,6 +84,7 @@ typedef unsigned char BYTE;
 #define U12_PRODUCT_ID         1
 #define BRIDGE_PRODUCT_ID      1000
 #define T7_PRODUCT_ID          17
+#define DIGIT_PRODUCT_ID       200
 #define UNUSED_PRODUCT_ID      -1
 
 //UE9 pipes to read/write through
@@ -115,6 +117,11 @@ typedef unsigned char BYTE;
 #define T7_PIPE_EP2_IN         0x82
 #define T7_PIPE_EP3_IN         0x83  //Stream Endpoint
 
+//Digit pipes to read/write through
+#define DIGIT_PIPE_EP1_OUT        1
+#define DIGIT_PIPE_EP2_IN         0x82
+
+
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -136,8 +143,8 @@ unsigned int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n);
 //   uint productCounts[10], productIds[10];
 //   r = LJUSB_GetDevCounts(productCounts, productIds, 10);
 // would return arrays that may look like
-//   {1, 2, 3, 4, 5, 6, 0, 0, 0, 0}
-//   {3, 6, 9, 1, 1000, 17, 0, 0, 0, 0}
+//   {1, 2, 3, 4, 5, 6, 7, 0, 0, 0}
+//   {3, 6, 9, 1, 1000, 17, 200, 0, 0, 0}
 // which means there are
 //   1 U3
 //   2 U6s
@@ -145,6 +152,7 @@ unsigned int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n);
 //   4 U12s
 //   5 SkyMote Bridges
 //   6 T7s
+//   7 Digits
 // connected.
 
 int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices);
