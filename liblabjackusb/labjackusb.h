@@ -83,7 +83,7 @@ typedef unsigned char BYTE;
 #define U6_PRODUCT_ID          6
 #define U12_PRODUCT_ID         1
 #define BRIDGE_PRODUCT_ID      1000
-#define T7_PRODUCT_ID          17
+#define T7_PRODUCT_ID          7
 #define DIGIT_PRODUCT_ID       200
 #define UNUSED_PRODUCT_ID      -1
 
@@ -144,7 +144,7 @@ unsigned int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n);
 //   r = LJUSB_GetDevCounts(productCounts, productIds, 10);
 // would return arrays that may look like
 //   {1, 2, 3, 4, 5, 6, 7, 0, 0, 0}
-//   {3, 6, 9, 1, 1000, 17, 200, 0, 0, 0}
+//   {3, 6, 9, 1, 1000, 7, 200, 0, 0, 0}
 // which means there are
 //   1 U3
 //   2 U6s
