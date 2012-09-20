@@ -11,7 +11,7 @@ ATTRS{idVendor}=="0cd5", ATTRS{idProduct}=="0001", GROUP="adm"
 # SkyMote Bridge
 ATTRS{idVendor}=="0cd5", ATTRS{idProduct}=="03e8", GROUP="adm"
 # T7
-ATTRS{idVendor}=="0cd5", ATTRS{idProduct}=="0011", GROUP="adm"
+ATTRS{idVendor}=="0cd5", ATTRS{idProduct}=="0007", GROUP="adm"
 # Digit
 ATTRS{idVendor}=="0cd5", ATTRS{idProduct}=="00c8", GROUP="adm"
 
