@@ -389,15 +389,15 @@ double FPuint8ArrayToFPDouble(uint8 *buffer, int startIndex)
 {
     uint32 resultDec = 0, resultWh = 0;
 
-    resultDec = buffer[startIndex] |
-                (buffer[startIndex + 1] << 8) |
-                (buffer[startIndex + 2] << 16) |
-                (buffer[startIndex + 3] << 24);
+    resultDec = (uint32)buffer[startIndex] |
+                ((uint32)buffer[startIndex + 1] << 8) |
+                ((uint32)buffer[startIndex + 2] << 16) |
+                ((uint32)buffer[startIndex + 3] << 24);
 
-    resultWh = buffer[startIndex + 4] |
-                (buffer[startIndex + 5] << 8) |
-                (buffer[startIndex + 6] << 16) |
-                (buffer[startIndex + 7] << 24);
+    resultWh = (uint32)buffer[startIndex + 4] |
+                ((uint32)buffer[startIndex + 5] << 8) |
+                ((uint32)buffer[startIndex + 6] << 16) |
+                ((uint32)buffer[startIndex + 7] << 24);
 
     return ( (double)((int)resultWh) + (double)(resultDec)/4294967296.0 );
 }
