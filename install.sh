@@ -1,7 +1,7 @@
 #! /bin/bash
 
-RULES=50-labjack.rules
-OLD_RULES=10-labjack.rules
+RULES=10-labjack.rules
+# OLD_RULES=10-labjack.rules
 RULES_DEST_PRIMARY=/lib/udev/rules.d
 RULES_DEST_ALTERNATE=/etc/udev/rules.d
 GROUP=adm
@@ -78,10 +78,10 @@ else
 fi
 
 if [ $NO_RULES -ne $TRUE ]; then
-	if [ -f $RULES_DEST_ALTERNATE/$OLD_RULES ]; then
-		echo "Removing old rules: $RULES_DEST_ALTERNATE/$OLD_RULES.."
-		go rm $RULES_DEST_ALTERNATE/$OLD_RULES
-	fi
+	# if [ -f $RULES_DEST_ALTERNATE/$OLD_RULES ]; then
+	# 	echo "Removing old rules: $RULES_DEST_ALTERNATE/$OLD_RULES.."
+	# 	go rm $RULES_DEST_ALTERNATE/$OLD_RULES
+	# fi
 
 	echo "Adding $RULES to $RULES_DEST.."
 	go cp -f $RULES $RULES_DEST
