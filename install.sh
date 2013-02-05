@@ -53,6 +53,7 @@ success ()
 go cd liblabjackusb/
 
 echo "Making.."
+go make clean
 go make
 
 echo "Installing.."
