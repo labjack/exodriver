@@ -60,6 +60,7 @@
 //         improve LJUSB_Write/Read/Stream speeds
 //       - Initial T7 support
 //       - Initial Digit support
+//       - Added LJUSB_ResetConnection function.
 //-----------------------------------------------------------------------------
 //
 
@@ -182,6 +183,7 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
 bool LJUSB_ResetConnection(HANDLE hDevice);
 // Performs a USB port reset to reinitialize a device.
 // Returns true on success, or false on error and errno is set.
+// Note that this function is experimental and currently may not work.
 // If this function fails, hDevice is no longer valid (you should close it)
 // and you should re-open the device.
 // hDevice = The handle for your device

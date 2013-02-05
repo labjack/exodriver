@@ -175,20 +175,20 @@ steps, along with a handful of steps at the end that build LabJackPython
 (http://labjack.com/support/labjackpython) which is our Python module
 that works well with the Exodriver:
 
-	$ sudo apt-get install build-essential
-	$ sudo apt-get install libusb-1.0-0-dev
-	$ sudo apt-get install git-core
-	$ git clone git://github.com/labjack/exodriver.git
-	$ cd exodriver/
-	$ sudo ./install.sh
-	$ cd
-	$ git clone git://github.com/labjack/LabJackPython.git
-	$ cd LabJackPython/src/
-	$ sudo python setup.py install
-	$ python
-	>>> import u3
-	>>> d = u3.U3()
-	>>> d.configU3()
+    $ sudo apt-get install build-essential
+    $ sudo apt-get install libusb-1.0-0-dev
+    $ sudo apt-get install git-core
+    $ git clone git://github.com/labjack/exodriver.git
+    $ cd exodriver/
+    $ sudo ./install.sh
+    $ cd
+    $ git clone git://github.com/labjack/LabJackPython.git
+    $ cd LabJackPython/src/
+    $ sudo python setup.py install
+    $ python
+    >>> import u3
+    >>> d = u3.U3()
+    >>> d.configU3()
 
 
 Uninstalling the Old U3 and UE9 Driver

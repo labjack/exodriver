@@ -29,7 +29,7 @@ Installation From Installer
 
 First, download the installer online here:
 
-	http://labjack.com/support/linux-and-mac-os-x-drivers
+    http://labjack.com/support/linux-and-mac-os-x-drivers
 
 Next, unzip the downloaded file (if not done automatically) and run the
 Exodriver_NativeUSB_Setup.pkg package installer.  Follow the instructions
@@ -105,9 +105,9 @@ system configurations.
 Alternatively, without using the script go to the liblabjackusb/
 directory and run the following commands:
 
-	$ cd liblabjackusb/
-	$ make
-	$ sudo make install
+    $ cd liblabjackusb/
+    $ make
+    $ sudo make install
 
 For building a combined 32/64-bit liblabjackusb library, refer to the
 "Optional: Build a combined 32-/64-bit Exodriver on Mac OS X" section.

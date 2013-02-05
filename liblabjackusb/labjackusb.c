@@ -2,7 +2,7 @@
 //
 //  labjackusb.c
 //
-//    Library for accessing a U3, U6, UE9, SkyMote bridge, T7 and digit over
+//    Library for accessing a U3, U6, UE9, SkyMote bridge, T7 and Digit over
 //    USB.
 //
 //  support@labjack.com
@@ -669,7 +669,7 @@ bool LJUSB_ResetConnection(HANDLE hDevice)
 {
     int r;
 
-	if (LJUSB_isNullHandle(hDevice)) {
+    if (LJUSB_isNullHandle(hDevice)) {
         if (LJ_DEBUG) {
             fprintf(stderr, "LJUSB_ResetConnection: returning 0. hDevice is NULL.\n");
         }
