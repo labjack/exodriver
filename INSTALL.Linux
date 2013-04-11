@@ -112,15 +112,14 @@ install the library.
 Programs that use the liblabjackusb will need to access the USB device bus
 at /dev/bus/usb/, typically with root permission.  On Debian-based
 distributions, we provide udev rules that allow members of the "adm" group
-to access LabJack devices.  First remove the old udev rules if you installed
-a version of Exodriver before August 13th, 2012:
+to access LabJack devices.
 
-    $ sudo rm /lib/udev/rules.d/10-labjack.rules
+Install The udev Rules
 
-To install the current udev rules, run the following commands from the root
+To install the udev rules, run the following commands from the root
 directory of this package.
 
-    $ sudo cp 50-labjack.rules /lib/udev/rules.d
+    $ sudo cp 10-labjack.rules /lib/udev/rules.d
     $ sudo udevadm control --reload-rules
 
 Older vesions of udevadm (e.g., the version included in Ubuntu 8.04) use an
