@@ -203,7 +203,7 @@ unsigned long LJUSB_Read(HANDLE hDevice, BYTE *pBuff, unsigned long count);
 // no data is transferred the USB request is aborted and the call returns.
 // Returns the number of bytes read, or 0 on error and errno is set.
 // hDevice = The handle for your device
-// pBuff = The buffer to filled in with bytes from the device.
+// pBuff = The buffer to be filled in with bytes from the device.
 // count = The number of bytes expected to be read.
 // This function replaces the deprecated LJUSB_BulkRead, which required the
 // endpoint.
@@ -214,7 +214,7 @@ unsigned long LJUSB_Stream(HANDLE hDevice, BYTE *pBuff, unsigned long count);
 // and the call returns.  Returns the number of bytes written, or 0 on error and
 // errno is set.
 // hDevice = The handle for your device
-// pBuff = The buffer to filled in with bytes from the device.
+// pBuff = The buffer to be filled in with bytes from the device.
 // count = The number of bytes expected to be read.
 // This function replaces the deprecated LJUSB_BulkRead, which required the
 // (stream) endpoint.
@@ -234,7 +234,7 @@ unsigned long LJUSB_ReadTO(HANDLE hDevice, BYTE *pBuff, unsigned long count, uns
 // no data is transferred the USB request is aborted and the call returns.
 // Returns the number of bytes read, or 0 on error and errno is set.
 // hDevice = The handle for your device
-// pBuff = The buffer to filled in with bytes from the device.
+// pBuff = The buffer to be filled in with bytes from the device.
 // count = The number of bytes expected to be read.
 // timeout = The USB communication timeout value in milliseconds.  Pass 0 for
 //           an unlimited timeout.
@@ -245,7 +245,7 @@ unsigned long LJUSB_StreamTO(HANDLE hDevice, BYTE *pBuff, unsigned long count, u
 // and the call returns.  Returns the number of bytes read, or 0 on error and
 // errno is set.
 // hDevice = The handle for your device
-// pBuff = The buffer to filled in with bytes from the device.
+// pBuff = The buffer to be filled in with bytes from the device.
 // count = The number of bytes expected to be read.
 // timeout = The USB communication timeout value in milliseconds.  Pass 0 for
 //           an unlimited timeout.
