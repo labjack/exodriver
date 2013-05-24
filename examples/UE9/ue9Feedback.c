@@ -134,7 +134,7 @@ int feedback_example(HANDLE hDevice, ue9CalibrationInfo *caliInfo)
     {
         tempDir = ( (uint32)(recBuff[6] / pow(2, i)) & (0x01) );
         tempState = ( (uint32)(recBuff[7] / pow(2, i)) & (0x01) );
-        printf("  FI%d: %d and %d\n", i, tempDir, tempState);
+        printf("  FI%d: %u and %u\n", i, tempDir, tempState);
     }
 
     printf("\nAnalog Inputs (AI0 - AI3):\n");

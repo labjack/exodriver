@@ -4,7 +4,7 @@
 
 /* --------- Static Variables --------- */
 
-short nextTransactionId = 0x37;
+static short nextTransactionId = 0x37;
 
 /* --------- Read Functions --------- */
 
