@@ -581,8 +581,6 @@ long getTdacBinVoltCalibrated(u3TdacCalibrationInfo *caliInfo, int dacNumber, do
     tBytesVolt = analogVolt*caliInfo->ccConstants[dacNumber*2] + caliInfo->ccConstants[dacNumber*2 + 1];
 
     //Checking to make sure bytesVolt will be a value between 0 and 65535.
-    if( tBytesVolt < 0 )
-        tBytesVolt = 0;
     if( tBytesVolt > 65535 )
         tBytesVolt = 65535;
 
@@ -751,7 +749,7 @@ long I2C(HANDLE hDevice, uint8 I2COptions, uint8 SpeedAdjust, uint8 SDAPinNum, u
     checksumTotal = extendedChecksum16(recBuff, recSize);
     if( (uint8)((checksumTotal / 256) & 0xff) != recBuff[5] || (uint8)(checksumTotal & 255) != recBuff[4])
     {
-        printf("I2C error : read buffer has bad checksum16 (%d)\n", checksumTotal);
+        printf("I2C error : read buffer has bad checksum16 (%u)\n", checksumTotal);
         ret = -1;
     }
 
@@ -760,7 +758,7 @@ long I2C(HANDLE hDevice, uint8 I2COptions, uint8 SpeedAdjust, uint8 SDAPinNum, u
     ackArrayTotal = AckArray[0] + AckArray[1]*256 + AckArray[2]*65536 + AckArray[3]*16777216;
     expectedAckArray = pow(2.0,  NumI2CBytesToSend+1)-1;
     if( ackArrayTotal != expectedAckArray )
-        printf("I2C error : expected an ack of %d, but received %d\n", expectedAckArray, ackArrayTotal);
+        printf("I2C error : expected an ack of %u, but received %u\n", expectedAckArray, ackArrayTotal);
 
 cleanmem:
     free(sendBuff);
