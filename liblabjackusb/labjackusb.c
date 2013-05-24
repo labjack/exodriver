@@ -397,7 +397,7 @@ static bool LJUSB_isRecentKernel(void)
 
 static bool LJUSB_isMinFirmware(HANDLE hDevice, unsigned long ProductID)
 {
-    struct LJUSB_FirmwareHardwareVersion fhv;
+    struct LJUSB_FirmwareHardwareVersion fhv = {0, 0, 0, 0};
 
     // If we are running on a recent kernel, no firmware check is necessary.
     if (LJUSB_isRecentKernel()) {
