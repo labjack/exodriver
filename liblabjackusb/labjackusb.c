@@ -68,12 +68,8 @@ static void LJUSB_U3_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_Firmwa
     BYTE command[COMMAND_LENGTH];
     BYTE response[RESPONSE_LENGTH];
 
-    for (i = 0; i < COMMAND_LENGTH; i++) {
-        command[i] = 0;
-    }
-    for (i = 0; i < RESPONSE_LENGTH; i++) {
-        response[i] = 0;
-    }
+    memset(command, 0, COMMAND_LENGTH);
+    memset(response, 0, RESPONSE_LENGTH);
 
     //Checking firmware for U3.  Using ConfigU3 Low-level command
     command[0] = 11;
@@ -121,12 +117,8 @@ static void LJUSB_U6_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_Firmwa
     BYTE command[COMMAND_LENGTH];
     BYTE response[RESPONSE_LENGTH];
 
-    for (i = 0; i < COMMAND_LENGTH; i++) {
-        command[i] = 0;
-    }
-    for (i = 0; i < RESPONSE_LENGTH; i++) {
-        response[i] = 0;
-    }
+    memset(command, 0, COMMAND_LENGTH);
+    memset(response, 0, RESPONSE_LENGTH);
 
     //Checking firmware for U6.  Using ConfigU3 Low-level command
     command[0] = 11;
@@ -173,12 +165,8 @@ static void LJUSB_UE9_FirmwareHardwareVersion(HANDLE hDevice, struct LJUSB_Firmw
     BYTE command[COMMAND_LENGTH];
     BYTE response[RESPONSE_LENGTH];
 
-    for (i = 0; i < COMMAND_LENGTH; i++) {
-        command[i] = 0;
-    }
-    for (i = 0; i < RESPONSE_LENGTH; i++) {
-        response[i] = 0;
-    }
+    memset(command, 0, COMMAND_LENGTH);
+    memset(response, 0, RESPONSE_LENGTH);
 
     //Checking firmware for UE9.  Using CommConfig Low-level command
     command[0] = 137;
@@ -473,7 +461,7 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
     int r = 1;
     unsigned int i = 0;
     unsigned int ljFoundCount = 0;
-    void *handle = NULL;
+    HANDLE handle = NULL;
 
     if (!gIsLibUSBInitialized) {
         r = libusb_init(&gLJContext);
@@ -538,7 +526,7 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
                     libusb_close(devh);
                     return NULL;
                 }
-                handle = (void *) devh;
+                handle = (HANDLE) devh;
                 if (LJ_DEBUG) {
                     fprintf(stderr, "LJUSB_OpenDevice: Found handle for product ID %ld\n", ProductID);
                 }
@@ -571,7 +559,7 @@ int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
     ssize_t cnt = 0;
     int r = 1;
     unsigned int i = 0, ljFoundCount = 0;
-    void * handle = NULL;
+    HANDLE handle = NULL;
 
     if (!gIsLibUSBInitialized) {
         r = libusb_init(&gLJContext);
@@ -636,7 +624,7 @@ int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
                 continue;
             }
 
-            handle = (void *) devh;
+            handle = (HANDLE) devh;
 
             if (handle == NULL) {
                 // Not a valid handle
@@ -671,19 +659,19 @@ bool LJUSB_ResetConnection(HANDLE hDevice)
 
     if (LJUSB_isNullHandle(hDevice)) {
         if (LJ_DEBUG) {
-            fprintf(stderr, "LJUSB_ResetConnection: returning 0. hDevice is NULL.\n");
+            fprintf(stderr, "LJUSB_ResetConnection: returning false. hDevice is NULL.\n");
         }
-        return 0;
+        return false;
     }
 
     r = libusb_reset_device(hDevice);
     if (r != 0)
     {
         LJUSB_libusbError(r);
-        return 0;
+        return false;
     }
 
-    return 1; //Success
+    return true; //Success
 }
 
 
