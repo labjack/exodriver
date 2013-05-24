@@ -368,7 +368,7 @@ long getAinVoltCalibrated(ue9CalibrationInfo *caliInfo, uint8 gainBip, uint8 res
 
     if( resolution < 18 )
     {
-        if( (gainBip >= 0 && gainBip <= 3) || gainBip == 8 )
+        if( gainBip <= 3 || gainBip == 8 )
         {
             if( gainBip == 8 )
                 gainBip = 4;  //setting this for index purposes
