@@ -43,7 +43,8 @@
 #define MIN_U6_FIRMWARE_MAJOR   0
 #define MIN_U6_FIRMWARE_MINOR   81
 
-#define LJ_DEBUG false
+// Set to 0 for no debug logging or 1 for logging.
+#define LJ_DEBUG 0
 
 static bool gIsLibUSBInitialized = false;
 static struct libusb_context *gLJContext = NULL;
@@ -325,14 +326,14 @@ static bool LJUSB_U6_isMinFirmware(const struct LJUSB_FirmwareHardwareVersion * 
 
 static bool LJUSB_UE9_isMinFirmware(const struct LJUSB_FirmwareHardwareVersion * fhv)
 {
-    if (LJ_DEBUG) {
-        fprintf(stderr, "In LJUSB_UE9_isMinFirmware\n");
-    }
+#if LJ_DEBUG
+    fprintf(stderr, "In LJUSB_UE9_isMinFirmware\n");
+#endif
 
     if (fhv->firmwareMajor > MIN_UE9_FIRMWARE_MAJOR || (fhv->firmwareMajor == MIN_UE9_FIRMWARE_MAJOR && fhv->firmwareMinor >= MIN_UE9_FIRMWARE_MINOR)) {
-        if (LJ_DEBUG) {
-            fprintf(stderr, "Minimum UE9 firmware met. Version is %d.%d.\n", fhv->firmwareMajor, fhv->firmwareMinor);
-        }
+#if LJ_DEBUG
+        fprintf(stderr, "Minimum UE9 firmware met. Version is %d.%d.\n", fhv->firmwareMajor, fhv->firmwareMinor);
+#endif
         return true;
     }
     else {
@@ -356,38 +357,38 @@ static bool LJUSB_isRecentKernel(void)
     }
 
     // There are no known kernel-compatibility problems with Mac OS X.
-    if (LJ_DEBUG) {
-        fprintf(stderr, "LJUSB_recentKernel: sysname: %s.\n", u.sysname);
-    }
+#if LJ_DEBUG
+    fprintf(stderr, "LJUSB_recentKernel: sysname: %s.\n", u.sysname);
+#endif
 
     if (strncmp("Darwin", u.sysname, strlen("Darwin")) == 0) {
-        if (LJ_DEBUG) {
-            fprintf(stderr, "LJUSB_recentKernel: returning true on Darwin.\n");
-        }
+#if LJ_DEBUG
+        fprintf(stderr, "LJUSB_recentKernel: returning true on Darwin.\n");
+#endif
         return true;
     }
 
-    if (LJ_DEBUG) {
-        fprintf(stderr, "LJUSB_recentKernel: Kernel release: %s.\n", u.release);
-    }
+#if LJ_DEBUG
+    fprintf(stderr, "LJUSB_recentKernel: Kernel release: %s.\n", u.release);
+#endif
     tok = strtok(u.release, ".-");
     kernelMajor = strtoul(tok, NULL, 10);
-    if (LJ_DEBUG) {
-        fprintf(stderr, "LJUSB_recentKernel: tok: %s\n", tok);
-        fprintf(stderr, "LJUSB_recentKernel: kernelMajor: %lu\n", kernelMajor);
-    }
+#if LJ_DEBUG
+    fprintf(stderr, "LJUSB_recentKernel: tok: %s\n", tok);
+    fprintf(stderr, "LJUSB_recentKernel: kernelMajor: %lu\n", kernelMajor);
+#endif
     tok = strtok(NULL, ".-");
     kernelMinor = strtoul(tok, NULL, 10);
-    if (LJ_DEBUG) {
-        fprintf(stderr, "LJUSB_recentKernel: tok: %s\n", tok);
-        fprintf(stderr, "LJUSB_recentKernel: kernelMinor: %lu\n", kernelMinor);
-    }
+#if LJ_DEBUG
+    fprintf(stderr, "LJUSB_recentKernel: tok: %s\n", tok);
+    fprintf(stderr, "LJUSB_recentKernel: kernelMinor: %lu\n", kernelMinor);
+#endif
     tok = strtok(NULL, ".-");
     kernelRev = strtoul(tok, NULL, 10);
-    if (LJ_DEBUG) {
-        fprintf(stderr, "LJUSB_recentKernel: tok: %s\n", tok);
-        fprintf(stderr, "LJUSB_recentKernel: kernelRev: %lu\n", kernelRev);
-    }
+#if LJ_DEBUG
+    fprintf(stderr, "LJUSB_recentKernel: tok: %s\n", tok);
+    fprintf(stderr, "LJUSB_recentKernel: kernelRev: %lu\n", kernelRev);
+#endif
 
     return (kernelMajor == LJ_RECENT_KERNEL_MAJOR && kernelMinor == LJ_RECENT_KERNEL_MINOR && kernelRev >= LJ_RECENT_KERNEL_REV) ||
            (kernelMajor == LJ_RECENT_KERNEL_MAJOR && kernelMinor > LJ_RECENT_KERNEL_MINOR) ||
@@ -401,14 +402,14 @@ static bool LJUSB_isMinFirmware(HANDLE hDevice, unsigned long ProductID)
 
     // If we are running on a recent kernel, no firmware check is necessary.
     if (LJUSB_isRecentKernel()) {
-        if (LJ_DEBUG) {
-            fprintf(stderr, "LJUSB_isMinFirmware: LJUSB_isRecentKernel: true\n");
-        }
+#if LJ_DEBUG
+        fprintf(stderr, "LJUSB_isMinFirmware: LJUSB_isRecentKernel: true\n");
+#endif
         return true;
     }
-    if (LJ_DEBUG) {
-        fprintf(stderr, "LJUSB_isMinFirmware: LJUSB_isRecentKernel: false\n");
-    }
+#if LJ_DEBUG
+    fprintf(stderr, "LJUSB_isMinFirmware: LJUSB_isRecentKernel: false\n");
+#endif
 
     switch (ProductID) {
     case U3_PRODUCT_ID:
@@ -482,9 +483,9 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
     }
 
     while ((dev = devs[i++]) != NULL) {
-        if (LJ_DEBUG) {
-            fprintf(stderr, "LJUSB_OpenDevice: calling libusb_get_device_descriptor\n");
-        }
+#if LJ_DEBUG
+        fprintf(stderr, "LJUSB_OpenDevice: calling libusb_get_device_descriptor\n");
+#endif
         r = libusb_get_device_descriptor(dev, &desc);
         if (r < 0) {
             fprintf(stderr, "failed to get device descriptor");
@@ -506,9 +507,9 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
                 // Test if the kernel driver has the device.
                 // Should only be true for HIDs.
                 if (libusb_kernel_driver_active(devh, 0)) {
-                    if (LJ_DEBUG) {
-                        fprintf(stderr, "Kernel Driver was active, detaching...\n");
-                    }
+#if LJ_DEBUG
+                    fprintf(stderr, "Kernel Driver was active, detaching...\n");
+#endif
 
                     // Detaches U12s from kernel driver.
                     r = libusb_detach_kernel_driver(devh, 0);
@@ -527,9 +528,9 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
                     return NULL;
                 }
                 handle = (HANDLE) devh;
-                if (LJ_DEBUG) {
-                    fprintf(stderr, "LJUSB_OpenDevice: Found handle for product ID %ld\n", ProductID);
-                }
+#if LJ_DEBUG
+                fprintf(stderr, "LJUSB_OpenDevice: Found handle for product ID %ld\n", ProductID);
+#endif
                 break;
             }
         }
@@ -544,9 +545,9 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
             return NULL;
         }
     }
-    if (LJ_DEBUG) {
-       fprintf(stderr, "LJUSB_OpenDevice: Returning handle\n");
-    }
+#if LJ_DEBUG
+    fprintf(stderr, "LJUSB_OpenDevice: Returning handle\n");
+#endif
     return handle;
 }
 
@@ -580,9 +581,9 @@ int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
     }
 
     while ((dev = devs[i++]) != NULL) {
-        if (LJ_DEBUG) {
-            fprintf(stderr, "LJUSB_OpenDevice: calling libusb_get_device_descriptor\n");
-        }
+#if LJ_DEBUG
+        fprintf(stderr, "LJUSB_OpenDevice: calling libusb_get_device_descriptor\n");
+#endif
         r = libusb_get_device_descriptor(dev, &desc);
         if (r < 0) {
             fprintf(stderr, "failed to get device descriptor");
@@ -602,9 +603,9 @@ int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
             // Test if the kernel driver has the device.
             // Should only be true for HIDs.
             if (libusb_kernel_driver_active(devh, 0) ) {
-                if (LJ_DEBUG) {
-                    fprintf(stderr, "Kernel Driver was active, detaching...\n");
-                }
+#if LJ_DEBUG
+                fprintf(stderr, "Kernel Driver was active, detaching...\n");
+#endif
 
                 // Detaches U12s from kernel driver.
                 r = libusb_detach_kernel_driver(devh, 0);
@@ -658,9 +659,9 @@ bool LJUSB_ResetConnection(HANDLE hDevice)
     int r;
 
     if (LJUSB_isNullHandle(hDevice)) {
-        if (LJ_DEBUG) {
-            fprintf(stderr, "LJUSB_ResetConnection: returning false. hDevice is NULL.\n");
-        }
+#if LJ_DEBUG
+        fprintf(stderr, "LJUSB_ResetConnection: returning false. hDevice is NULL.\n");
+#endif
         return false;
     }
 
@@ -680,14 +681,14 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
     int r = 0;
     int transferred = 0;
 
-    if (LJ_DEBUG) {
-        fprintf(stderr, "Calling LJUSB_DoTransfer with endpoint = 0x%x, count = %lu, and isBulk = %d.\n", endpoint, count, isBulk);
-    }
+#if LJ_DEBUG
+    fprintf(stderr, "Calling LJUSB_DoTransfer with endpoint = 0x%x, count = %lu, and isBulk = %d.\n", endpoint, count, isBulk);
+#endif
 
     if (LJUSB_isNullHandle(hDevice)) {
-        if (LJ_DEBUG) {
-            fprintf(stderr, "LJUSB_DoTransfer: returning 0. hDevice is NULL.\n");
-        }
+#if LJ_DEBUG
+        fprintf(stderr, "LJUSB_DoTransfer: returning 0. hDevice is NULL.\n");
+#endif
         return 0;
     }
 
@@ -707,9 +708,9 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
                 return 0;
             }
 
-            if (LJ_DEBUG) {
-                fprintf(stderr, "LJUSB_DoTransfer: returning control transferred = %d.\n", r);
-            }
+#if LJ_DEBUG
+            fprintf(stderr, "LJUSB_DoTransfer: returning control transferred = %d.\n", r);
+#endif
 
             return r;
         }
@@ -721,9 +722,9 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
     if (r == LIBUSB_ERROR_TIMEOUT) {
         //Timeout occured but may have received partial data.  Setting errno but
         //returning the number of bytes transferred which may be > 0.
-        if (LJ_DEBUG) {
-            fprintf(stderr, "LJUSB_DoTransfer: Transfer timed out. Returning.\n");
-        }
+#if LJ_DEBUG
+        fprintf(stderr, "LJUSB_DoTransfer: Transfer timed out. Returning.\n");
+#endif
         errno = ETIMEDOUT;
         return transferred;
     }
@@ -732,9 +733,9 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
         return 0;
     }
 
-    if (LJ_DEBUG) {
-        fprintf(stderr, "LJUSB_DoTransfer: returning transferred = %d.\n", transferred);
-    }
+#if LJ_DEBUG
+    fprintf(stderr, "LJUSB_DoTransfer: returning transferred = %d.\n", transferred);
+#endif
 
     return transferred;
 }
@@ -749,14 +750,14 @@ static unsigned long LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, unsigned l
     unsigned char endpoint = 0;
     int r = 0;
 
-    if (LJ_DEBUG) {
-        fprintf(stderr, "Calling LJUSB_SetupTransfer with count = %lu and operation = %d.\n", count, operation);
-    }
+#if LJ_DEBUG
+    fprintf(stderr, "Calling LJUSB_SetupTransfer with count = %lu and operation = %d.\n", count, operation);
+#endif
 
     if (LJUSB_isNullHandle(hDevice)) {
-        if (LJ_DEBUG) {
-            fprintf(stderr, "LJUSB_SetupTransfer: returning 0. hDevice is NULL.\n");
-        }
+#if LJ_DEBUG
+        fprintf(stderr, "LJUSB_SetupTransfer: returning 0. hDevice is NULL.\n");
+#endif
         return 0;
     }
 
@@ -918,63 +919,63 @@ unsigned long LJUSB_BulkWrite(HANDLE hDevice, unsigned char endpoint, BYTE *pBuf
 
 unsigned long LJUSB_Write(HANDLE hDevice, BYTE *pBuff, unsigned long count)
 {
-    if (LJ_DEBUG) {
-        fprintf(stderr, "LJUSB_Write: calling LJUSB_Write.\n");
-    }
+#if LJ_DEBUG
+    fprintf(stderr, "LJUSB_Write: calling LJUSB_Write.\n");
+#endif
     return LJUSB_SetupTransfer(hDevice, pBuff, count, LJ_LIBUSB_TIMEOUT_DEFAULT, LJUSB_WRITE);
 }
 
 
 unsigned long LJUSB_Read(HANDLE hDevice, BYTE *pBuff, unsigned long count)
 {
-    if (LJ_DEBUG) {
-        fprintf(stderr, "LJUSB_Read: calling LJUSB_Read.\n");
-    }
+#if LJ_DEBUG
+    fprintf(stderr, "LJUSB_Read: calling LJUSB_Read.\n");
+#endif
     return LJUSB_SetupTransfer(hDevice, pBuff, count, LJ_LIBUSB_TIMEOUT_DEFAULT, LJUSB_READ);
 }
 
 
 unsigned long LJUSB_Stream(HANDLE hDevice, BYTE *pBuff, unsigned long count)
 {
-    if (LJ_DEBUG) {
-        fprintf(stderr, "LJUSB_Stream: calling LJUSB_Stream.\n");
-    }
+#if LJ_DEBUG
+    fprintf(stderr, "LJUSB_Stream: calling LJUSB_Stream.\n");
+#endif
     return LJUSB_SetupTransfer(hDevice, pBuff, count, LJ_LIBUSB_TIMEOUT_DEFAULT, LJUSB_STREAM);
 }
 
 
 unsigned long LJUSB_WriteTO(HANDLE hDevice, BYTE *pBuff, unsigned long count, unsigned int timeout)
 {
-    if (LJ_DEBUG) {
-        fprintf(stderr, "LJUSB_Stream: calling LJUSB_WriteTO.\n");
-    }
+#if LJ_DEBUG
+    fprintf(stderr, "LJUSB_Stream: calling LJUSB_WriteTO.\n");
+#endif
     return LJUSB_SetupTransfer(hDevice, pBuff, count, timeout, LJUSB_WRITE);
 }
 
 
 unsigned long LJUSB_ReadTO(HANDLE hDevice, BYTE *pBuff, unsigned long count, unsigned int timeout)
 {
-    if (LJ_DEBUG) {
-        fprintf(stderr, "LJUSB_Stream: calling LJUSB_ReadTO.\n");
-    }
+#if LJ_DEBUG
+    fprintf(stderr, "LJUSB_Stream: calling LJUSB_ReadTO.\n");
+#endif
     return LJUSB_SetupTransfer(hDevice, pBuff, count, timeout, LJUSB_READ);
 }
 
 
 unsigned long LJUSB_StreamTO(HANDLE hDevice, BYTE *pBuff, unsigned long count, unsigned int timeout)
 {
-    if (LJ_DEBUG) {
-        fprintf(stderr, "LJUSB_Stream: calling LJUSB_StreamTO.\n");
-    }
+#if LJ_DEBUG
+    fprintf(stderr, "LJUSB_Stream: calling LJUSB_StreamTO.\n");
+#endif
     return LJUSB_SetupTransfer(hDevice, pBuff, count, timeout, LJUSB_STREAM);
 }
 
 
 void LJUSB_CloseDevice(HANDLE hDevice)
 {
-    if (LJ_DEBUG) {
-        fprintf(stderr, "LJUSB_CloseDevice\n");
-    }
+#if LJ_DEBUG
+    fprintf(stderr, "LJUSB_CloseDevice\n");
+#endif
 
     if (LJUSB_isNullHandle(hDevice)) {
         return;
@@ -985,9 +986,9 @@ void LJUSB_CloseDevice(HANDLE hDevice)
 
     //Close
     libusb_close(hDevice);
-    if (LJ_DEBUG) {
-        fprintf(stderr, "LJUSB_CloseDevice: closed\n");
-    }
+#if LJ_DEBUG
+    fprintf(stderr, "LJUSB_CloseDevice: closed\n");
+#endif
 }
 
 
@@ -1158,9 +1159,9 @@ bool LJUSB_IsHandleValid(HANDLE hDevice)
     int r = 1;
 
     if (LJUSB_isNullHandle(hDevice)) {
-        if (LJ_DEBUG) {
-            fprintf(stderr, "LJUSB_IsHandleValid: returning false. hDevice is NULL.\n");
-        }
+#if LJ_DEBUG
+        fprintf(stderr, "LJUSB_IsHandleValid: returning false. hDevice is NULL.\n");
+#endif
         return false;
     }
 
@@ -1173,15 +1174,15 @@ bool LJUSB_IsHandleValid(HANDLE hDevice)
     r = libusb_control_transfer(hDevice, LIBUSB_ENDPOINT_IN,
         LIBUSB_REQUEST_GET_CONFIGURATION, 0, 0, &config, 1, LJ_LIBUSB_TIMEOUT_DEFAULT);
     if (r < 0) {
-        if (LJ_DEBUG) {
-            fprintf(stderr, "LJUSB_IsHandleValid: returning false. Return value from libusb_get_configuration was: %d\n", r);
-        }
+#if LJ_DEBUG
+        fprintf(stderr, "LJUSB_IsHandleValid: returning false. Return value from libusb_get_configuration was: %d\n", r);
+#endif
         LJUSB_libusbError(r);
         return false;
     } else {
-        if (LJ_DEBUG) {
-            fprintf(stderr, "LJUSB_IsHandleValid: returning true.\n");
-        }
+#if LJ_DEBUG
+        fprintf(stderr, "LJUSB_IsHandleValid: returning true.\n");
+#endif
         return true;
     }
 }
@@ -1194,9 +1195,9 @@ unsigned short LJUSB_GetDeviceDescriptorReleaseNumber(HANDLE hDevice)
     int r = 0;
 
     if (LJUSB_isNullHandle(hDevice)) {
-        if (LJ_DEBUG) {
-            fprintf(stderr, "LJUSB_GetDeviceDescriptorReleaseNumber: returning 0. hDevice is NULL.\n");
-        }
+#if LJ_DEBUG
+        fprintf(stderr, "LJUSB_GetDeviceDescriptorReleaseNumber: returning 0. hDevice is NULL.\n");
+#endif
         return 0;
     }
 
@@ -1219,9 +1220,9 @@ unsigned long LJUSB_GetHIDReportDescriptor(HANDLE hDevice, BYTE *pBuff, unsigned
     int r = 0;
 
     if (LJUSB_isNullHandle(hDevice)) {
-        if (LJ_DEBUG) {
-            fprintf(stderr, "LJUSB_GetHIDReportDescriptor: returning 0. hDevice is NULL.\n");
-        }
+#if LJ_DEBUG
+        fprintf(stderr, "LJUSB_GetHIDReportDescriptor: returning 0. hDevice is NULL.\n");
+#endif
         return 0;
     }
 
@@ -1246,9 +1247,9 @@ unsigned long LJUSB_GetHIDReportDescriptor(HANDLE hDevice, BYTE *pBuff, unsigned
         return 0;
     }
 
-    if (LJ_DEBUG) {
-        fprintf(stderr, "LJUSB_GetHIDReportDescriptor: returning control transferred = %d.\n", r);
-    }
+#if LJ_DEBUG
+    fprintf(stderr, "LJUSB_GetHIDReportDescriptor: returning control transferred = %d.\n", r);
+#endif
 
     return r;
 }
