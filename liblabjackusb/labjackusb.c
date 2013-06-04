@@ -26,7 +26,7 @@
 
 #define LJ_LIBUSB_TIMEOUT_DEFAULT   1000   // Milliseconds to wait on USB transfers
 
-// With a recent linux kernel, firmware and hardware checks aren't necessary
+// With a recent Linux kernel, firmware and hardware checks aren't necessary
 #define LJ_RECENT_KERNEL_MAJOR  2
 #define LJ_RECENT_KERNEL_MINOR  6
 #define LJ_RECENT_KERNEL_REV    28
