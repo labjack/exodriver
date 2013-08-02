@@ -180,7 +180,7 @@ that works well with the Exodriver:
     $ git clone git://github.com/labjack/exodriver.git
     $ cd exodriver/
     $ sudo ./install.sh
-    $ cd
+    $ cd ..
     $ git clone git://github.com/labjack/LabJackPython.git
     $ cd LabJackPython/src/
     $ sudo python setup.py install
