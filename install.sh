@@ -143,7 +143,7 @@ fi
 
 echo "Adding $user to the $GROUP group.."
 
-declare -a tasks=("add/create a group named $GROUP" "add your user account to the group named $GROUP")
+declare -a tasks=("add/create a group named $GROUP ($ groupadd -f $GROUP)" "add your user account to the group named $GROUP ($usermod -a -G $GROUP $user)")
 
 print_tasks_if_needed()
 {
@@ -162,6 +162,7 @@ print_tasks_if_needed()
 			echo "    - $n"
 		done
 		echo
+		echo "Where the Ubuntu/Debian commands for the tasks are in parenthesis."
 		echo "Once these tasks are complete, your installation of Exodriver will be complete."
 		echo
 		echo "If you are on a common distribution of Linux or if you are not sure how to"
