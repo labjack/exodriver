@@ -142,8 +142,48 @@ if [ $in_group -eq $TRUE ]; then
 fi
 
 echo "Adding $user to the $GROUP group.."
-go groupadd -f $GROUP
-go usermod -a -G $GROUP $user
+
+declare -a tasks=("add/create a group named $GROUP" "add your user account to the group named $GROUP")
+
+print_tasks_if_needed()
+{
+	ret=$?
+	if [ $ret -ne 0 ]; then
+		echo
+		echo "It looks like this installer failed with only a few task(s) left to complete."
+		echo "LabJack developed this installer on Ubuntu/Debian Linux, so if you are running"
+		echo "Ubuntu/Debian, please contact LabJack. However, if you are running a"
+		echo "different distribution of Linux, it is likely that your distribution varies"
+		echo "enough to make these last task(s) fail."
+		echo
+		echo "You can search the internet for how to complete the following task(s) on your"
+		echo "distribution of Linux:"
+		for n in "${tasks[@]}"; do
+			echo "    - $n"
+		done
+		echo
+		echo "Once these tasks are complete, your installation of Exodriver will be complete."
+		echo
+		echo "If you are on a common distribution of Linux or if you are not sure how to"
+		echo "complete the above task(s), please contact LabJack support. If your"
+		echo "distribution of Linux is old, consider upgrading to see if that solves the"
+		echo "problem."
+		echo
+		echo "LabJack support: support@labjack.com"
+		echo
+		echo "Please also follow any following instructions."
+		echo
+		success
+	fi
+}
+
+groupadd -f $GROUP
+print_tasks_if_needed
+unset tasks[0]
+
+usermod -a -G $GROUP $user
+print_tasks_if_needed
+unset tasks[1]
 NEED_RELOG=$TRUE
 
 success
