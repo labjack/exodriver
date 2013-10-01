@@ -504,14 +504,13 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
                     return NULL;
                 }
 
-                // Test if the kernel driver has the device.
-                // Should only be true for HIDs.
-                if (libusb_kernel_driver_active(devh, 0)) {
+                // Test if the kernel driver has the U12.
+                if (desc.idProduct == U12_PRODUCT_ID && libusb_kernel_driver_active(devh, 0)) {
 #if LJ_DEBUG
                     fprintf(stderr, "Kernel Driver was active, detaching...\n");
 #endif
 
-                    // Detaches U12s from kernel driver.
+                    // Detach the U12 from kernel driver.
                     r = libusb_detach_kernel_driver(devh, 0);
 
                     // Check the return value
@@ -600,14 +599,13 @@ int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
                 continue;
             }
 
-            // Test if the kernel driver has the device.
-            // Should only be true for HIDs.
-            if (libusb_kernel_driver_active(devh, 0) ) {
+            // Test if the kernel driver has the U12.
+            if (desc.idProduct == U12_PRODUCT_ID && libusb_kernel_driver_active(devh, 0) ) {
 #if LJ_DEBUG
                 fprintf(stderr, "Kernel Driver was active, detaching...\n");
 #endif
 
-                // Detaches U12s from kernel driver.
+                // Detach the U12 from kernel driver.
                 r = libusb_detach_kernel_driver(devh, 0);
 
                 // Check the return value

@@ -5,12 +5,14 @@ RULES_DEST_PRIMARY=/lib/udev/rules.d
 RULES_DEST_ALTERNATE=/etc/udev/rules.d
 GROUP=adm
 SUPPORT_EMAIL=support@labjack.com
-TRUE=0
+TRUE=1
+FALSE=0
+IS_SUCCESS=$TRUE
 # Assume these are unneeded until otherwise
-NEED_RECONNECT=1
-NEED_RESTART=1
-NEED_RELOG=1
-NO_RULES=1
+NEED_RECONNECT=$FALSE
+NEED_RESTART=$FALSE
+NEED_RELOG=$FALSE
+NO_RULES=$FALSE
 NO_RULES_ERR=2
 
 go ()
@@ -28,7 +30,9 @@ go ()
 success ()
 {
 	e=0
-	echo "Install finished. Thanks for choosing LabJack."
+	if [ $IS_SUCCESS -eq $TRUE ]; then
+		echo "Install finished. Thanks for choosing LabJack."
+	fi
 	if [ $NEED_RECONNECT -eq $TRUE ]; then
 		echo "If you have any LabJack devices connected, please disconnect and reconnect them now for device rule changes to take effect."
 	fi
@@ -94,19 +98,19 @@ fi
 echo -n "Restarting the rules.."
 udevadm control --reload-rules 2> /dev/null
 ret=$?
-if [ ! $ret ]; then
+if [ $ret -ne 0 ]; then
 	udevadm control --reload_rules 2> /dev/null
 	ret=$?
 fi
-if [ ! $ret ]; then
+if [ $ret -ne 0 ]; then
 	/etc/init.d/udev-post reload 2> /dev/null
 	ret=$?
 fi
-if [ ! $ret ]; then
+if [ $ret -ne 0 ]; then
 	udevstart 2> /dev/null
 	ret=$?
 fi
-if [ ! $ret ]; then
+if [ $ret -ne 0 ]; then
 	NEED_RESTART=$TRUE
 	echo " cound not restart the rules."
 else
@@ -122,7 +126,7 @@ else
 	user=$USER
 fi
 
-in_group=1
+in_group=$FALSE
 for g in `id -nG $user`; do
 	if [ "$g" == "$GROUP" ]; then
 		in_group=$TRUE
@@ -132,7 +136,7 @@ done
 
 if [ $in_group -eq $TRUE ]; then
 	# Make sure the user is logged into the adm group
-	current_groups=1
+	current_groups=$FALSE
 	for g in `groups $user`; do
 		if [ "$g" == "$GROUP" ]; then
 			current_groups=$TRUE
@@ -147,8 +151,51 @@ if [ $in_group -eq $TRUE ]; then
 fi
 
 echo "Adding $user to the $GROUP group.."
-go groupadd -f $GROUP
-go usermod -a -G $GROUP $user
 NEED_RELOG=$TRUE
+
+declare -a tasks=("add/create a group named $GROUP ($ groupadd -f $GROUP)" "add your user account to the group named $GROUP ($ usermod -a -G $GROUP $user)")
+
+print_tasks_if_needed()
+{
+	ret=$?
+	if [ $ret -ne 0 ]; then
+		echo
+		echo "It looks like this installer failed with only a few task(s) left to complete."
+		echo "LabJack developed this installer on Ubuntu/Debian Linux, so if you are running"
+		echo "Ubuntu/Debian, please contact LabJack. However, if you are running a"
+		echo "different distribution of Linux, it is likely that your distribution varies"
+		echo "enough to make these last task(s) fail."
+		echo
+		echo "You can search the internet for how to complete the following task(s) on your"
+		echo "distribution of Linux:"
+		for n in "${tasks[@]}"; do
+			echo "    - $n"
+		done
+		echo
+		echo "Where the Ubuntu/Debian commands for the tasks are in parenthesis."
+		echo
+		echo "Once these tasks are complete, your installation of Exodriver will be complete."
+		echo
+		echo "If you are on a common distribution of Linux or if you are not sure how to"
+		echo "complete the above task(s), please contact LabJack support. If your"
+		echo "distribution of Linux is old, consider upgrading to see if that solves the"
+		echo "problem."
+		echo
+		echo "LabJack support: support@labjack.com"
+		echo
+		echo "Please also follow any following instructions."
+		echo
+		IS_SUCCESS=$FALSE
+		success
+	fi
+}
+
+groupadd -f $GROUP
+print_tasks_if_needed
+unset tasks[0]
+
+usermod -a -G $GROUP $user
+print_tasks_if_needed
+unset tasks[1]
 
 success
