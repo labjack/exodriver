@@ -224,61 +224,89 @@ static int LJUSB_libusbError(int r)
         return 0;
         break;
     case LIBUSB_ERROR_IO:
+#if LJ_DEBUG
         fprintf(stderr, "libusb error: LIBUSB_ERROR_IO\n");
+#endif
         errno = EIO;
         break;
     case LIBUSB_ERROR_INVALID_PARAM:
+#if LJ_DEBUG
         fprintf(stderr, "libusb error: LIBUSB_ERROR_INVALID_PARAM\n");
+#endif
         errno = EINVAL;
         break;
     case LIBUSB_ERROR_ACCESS:
+#if LJ_DEBUG
         fprintf(stderr, "libusb error: LIBUSB_ERROR_ACCESS\n");
+#endif
         errno = EACCES;
         break;
     case LIBUSB_ERROR_NO_DEVICE:
+#if LJ_DEBUG
         fprintf(stderr, "libusb error: LIBUSB_ERROR_NO_DEVICE\n");
+#endif
         errno = ENXIO;
         break;
     case LIBUSB_ERROR_NOT_FOUND:
+#if LJ_DEBUG
         fprintf(stderr, "libusb error: LIBUSB_ERROR_NOT_FOUND\n");
+#endif
         errno = ENOENT;
         break;
     case LIBUSB_ERROR_BUSY:
+#if LJ_DEBUG
         fprintf(stderr, "libusb error: LIBUSB_ERROR_BUSY\n");
+#endif
         errno = EBUSY;
         break;
     case LIBUSB_ERROR_TIMEOUT:
+#if LJ_DEBUG
         fprintf(stderr, "libusb error: LIBUSB_ERROR_TIMEOUT\n");
+#endif
         errno = ETIMEDOUT;
         break;
     case LIBUSB_ERROR_OVERFLOW:
+#if LJ_DEBUG
         fprintf(stderr, "libusb error: LIBUSB_ERROR_OVERFLOW\n");
+#endif
         errno = EOVERFLOW;
         break;
     case LIBUSB_ERROR_PIPE:
+#if LJ_DEBUG
         fprintf(stderr, "libusb error: LIBUSB_ERROR_PIPE\n");
+#endif
         errno = EPIPE;
         break;
     case LIBUSB_ERROR_INTERRUPTED:
+#if LJ_DEBUG
         fprintf(stderr, "libusb error: LIBUSB_ERROR_INTERRUPTED\n");
+#endif
         errno = EINTR;
         break;
     case LIBUSB_ERROR_NO_MEM:
+#if LJ_DEBUG
         fprintf(stderr, "libusb error: LIBUSB_ERROR_NO_MEM\n");
+#endif
         errno = ENOMEM;
         break;
     case LIBUSB_ERROR_NOT_SUPPORTED:
+#if LJ_DEBUG
         fprintf(stderr, "libusb error: LIBUSB_ERROR_NOT_SUPPORTED\n");
+#endif
         errno = ENOSYS;
         break;
     case LIBUSB_ERROR_OTHER:
+#if LJ_DEBUG
         fprintf(stderr, "libusb error: LIBUSB_ERROR_OTHER\n");
+#endif
         if (errno == 0) {
             errno = ENOSYS;
         }
         break;
     default:
+#if LJ_DEBUG
         fprintf(stderr, "libusb error: Unexpected error code: %d.\n", r);
+#endif
         if (errno == 0) {
             errno = ENOSYS;
         }
