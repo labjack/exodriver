@@ -120,11 +120,7 @@ fi
 #####################
 # Add user to group #
 #####################
-if [ $USER == "root" ]; then
-	user=$SUDO_USER
-else
-	user=$USER
-fi
+user=`logname`
 
 in_group=$FALSE
 for g in `id -nG $user`; do
