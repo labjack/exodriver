@@ -141,7 +141,7 @@ int checkResponseForErrors(BYTE * recBuffer) {
         printf("The U3 detected a bad checksum. Double check your checksum calculations and try again.\n");
         return -1;
     }
-    else if (recBuffer[1] == 0xF8 && recBuffer[2] == 0x10 && recBuffer[2] == 0x08) {
+    else if (recBuffer[1] != 0xF8 || recBuffer[2] != 0x10 || recBuffer[3] != 0x08) {
         // Make sure the command bytes match what we expect.
         printf("Got the wrong command bytes back from the U3.\n");
         return -1;

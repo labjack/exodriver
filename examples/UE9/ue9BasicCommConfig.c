@@ -140,7 +140,7 @@ int checkResponseForErrors(BYTE * recBuffer) {
         printf("The UE9 detected a bad checksum. Double check your checksum calculations and try again.\n");
         return -1;
     }
-    else if (recBuffer[1] == 0x78 && recBuffer[2] == 0x10 && recBuffer[2] == 0x01) {
+    else if (recBuffer[1] != 0x78 || recBuffer[2] != 0x10 || recBuffer[3] != 0x01) {
         // Make sure the command bytes match what we expect.
         printf("Got the wrong command bytes back from the UE9.\n");
         return -1;
