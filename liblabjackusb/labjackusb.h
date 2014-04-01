@@ -61,13 +61,18 @@
 //       - Initial T7 support
 //       - Initial Digit support
 //       - Added LJUSB_ResetConnection function.
+//  2.0503 - Fixed open calls to not steal handles from other processes on
+//           Linux.
+//         - libusb error prints are silenced when LJ_DEBUG is not enabled.
+//         - Added revision number to library version number. The float version
+//           number 2.0503 is equivalent to 2.5.3 (major.minor.revision).
 //-----------------------------------------------------------------------------
 //
 
 #ifndef LABJACKUSB_H_
 #define LABJACKUSB_H_
 
-#define LJUSB_LIBRARY_VERSION 2.05f
+#define LJUSB_LIBRARY_VERSION 2.0503f
 
 #include <stdbool.h>
 

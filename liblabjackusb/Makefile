@@ -5,7 +5,7 @@
 
 UNAME = $(shell uname -s)
 
-VERSION = 2.5.2
+VERSION = 2.5.3
 DESTINATION = /usr/local/lib
 HEADER = labjackusb.h
 HEADER_DESTINATION = /usr/local/include
