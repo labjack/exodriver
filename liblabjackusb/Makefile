@@ -6,9 +6,10 @@
 UNAME = $(shell uname -s)
 
 VERSION = 2.5.3
-DESTINATION = /usr/local/lib
+PREFIX ?= /usr/local
+DESTINATION = $(PREFIX)/lib
 HEADER = labjackusb.h
-HEADER_DESTINATION = /usr/local/include
+HEADER_DESTINATION = $(PREFIX)/include
 LIBFLAGS = -lusb-1.0 -lc
 ADD_LDCONFIG_PATH = ./add_ldconfig_path.sh
 
@@ -22,12 +23,14 @@ ifeq ($(UNAME),Darwin)
 	# Build for multiple architectures
 	#ARCHFLAGS = -arch i386 -arch x86_64 -arch ppc
 	COMPILE = libtool -dynamic -o $(TARGET) -install_name $(TARGET) -current_version $(VERSION) -compatibility_version $(VERSION) labjackusb.o $(LIBFLAGS)
+	RUN_LDCONFIG ?= 0
 else
 	#Linux operating system macros
 	TARGET = liblabjackusb.so.$(VERSION)
 	# Build for only the host architecture
 	ARCHFLAGS =
 	COMPILE = $(CC) -shared -Wl,-soname,liblabjackusb.so -o $(TARGET) labjackusb.o $(LIBFLAGS)
+	RUN_LDCONFIG ?= 1
 endif
 
 CFLAGS += -fPIC -g -Wall $(ARCHFLAGS)
@@ -45,7 +48,7 @@ install: $(TARGET)
 	install $(TARGET) $(DESTINATION)
 	test -z $(HEADER_DESTINATION) || mkdir -p $(HEADER_DESTINATION)
 	install $(HEADER) $(HEADER_DESTINATION)
-ifeq ($(UNAME),Linux)
+ifeq ($(RUN_LDCONFIG),1)
 	@$(ADD_LDCONFIG_PATH)
 	ldconfig
 endif
