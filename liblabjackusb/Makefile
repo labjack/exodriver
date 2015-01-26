@@ -21,7 +21,7 @@ ifeq ($(UNAME),Darwin)
 	# Build for 32- and 64-bit Intel architectures
 	#ARCHFLAGS = -arch i386 -arch x86_64
 	# Build for multiple architectures
-	#ARCHFLAGS = -arch i386 -arch x86_64 -arch ppc
+	ARCHFLAGS = -arch i386 -arch x86_64 -arch ppc
 	COMPILE = libtool -dynamic -o $(TARGET) -install_name $(TARGET) -current_version $(VERSION) -compatibility_version $(VERSION) labjackusb.o $(LIBFLAGS)
 	RUN_LDCONFIG ?= 0
 else
