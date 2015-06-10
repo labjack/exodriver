@@ -746,7 +746,7 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
     }
 
     if (r == LIBUSB_ERROR_TIMEOUT) {
-        //Timeout occured but may have received partial data.  Setting errno but
+        //Timeout occurred but may have received partial data.  Setting errno but
         //returning the number of bytes transferred which may be > 0.
 #if LJ_DEBUG
         fprintf(stderr, "LJUSB_DoTransfer: Transfer timed out. Returning.\n");
@@ -943,12 +943,12 @@ unsigned long LJUSB_BulkWrite(HANDLE hDevice, unsigned char endpoint, BYTE *pBuf
 }
 
 
-unsigned long LJUSB_Write(HANDLE hDevice, BYTE *pBuff, unsigned long count)
+unsigned long LJUSB_Write(HANDLE hDevice, const BYTE *pBuff, unsigned long count)
 {
 #if LJ_DEBUG
     fprintf(stderr, "LJUSB_Write: calling LJUSB_Write.\n");
 #endif
-    return LJUSB_SetupTransfer(hDevice, pBuff, count, LJ_LIBUSB_TIMEOUT_DEFAULT, LJUSB_WRITE);
+    return LJUSB_SetupTransfer(hDevice, (BYTE *)pBuff, count, LJ_LIBUSB_TIMEOUT_DEFAULT, LJUSB_WRITE);
 }
 
 
@@ -970,12 +970,12 @@ unsigned long LJUSB_Stream(HANDLE hDevice, BYTE *pBuff, unsigned long count)
 }
 
 
-unsigned long LJUSB_WriteTO(HANDLE hDevice, BYTE *pBuff, unsigned long count, unsigned int timeout)
+unsigned long LJUSB_WriteTO(HANDLE hDevice, const BYTE *pBuff, unsigned long count, unsigned int timeout)
 {
 #if LJ_DEBUG
     fprintf(stderr, "LJUSB_Stream: calling LJUSB_WriteTO.\n");
 #endif
-    return LJUSB_SetupTransfer(hDevice, pBuff, count, timeout, LJUSB_WRITE);
+    return LJUSB_SetupTransfer(hDevice, (BYTE *)pBuff, count, timeout, LJUSB_WRITE);
 }
 
 

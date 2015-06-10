@@ -193,7 +193,7 @@ bool LJUSB_ResetConnection(HANDLE hDevice);
 // and you should re-open the device.
 // hDevice = The handle for your device
 
-unsigned long LJUSB_Write(HANDLE hDevice, BYTE *pBuff, unsigned long count);
+unsigned long LJUSB_Write(HANDLE hDevice, const BYTE *pBuff, unsigned long count);
 // Writes to a device with a 1 second timeout.  If the timeout time elapses and
 // no data is transferred the USB request is aborted and the call returns.
 // Returns the number of bytes written, or 0 on error and errno is set.
@@ -224,7 +224,7 @@ unsigned long LJUSB_Stream(HANDLE hDevice, BYTE *pBuff, unsigned long count);
 // This function replaces the deprecated LJUSB_BulkRead, which required the
 // (stream) endpoint.
 
-unsigned long LJUSB_WriteTO(HANDLE hDevice, BYTE *pBuff, unsigned long count, unsigned int timeout);
+unsigned long LJUSB_WriteTO(HANDLE hDevice, const BYTE *pBuff, unsigned long count, unsigned int timeout);
 // Writes to a device with a specified timeout.  If the timeout time elapses and
 // no data is transferred the USB request is aborted and the call returns.
 // Returns the number of bytes written, or 0 on error and errno is set.
