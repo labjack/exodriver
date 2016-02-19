@@ -1,5 +1,5 @@
 //Author : LabJack
-//April 5, 2011
+//Feb 18, 2016
 //This example demonstrates how to write and read some or all analog I/O.
 //By default, it records the time for 1000 iterations and divides by 1000,
 //to allow measurement of the basic command/response communication times.  These
@@ -9,12 +9,12 @@
 #include <stdlib.h>
 #include "u6.h"
 
-const int numIterations = 1000;  //Number of Feedback calls that will be performed.  Default 1000.
-const uint8 numChannels = 8; //Number of AIN channels, 0-14.  Default 8.
-const uint8 settlingFactor = 0; //0=5us, 1=10us, 2=100us, 3=1ms, 4=10ms.  Default 0.
-const uint8 gainIndex = 0; //0 = +-10V, 1 = +-1V, 2 = +-100mV, 3 = +-10mV, 15=autorange.  Default 0.
-const uint8 resolution = 1; //1=default, 1-8 for high-speed ADC, 9-13 for high-res ADC on U6-Pro. Default 1.
-const uint8 differential = 0; //Indicates whether to do differential readings.  Default 0 (false).
+const int numIterations = 1000;  //Number of Feedback calls that will be performed.
+const uint8 numChannels = 8;  //Number of AIN channels, 0-14.
+const uint8 settlingFactor = 0;  //0=Auto, 1=20us, 2=50us, 3=100us, 4=200us, 5=500us, 6=1ms, 7=2ms, 8=5ms, 9=10ms.
+const uint8 gainIndex = 0;  //0=x1 (+-10V), 1=x10 (+-1V), 2=x100 (+-0.1V), 3=x1000 (+-0.01mV), 15=autorange.
+const uint8 resolution = 1;  //0=default, 1-8 for high-speed ADC, 9-12 for high-res ADC on U6-Pro.
+const uint8 differential = 0;  //Indicates whether to do differential readings. 1=true, 0=false.
 
 int allIO(HANDLE hDevice, u6CalibrationInfo *caliInfo);
 
@@ -55,8 +55,8 @@ int allIO(HANDLE hDevice, u6CalibrationInfo *caliInfo)
     for( i = 0; i < 14; i++ )
         valueAIN[i] = 9999;
 
-    //Setting up a Feedback command that will set CIO0-3 as input, and
-    //set DAC0 voltage
+    //Setting up a Feedback command that will set CIO0-3 as input, and setting
+    //DAC0 voltage
     sendBuff = (uint8 *)malloc(18*sizeof(uint8));  //Creating an array of size 18
     recBuff = (uint8 *)malloc(10*sizeof(uint8));   //Creating an array of size 10
 
@@ -67,16 +67,16 @@ int allIO(HANDLE hDevice, u6CalibrationInfo *caliInfo)
 
     sendBuff[6] = 0;    //Echo
     sendBuff[7] = 29;   //IOType is PortDirWrite
-    sendBuff[8] = 0;    //Writemask (for FIO)
-    sendBuff[9] = 0;    //Writemask (for EIO)
-    sendBuff[10] = 15;  //Writemask (for CIO)
-    sendBuff[11] = 0;   //Direction (for FIO)
-    sendBuff[12] = 0;   //Direction (for EIO)
-    sendBuff[13] = 0;   //Direction (for CIO)
+    sendBuff[8] = 0;    //FIO Writemask
+    sendBuff[9] = 0;    //EIO Writemask
+    sendBuff[10] = 15;  //CIO Writemask
+    sendBuff[11] = 0;   //FIO Direction
+    sendBuff[12] = 0;   //EIO Direction
+    sendBuff[13] = 0;   //CIO Direction
 
-	//Setting DAC0 with 2.5 volt output
+    //Setting DAC0 with 2.5 volt output
     sendBuff[14] = 38;    //IOType is DAC0(16-bit)
-	
+
     //Value is 2.5 volts (in binary)
     getDacBinVoltCalibrated16Bit(caliInfo, 0, 2.5, &bits16);
     sendBuff[15] = (uint8)(bits16&255);
@@ -151,11 +151,11 @@ int allIO(HANDLE hDevice, u6CalibrationInfo *caliInfo)
 
     //Setting up Feedback command that will run numIterations times
     if( ((sendSize = 7+numChannels*4) % 2) != 0 )
-        sendSize++;
+        sendSize++; //Need an extra byte
     sendBuff = malloc(sendSize*sizeof(uint8)); //Creating an array of size sendSize
 
     if( ((recSize = 9+numChannels*3) % 2) != 0 )
-        recSize++;
+        recSize++;  //Need an extra byte
     recBuff = malloc(recSize*sizeof(uint8));   //Creating an array of size recSize
 
     sendBuff[1] = (uint8)(0xF8);     //Command byte
@@ -164,17 +164,19 @@ int allIO(HANDLE hDevice, u6CalibrationInfo *caliInfo)
 
     sendBuff[6] = 0;     //Echo
 
+    sendBuff[sendSize - 1] = 0;  //Setting last byte to zero in case it is the extra padding byte
+
     //Setting AIN read commands
     for( j = 0; j < numChannels; j++ )
     {
         sendBuff[7 + j*4] = 2;     //IOType is AIN24
 
         //Positive Channel (bits 0 - 4), LongSettling (bit 6) and QuickSample (bit 7)
-        sendBuff[8 + j*4] = j; //Positive Channel
-        sendBuff[9 + j*4] = (uint8)(resolution&15) + (uint8)((gainIndex&15)*16);   //ResolutionIndex(Bits 0-3), GainIndex(Bits 4-7)
-        sendBuff[10 + j*4] = (uint8)(settlingFactor&7);  //SettlingFactor(Bits 0-2)
+        sendBuff[8 + j*4] = j;  //Positive Channel
+        sendBuff[9 + j*4] = (uint8)(resolution&15) + (uint8)((gainIndex&15)*16);   //ResolutionIndex (Bits 0-3), GainIndex (Bits 4-7)
+        sendBuff[10 + j*4] = (uint8)(settlingFactor&7);  //SettlingFactor (Bits 0-2)
         if( j%2 == 0 )
-            sendBuff[10 + j*4] += (uint8)((differential&1)*128);   //Differential(Bits 7)
+            sendBuff[10 + j*4] += (uint8)((differential&1)*128);  //Differential (Bits 7)
     }
 
     extendedChecksum(sendBuff, sendSize);
