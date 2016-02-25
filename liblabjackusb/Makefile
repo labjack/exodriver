@@ -12,6 +12,7 @@ HEADER = labjackusb.h
 HEADER_DESTINATION = $(PREFIX)/include
 LIBFLAGS = -lusb-1.0 -lc
 ADD_LDCONFIG_PATH = ./add_ldconfig_path.sh
+LINK_SO ?= 0
 
 ifeq ($(UNAME),Darwin)
 	#Mac OS X operating system macros
@@ -57,6 +58,9 @@ install: $(TARGET)
 ifeq ($(RUN_LDCONFIG),1)
 	@$(ADD_LDCONFIG_PATH)
 	ldconfig
+endif
+ifeq ($(LINK_SO),1)
+	ln -i -s $(TARGET) $(DESTINATION)/liblabjackusb.so
 endif
 
 clean:
