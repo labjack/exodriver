@@ -55,7 +55,7 @@ install: $(TARGET)
 	test -z $(HEADER_DESTINATION) || mkdir -p $(HEADER_DESTINATION)
 	install $(HEADER) $(HEADER_DESTINATION)
 ifeq ($(RUN_LDCONFIG),1)
-	@$(ADD_LDCONFIG_PATH)
+	@$(ADD_LDCONFIG_PATH) $(DESTINATION)
 	ldconfig
 endif
 
