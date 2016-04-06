@@ -11,6 +11,8 @@ Table of Contents
 
     liblabjackusb Library Script Installation
 
+    Install Without Root
+
     Compiling and Running the Example Programs
 
     Machines Using VirtualBox
@@ -71,6 +73,21 @@ For information on allowing multiple users to use LabJack devices, see the
 
 For more information, read the section titled liblabjackusb Library Manual
 Installation later in this file.
+
+
+Install Without Root
+--------------------
+
+To install without root / sudo access, invoke `make install` with:
+ - PREFIX set to the desired installation directory
+ - LINK_SO set to true
+ - RUN_LDCONFIG set to false
+
+For example:
+
+    $ cd libjabjack/
+    $ make
+    $ make install PREFIX=myprefix LINK_SO=1 RUN_LDCONFIG=0
 
 
 Compiling and Running the Example Programs
