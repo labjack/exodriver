@@ -1,5 +1,5 @@
 //Author: LabJack
-//December 27, 2011
+//April 8, 2016
 //Header for U3 example helper functions.
 //
 //History
@@ -13,6 +13,7 @@
 // functions that apply the calibration constants. (06/25/2009)
 //-Replaced LJUSB_BulkWrite/Read with LJUSB_write/Read calls.  Added serial
 // number support to openUSBConnection. (12/27/2011)
+//-Updated functions to have C bindings. (04/08/2016)
 
 #ifndef U3_H_
 #define U3_H_
@@ -23,6 +24,10 @@
 #include <stdlib.h>
 #include "labjackusb.h"
 
+
+#ifdef __cplusplus
+extern "C"{
+#endif
 
 typedef unsigned char uint8;
 typedef unsigned short uint16;
@@ -595,7 +600,6 @@ long ehFeedback( HANDLE hDevice,
 
 /* Easy function constants */
 
-
 /* Timer clocks for Hardware Version 1.20 or lower */
 
 // 2 MHz
@@ -687,5 +691,9 @@ long ehFeedback( HANDLE hDevice,
 
 // 16-bit falling to falling edge measurement
 #define LJ_tmFALLINGEDGES16 13
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

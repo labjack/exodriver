@@ -24,6 +24,10 @@
 #ifndef _MODBUS_H_
 #define _MODBUS_H_
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 /* --------- Read Functions --------- */
 
 int buildReadHoldingRegistersPacket( unsigned char* sendBuffer, int startReg, int numRegs, int unitId, int prependZeros );
@@ -175,5 +179,9 @@ unsigned char sendBuffer[2];
 putShortIntoBuffer(sendBuffer, 0, (short)528);
 // sendBuffer -> [0x2, 0x10]
  */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _MODBUS_H_

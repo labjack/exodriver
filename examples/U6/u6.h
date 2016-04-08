@@ -1,5 +1,5 @@
 //Author: LabJack
-//April 6, 2011
+//April 8, 2016
 //Header for U6 example helper functions.
 
 #ifndef _U6_H
@@ -11,6 +11,10 @@
 #include <stdlib.h>
 #include "labjackusb.h"
 
+
+#ifdef __cplusplus
+extern "C"{
+#endif
 
 typedef unsigned char uint8;
 typedef unsigned short uint16;
@@ -550,5 +554,9 @@ long ehFeedback( HANDLE hDevice,
 #define LJ_tmSYSTIMERHIGH           11 // read upper 32-bits of system timer
 #define LJ_tmRISINGEDGES16          12 // 16-bit rising to rising edge measurement
 #define LJ_tmFALLINGEDGES16         13 // 16-bit falling to falling edge measurement
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
