@@ -1,5 +1,5 @@
 //Author : LabJack
-//Feb 18, 2016
+//April 8, 2016
 //This example demonstrates how to write and read some or all analog I/O.
 //By default, it records the time for 1000 iterations and divides by 1000,
 //to allow measurement of the basic command/response communication times.  These
