@@ -152,11 +152,11 @@ int allIO(HANDLE hDevice, u6CalibrationInfo *caliInfo)
     //Setting up Feedback command that will run numIterations times
     if( ((sendSize = 7+numChannels*4) % 2) != 0 )
         sendSize++; //Need an extra byte
-    sendBuff = malloc(sendSize*sizeof(uint8)); //Creating an array of size sendSize
+    sendBuff = (uint8 *)malloc(sendSize*sizeof(uint8)); //Creating an array of size sendSize
 
     if( ((recSize = 9+numChannels*3) % 2) != 0 )
         recSize++;  //Need an extra byte
-    recBuff = malloc(recSize*sizeof(uint8));   //Creating an array of size recSize
+    recBuff = (uint8 *)malloc(recSize*sizeof(uint8));   //Creating an array of size recSize
 
     sendBuff[1] = (uint8)(0xF8);     //Command byte
     sendBuff[2] = (sendSize - 6)/2;  //Number of data words
