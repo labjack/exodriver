@@ -1,5 +1,5 @@
 //Author: LabJack
-//April 11, 2016
+//April 12, 2016
 //This example demonstrates with the "easy" functions how to set an analog
 //output (DAC), read an analog input (AIN), set a digital output, read a
 //digital input, and configure/update/read timers and counters.
@@ -121,10 +121,9 @@ int main(int argc, char **argv)
     printf("\nWaiting for 1 second...\n");
     sleep(1);
 
-
     //Update the value (duty-cycle) of output timer (Timer0),
     //read and reset the input timer (Timer1), and
-    //read and reset the counter (Counter0).
+    //read and reset the counter (Counter1).
     printf("\nCalling eTCValues to update the value (duty-cycle) of output Timer0, read/reset input Timer1, and read/reset Counter1\n");
     alngReadTimers[0] = 0;  //Don't read Timer0 (output timer)
     alngReadTimers[1] = 1;  //Read Timer1
@@ -133,7 +132,7 @@ int main(int argc, char **argv)
     alngReadCounters[0] = 0;
     alngReadCounters[1] = 1;  //Read Counter1
     alngResetCounters[0] = 0;
-    alngResetCounters[1] = 1;  //Reset Counter0
+    alngResetCounters[1] = 1;  //Reset Counter1
     adblCounterValues[0] = 0;
     adblCounterValues[1] = 0;
     adblTimerValues[0] = 32768;  //Change Timer0 duty-cycle to 50%
@@ -155,25 +154,21 @@ int main(int argc, char **argv)
     printf("    Duty Cycle = %.1f%%\n", dutyCycle);
     printf("Counter1 value = %.0f\n", adblCounterValues[1]);
 
-
     //Disable all timers and counters
     alngEnableTimers[0] = 0;
     alngEnableTimers[1] = 0;
     alngEnableCounters[0] = 0;
     alngEnableCounters[1] = 0;
-    lngTCPinOffset = 4;
-    lngTimerClockBaseIndex = LJ_tc48MHZ;
-    lngTimerClockDivisor = 1;
-    error = eTCConfig(hDevice, alngEnableTimers, alngEnableCounters, lngTCPinOffset, lngTimerClockBaseIndex, lngTimerClockDivisor, alngTimerModes, adblTimerValues, 0, 0);
+    error = eTCConfig(hDevice, alngEnableTimers, alngEnableCounters, 4, LJ_tc48MHZ, 0, alngTimerModes, adblTimerValues, 0, 0);
     if( error != 0 )
         goto close;
     printf("\nCalling eTCConfig to disable all timers and counters\n");
-
 
 close:
     if( error > 0 )
         printf("Received an error code of %ld\n", error);
     closeUSBConnection(hDevice);
+
 done:
     return 0;
 }
