@@ -16,7 +16,7 @@ LINK_SO ?= 0
 
 ifeq ($(UNAME),Darwin)
 	#Mac OS X operating system macros
-	TARGET = liblabjackusb.dylib
+	TARGET = liblabjackusb-$(VERSION).dylib
 
 	# Build for only the host architecture
 	#ARCHFLAGS =
