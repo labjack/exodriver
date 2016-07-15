@@ -2,8 +2,8 @@
 //
 //  labjackusb.c
 //
-//    Library for accessing a U3, U6, UE9, SkyMote bridge, T7 and Digit over
-//    USB.
+//    Library for accessing U3, U6, UE9, SkyMote bridge, T4, T7, and Digit
+//    devices over USB.
 //
 //  support@labjack.com
 //
@@ -453,6 +453,8 @@ static bool LJUSB_isMinFirmware(HANDLE hDevice, unsigned long ProductID)
         return true;
     case BRIDGE_PRODUCT_ID: //Add Wireless bridge stuff Mike F.
         return true;
+    case T4_PRODUCT_ID:
+        return true;
     case T7_PRODUCT_ID:
         return true;
     case DIGIT_PRODUCT_ID:
@@ -867,6 +869,23 @@ static unsigned long LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, unsigned l
             return 0;
         }
         break;
+    case T4_PRODUCT_ID:
+        isBulk = true;
+        switch (operation) {
+        case LJUSB_WRITE:
+            endpoint = T4_PIPE_EP1_OUT;
+            break;
+        case LJUSB_READ:
+            endpoint = T4_PIPE_EP2_IN;
+            break;
+        case LJUSB_STREAM:
+            endpoint = T4_PIPE_EP3_IN;
+            break;
+        default:
+            errno = EINVAL;
+            return 0;
+        }
+        break;
     case T7_PRODUCT_ID:
         isBulk = true;
         switch (operation) {
@@ -1076,7 +1095,8 @@ unsigned int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n)
     unsigned int u3ProductCount = 0, u6ProductCount = 0;
     unsigned int ue9ProductCount = 0, u12ProductCount = 0;
     unsigned int bridgeProductCount = 0, t7ProductCount = 0;
-    unsigned int digitProductCount = 0, allProductCount = 0;
+    unsigned int digitProductCount = 0, t4ProductCount = 0;
+    unsigned int allProductCount = 0;
 
     if (!gIsLibUSBInitialized) {
         r = libusb_init(&gLJContext);
@@ -1123,6 +1143,9 @@ unsigned int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n)
                 break;
             case BRIDGE_PRODUCT_ID:
                 bridgeProductCount++;
+                break;
+            case T4_PRODUCT_ID:
+                t4ProductCount++;
                 break;
             case T7_PRODUCT_ID:
                 t7ProductCount++;
@@ -1171,6 +1194,11 @@ unsigned int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n)
             productCounts[i] = digitProductCount;
             productIds[i] = DIGIT_PRODUCT_ID;
             allProductCount += digitProductCount;
+            break;
+        case 7:
+            productCounts[i] = t4ProductCount;
+            productIds[i] = T4_PRODUCT_ID;
+            allProductCount += t4ProductCount;
             break;
         }
     }

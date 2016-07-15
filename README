@@ -1,10 +1,11 @@
 Exodriver: Linux (kernel 2.6+) and Mac OS X low-level LabJack U12, U3, U6, UE9,
-Digit and T7 USB library 2.0 and C examples
+Digit, T4, and T7 USB library 2.0 and C examples
 04/01/2014
 support@labjack.com
 
 This package contains the liblabjackusb 2.0 USB library for low-level U3, U6,
-UE9, Digit and T7 USB communications and C examples for select LabJack devices.
+UE9, Digit, T4, and T7 USB communications and C examples for select LabJack
+devices.
 
 Refer to the INSTALL.Linux or INSTALL.MacOSX file for library requirements,
 installation instructions, and compiling information (library and examples).
@@ -28,8 +29,8 @@ of their User's Guide and were tested with the Feedback low-level function. USB
 Stream times are in Section 3.2. These times were measured in Windows and are
 similar in Linux and Mac OS X. 
 
-Examples are not provided for the Digit or T7 in this package. Please refer to
-the LJM library package and documentation for their API.
+Examples are not provided for Digit, T4, or T7 devices in this package. Please
+refer to the LJM library package and documentation for their API.
 
 The U12 also has a high-level library, which requires this library
 (liblabjackusb), that provides the same API as the U12 Windows driver. It can
