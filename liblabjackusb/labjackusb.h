@@ -66,7 +66,7 @@
 //         - libusb error prints are silenced when LJ_DEBUG is not enabled.
 //         - Added revision number to library version number. The float version
 //           number 2.0503 is equivalent to 2.5.3 (major.minor.revision).
-//  2.0600 - Initial T4 support
+//  2.0600 - Initial T4 and T5 support
 //-----------------------------------------------------------------------------
 //
 
@@ -91,6 +91,7 @@ typedef unsigned char BYTE;
 #define U12_PRODUCT_ID         1
 #define BRIDGE_PRODUCT_ID      1000
 #define T4_PRODUCT_ID          4
+#define T5_PRODUCT_ID          5
 #define T7_PRODUCT_ID          7
 #define DIGIT_PRODUCT_ID       200
 #define UNUSED_PRODUCT_ID      -1
@@ -125,6 +126,11 @@ typedef unsigned char BYTE;
 #define T4_PIPE_EP2_IN         0x82
 #define T4_PIPE_EP3_IN         0x83  //Stream Endpoint
 
+//T5 pipes to read/write through
+#define T5_PIPE_EP1_OUT        1
+#define T5_PIPE_EP2_IN         0x82
+#define T5_PIPE_EP3_IN         0x83  //Stream Endpoint
+
 //T7 pipes to read/write through
 #define T7_PIPE_EP1_OUT        1
 #define T7_PIPE_EP2_IN         0x82
@@ -156,8 +162,8 @@ unsigned int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n);
 //   uint productCounts[10], productIds[10];
 //   r = LJUSB_GetDevCounts(productCounts, productIds, 10);
 // would return arrays that may look like
-//   {1, 2, 3, 4,    5, 6,   7, 8, 0, 0}
-//   {3, 6, 9, 1, 1000, 7, 200, 4, 0, 0}
+//   {1, 2, 3, 4,    5, 6,   7, 8, 9, 0}
+//   {3, 6, 9, 1, 1000, 7, 200, 4, 5, 0}
 // which means there are
 //   1 U3
 //   2 U6s
@@ -167,6 +173,7 @@ unsigned int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n);
 //   6 T7s
 //   7 Digits
 //   8 T4s
+//   9 T5s
 // connected.
 
 int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices);
