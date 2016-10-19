@@ -75,9 +75,17 @@
 
 #define LJUSB_LIBRARY_VERSION 2.0600f
 
-#include <stdbool.h>
+#ifdef _WIN32
+	// Nothing to see here
+#else
+	#include <stdbool.h>
+#endif
 
-typedef void * HANDLE;
+// On Windows, WINNT.H defines HANDLE as a void *.
+#ifndef HANDLE
+	typedef void * HANDLE;
+#endif
+
 typedef unsigned int UINT;
 typedef unsigned char BYTE;
 

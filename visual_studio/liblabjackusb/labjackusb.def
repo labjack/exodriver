@@ -1,0 +1,23 @@
+LIBRARY	"liblabjackusb"
+DESCRIPTION  'labjackusb (Exodriver) Lowlevel USB Device Interface'
+
+EXPORTS
+LJUSB_GetLibraryVersion
+LJUSB_GetDevCount
+LJUSB_GetDevCounts
+LJUSB_OpenAllDevices
+LJUSB_OpenDevice
+LJUSB_ResetConnection
+LJUSB_Write
+LJUSB_Read
+LJUSB_Stream
+LJUSB_WriteTO
+LJUSB_ReadTO
+LJUSB_StreamTO
+LJUSB_CloseDevice
+LJUSB_IsHandleValid
+LJUSB_GetDeviceDescriptorReleaseNumber
+LJUSB_GetHIDReportDescriptor
+LJUSB_BulkRead
+LJUSB_BulkWrite
+LJUSB_AbortPipe
