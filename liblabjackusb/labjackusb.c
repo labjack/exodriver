@@ -20,13 +20,13 @@
 #include <errno.h>
 
 #ifdef _WIN32
-	#define EOVERFLOW       75
-	#define ETIMEDOUT       110
+    #define EOVERFLOW       75
+    #define ETIMEDOUT       110
 #else
-	#include <unistd.h>
-	#include <stdbool.h>
-	#include <sys/utsname.h>
-	#include <unistd.h>
+    #include <unistd.h>
+    #include <stdbool.h>
+    #include <sys/utsname.h>
+    #include <unistd.h>
 #endif
 
 #include <libusb-1.0/libusb.h>
