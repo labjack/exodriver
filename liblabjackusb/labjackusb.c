@@ -222,7 +222,7 @@ static int LJUSB_libusbError(int r)
     case LIBUSB_SUCCESS:
         // No error
         return 0;
-        break;
+
     case LIBUSB_ERROR_IO:
 #if LJ_DEBUG
         fprintf(stderr, "libusb error: LIBUSB_ERROR_IO\n");
