@@ -51,7 +51,7 @@ else
 	LINK_SO ?= 0
 endif
 
-CFLAGS += -fPIC -g -Wall $(ARCHFLAGS)
+CFLAGS += -fPIC -g -Wall $(ARCHFLAGS) -O2
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $<

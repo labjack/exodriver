@@ -10,6 +10,23 @@
 //---------------------------------------------------------------------------
 //
 
+
+
+#include "debug_share.h"
+#include <sys/time.h>
+unsigned int GetCurrentTimeMicrosec()
+{
+    struct timeval tv;
+    gettimeofday(&tv, 0);
+    return tv.tv_sec * 1000000 + tv.tv_usec;
+}
+unsigned long sharediff = 0;
+
+
+
+
+
+
 #include "labjackusb.h"
 #include <stdlib.h>
 #include <string.h>
@@ -738,7 +755,15 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
     }
 
     if (isBulk) {
+        unsigned long t0 = GetCurrentTimeMicrosec();
         r = libusb_bulk_transfer((libusb_device_handle *)hDevice, endpoint, pBuff, (int)count, &transferred, timeout);
+        unsigned long t1 = GetCurrentTimeMicrosec();
+        if (endpoint ==  T7_PIPE_EP3_IN) {
+            sharediff = t1 - t0;
+            //printf("sharediff: %lu\n", sharediff);
+            //printf("  t0: %lu,\n", t0);
+            //printf("  t1: %lu\n", t1);
+        }
     }
     else {
         if (endpoint == 0) {
