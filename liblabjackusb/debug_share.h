@@ -1,0 +1,2 @@
+extern unsigned long sharediff;
+
