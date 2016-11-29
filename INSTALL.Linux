@@ -126,17 +126,44 @@ install the library.
     $ make
     $ sudo make install
 
-Programs that use the liblabjackusb will need to access the USB device bus
-at /dev/bus/usb/, typically with root permission.  On Debian-based
-distributions, we provide udev rules that allow members of the "adm" group
-to access LabJack devices.
+Programs that use liblabjackusb will need to access the USB device bus at
+/dev/bus/usb/, without root permission.  On Debian-based distributions, we
+provide udev rules that allow all users to access LabJack devices.
 
-Install The udev Rules
+To Install The udev Rules:
 
-To install the udev rules, run the following commands from the root
-directory of this package.
+To install the udev rules, run the following command from the root
+directory of this package:
 
-    $ sudo cp 10-labjack.rules /lib/udev/rules.d
+    $ sudo cp 90-labjack.rules /lib/udev/rules.d
+
+Next, reload the udev rules.  For instructions, see the section "To Reload the
+udev Rules" below.
+
+To Set Restrictive Permissions:
+
+The current udev rules in 90-labjack.rules give LabJack device access to all
+users.  If you need to restrict permissions, alter 90-labjack.rules or install
+custom rules to /etc/udev/rules.d/, which takes priority over
+/lib/udev/rules.d/.  For example, to restrict usage to members of the adm group:
+
+    $ sudo cat > /etc/udev/rules.d/90-labjack.rules << EOF
+    SUBSYSTEM!="usb_device", ACTION!="add", GOTO="labjack_rules_end"
+
+    # LabJack Vendor ID
+    ATTRS{idVendor}=="0cd5", MODE="0664", GROUP="adm"
+
+    LABEL="labjack_rules_end"
+
+Next, reload the udev rules.  For instructions, see the section "To Reload the
+udev Rules" below.  Also, notice that the MODE is 0664, which is the only
+difference between what's installed as /lib/udev/rules.d/90-labjack.rules by
+default.  For more information about writing udev rules, see "man udev".
+
+To Reload the udev Rules:
+
+To reload the udev rules, the following command works on most systems:
+
     $ sudo udevadm control --reload-rules
 
 Older vesions of udevadm (e.g., the version included in Ubuntu 8.04) use an
@@ -149,31 +176,6 @@ your distribution does not have udevadm, restart udev or restart your
 computer. On a Fedora machine run:
 
     $ sudo /etc/init.d/udev-post reload
-
-Permissions
-
-Be sure to add any users that need to use LabJack devices to the "adm"
-group. If a user is not in the adm group, they will need to execute
-programs that use Exodriver with altered permissions. For example, they will
-need to run `sudo ./labjack_program` rather than `./labjack_program`.
-
-To check if the user with username USERNAME is in the adm group, type:
-
-    $ groups USERNAME
-
-For this command, you can leave USERNAME blank if you are checking what groups
-the current user is in.
-
-If "adm" does not appear in the output, you need to add yourself to the
-adm group, as follows.
-
-To add a user with username USERNAME to the adm group, run the following
-command:
-
-    $ sudo usermod -a -G adm USERNAME
-
-For every user that is added to the adm group, they must log out and log
-back in for the group changes to take effect. Re-run "groups" to double check.
 
 
 LabJackPython and the Exodriver on Ubuntu 10.04
