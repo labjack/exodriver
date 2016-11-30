@@ -30,14 +30,14 @@ success ()
 {
 	e=0
 	if [ $IS_SUCCESS -eq $TRUE ]; then
-		echo "Install finished. Thanks for choosing LabJack."
+		echo "Install finished. Thank you for choosing LabJack."
 	fi
 	if [ $NEED_RECONNECT -eq $TRUE ]; then
 		echo "If you have any LabJack devices connected, please disconnect and reconnect them now for device rule changes to take effect."
 	fi
 	if [ $NO_RULES -eq $TRUE ]; then
 		echo "No udev rules directory found. Searched for $RULES_DEST_PRIMARY, $RULES_DEST_ALTERNATE."
-		echo "Please copy $RULES to your device rules directory and reload the rules or contact LabJack support for assistence: <$SUPPORT_EMAIL>"
+		echo "Please copy $RULES to your device rules directory and reload the rules or contact LabJack support for assistance: <$SUPPORT_EMAIL>"
 		let e=e+$NO_RULES_ERR
 	fi
 	if [ $NEED_RESTART -eq $TRUE ]; then
@@ -110,7 +110,7 @@ if [ $ret -ne 0 ]; then
 fi
 if [ $ret -ne 0 ]; then
 	NEED_RESTART=$TRUE
-	echo " cound not restart the rules."
+	echo " could not restart the rules."
 else
 	echo # Finishes previous echo -n
 fi
