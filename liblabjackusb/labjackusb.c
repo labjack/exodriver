@@ -613,7 +613,7 @@ int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
 
     while ((dev = devs[i++]) != NULL) {
 #if LJ_DEBUG
-        fprintf(stderr, "LJUSB_OpenDevice: calling libusb_get_device_descriptor\n");
+        fprintf(stderr, "LJUSB_OpenAllDevices: calling libusb_get_device_descriptor\n");
 #endif
         r = libusb_get_device_descriptor(dev, &desc);
         if (r < 0) {
@@ -983,54 +983,36 @@ unsigned long LJUSB_BulkWrite(HANDLE hDevice, unsigned char endpoint, BYTE *pBuf
 
 unsigned long LJUSB_Write(HANDLE hDevice, const BYTE *pBuff, unsigned long count)
 {
-#if LJ_DEBUG
-    fprintf(stderr, "LJUSB_Write: calling LJUSB_Write.\n");
-#endif
     return LJUSB_SetupTransfer(hDevice, (BYTE *)pBuff, count, LJ_LIBUSB_TIMEOUT_DEFAULT, LJUSB_WRITE);
 }
 
 
 unsigned long LJUSB_Read(HANDLE hDevice, BYTE *pBuff, unsigned long count)
 {
-#if LJ_DEBUG
-    fprintf(stderr, "LJUSB_Read: calling LJUSB_Read.\n");
-#endif
     return LJUSB_SetupTransfer(hDevice, pBuff, count, LJ_LIBUSB_TIMEOUT_DEFAULT, LJUSB_READ);
 }
 
 
 unsigned long LJUSB_Stream(HANDLE hDevice, BYTE *pBuff, unsigned long count)
 {
-#if LJ_DEBUG
-    fprintf(stderr, "LJUSB_Stream: calling LJUSB_Stream.\n");
-#endif
     return LJUSB_SetupTransfer(hDevice, pBuff, count, LJ_LIBUSB_TIMEOUT_DEFAULT, LJUSB_STREAM);
 }
 
 
 unsigned long LJUSB_WriteTO(HANDLE hDevice, const BYTE *pBuff, unsigned long count, unsigned int timeout)
 {
-#if LJ_DEBUG
-    fprintf(stderr, "LJUSB_Stream: calling LJUSB_WriteTO.\n");
-#endif
     return LJUSB_SetupTransfer(hDevice, (BYTE *)pBuff, count, timeout, LJUSB_WRITE);
 }
 
 
 unsigned long LJUSB_ReadTO(HANDLE hDevice, BYTE *pBuff, unsigned long count, unsigned int timeout)
 {
-#if LJ_DEBUG
-    fprintf(stderr, "LJUSB_Stream: calling LJUSB_ReadTO.\n");
-#endif
     return LJUSB_SetupTransfer(hDevice, pBuff, count, timeout, LJUSB_READ);
 }
 
 
 unsigned long LJUSB_StreamTO(HANDLE hDevice, BYTE *pBuff, unsigned long count, unsigned int timeout)
 {
-#if LJ_DEBUG
-    fprintf(stderr, "LJUSB_Stream: calling LJUSB_StreamTO.\n");
-#endif
     return LJUSB_SetupTransfer(hDevice, pBuff, count, timeout, LJUSB_STREAM);
 }
 
