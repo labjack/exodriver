@@ -54,8 +54,7 @@ Mac OS X Requirements
 2. The libusb-1.0 library.  See the "Installing libusb-1.0" for the libusb-1.0
 download and installation instructions.
 
-3. Mac OS X 10.5 Leopard or 10.6 Snow Leopard. We haven't tested the library
-on Tiger or Panther.
+3. Mac OS X 10.5 Leopard or later.
 
 4. Uninstall any MacOSX_C_NativeUSB based drivers. The old driver conflicts
 with the current liblabjackusb library. See the "Uninstalling the Old U3 and
