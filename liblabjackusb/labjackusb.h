@@ -91,7 +91,7 @@ typedef unsigned char BYTE;
 #define U12_PRODUCT_ID         1
 #define BRIDGE_PRODUCT_ID      1000
 #define T4_PRODUCT_ID          4
-#define T5_PRODUCT_ID          5
+#define T5_PRODUCT_ID          5 // Pending future development
 #define T7_PRODUCT_ID          7
 #define DIGIT_PRODUCT_ID       200
 #define UNUSED_PRODUCT_ID      -1

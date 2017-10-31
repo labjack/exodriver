@@ -2,7 +2,7 @@
 //
 //  labjackusb.c
 //
-//    Library for accessing U3, U6, UE9, SkyMote bridge, T4, T5, T7, and Digit
+//    Library for accessing U3, U6, UE9, SkyMote bridge, T4, T7, and Digit
 //    devices over USB.
 //
 //  support@labjack.com
