@@ -32,7 +32,7 @@ Linux Requirements
       $ sudo apt-get install build-essential
 
 2. The libusb-1.0 library and development files.  Download the source here:
-    http://sourceforge.net/projects/libusb/
+    http://libusb.info
 
 3. Linux kernel 2.6.28 or higher.  To use older 2.6.x kernels, you must upgrade
 your firmware.  These are the required firmware versions when using older

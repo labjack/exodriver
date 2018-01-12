@@ -49,7 +49,7 @@ Installation from Source Code
 Mac OS X Requirements
 ---------------------
 
-1. XCode developer tools
+1. Xcode developer tools
 
 2. The libusb-1.0 library.  See the "Installing libusb-1.0" for the libusb-1.0
 download and installation instructions.
@@ -72,15 +72,15 @@ Installing libusb-1.0
 ---------------------
 
 Mac OS X requires libusb-1.0 to be built from the source. Download the source
-from SourceForge:
+from the libusb project page:
 
-http://sourceforge.net/projects/libusb/files/libusb-1.0/
+http://libusb.info
 
-Version 1.0.9 is the latest as of April 2012. From the directory containing
+Version 1.0.21 is the latest as of 2017. From the directory containing
 the libusb source download, build it in the standard way:
 
-    $ tar xvfj libusb-1.0.9.tar.bz2
-    $ cd libusb-1.0.9/
+    $ tar xvfj libusb-1.0.21.tar.bz2
+    $ cd libusb-1.0.21/
     $ ./configure
     $ make
     $ sudo make install
@@ -167,8 +167,8 @@ When you must load the Exodriver from a 32-bit process, you must compile
 libusb-1.0 and the Exodriver to be combined 32-/64-bit libraries. Start with
 libusb-1.0:
 
-    $ tar xvfj libusb-1.0.9.tar.bz2
-    $ cd libusb-1.0.9/
+    $ tar xvfj libusb-1.0.21.tar.bz2
+    $ cd libusb-1.0.21/
     $ export CFLAGS="-arch i386 -arch x86_64"
     $ ./configure --disable-dependency-tracking
     $ make
