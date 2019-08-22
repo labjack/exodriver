@@ -501,7 +501,7 @@ long eTCConfig( HANDLE Handle,
 //                  must always have at least 2 elements.
 //TCPinOffset = Value from 0-8 specifies where to start assigning timers and
 //              counters.
-//              For U3 hardware versions 1.30, HV model, value needs to be 4-8.
+//              For U3 hardware version 1.30 (LV/HV), the value needs to be 4-8.
 //TimerClockBaseIndex = Pass a constant to set the timer base clock.  The
 //                      default is LJ_tc48MHZ.
 //TimerClockDivisor = Pass a divisor from 0-255 where 0 is a divisor of 256.
