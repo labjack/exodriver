@@ -1079,7 +1079,7 @@ long eTCConfig(HANDLE Handle, long *aEnableTimers, long *aEnableCounters, long T
     int sendDataBuffSize, numTimers, numCounters, i;
     long error;
 
-    if( TCPinOffset < 0 && TCPinOffset > 8 )
+    if( TCPinOffset < 0 || TCPinOffset > 8 )
     {
         printf("eTCConfig error: Invalid TimerCounterPinOffset\n");
         return -1;

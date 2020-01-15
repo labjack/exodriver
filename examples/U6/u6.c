@@ -856,7 +856,7 @@ long eTCConfig(HANDLE Handle, long *aEnableTimers, long *aEnableCounters, long T
     int sendDataBuffSize, i;
     long error;
  
-    if( TCPinOffset < 0 && TCPinOffset > 8)
+    if( TCPinOffset < 0 || TCPinOffset > 8)
     {
         printf("eTCConfig error: Invalid TCPinOffset.\n");
         return -1;
