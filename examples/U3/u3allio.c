@@ -148,6 +148,7 @@ int allIO(HANDLE hDevice, u3CalibrationInfo *caliInfo, int isDAC1Enabled)
     long time, numIterations;
     double hardwareVersion;
 
+    ret = 0;
     hardwareVersion = caliInfo->hardwareVersion;
 
     for( i = 0; i < 16; i++ )

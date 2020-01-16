@@ -723,10 +723,10 @@ long eTCConfig(HANDLE Handle, long *aEnableTimers, long *aEnableCounters, long T
     enableMask = 128;  //Bit 7: UpdateConfig
 
     if(aEnableCounters[1] != 0)
-    enableMask += 16;  //Bit 4: Enable Counter1
+        enableMask += 16;  //Bit 4: Enable Counter1
 
-    if(aEnableCounters[0] |= 0)
-    enableMask += 8;  //Bit 3: Enable Counter0
+    if(aEnableCounters[0] != 0)
+        enableMask += 8;  //Bit 3: Enable Counter0
 
     numTimers = 0;
     numTimersStop = 0;
