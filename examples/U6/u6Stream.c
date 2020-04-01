@@ -92,7 +92,7 @@ int ConfigIO_example(HANDLE hDevice)
         return -1;
     }
 
-    checksumTotal = extendedChecksum16(recBuff, 15);
+    checksumTotal = extendedChecksum16(recBuff, 16);
     if( (uint8)((checksumTotal / 256 ) & 0xff) != recBuff[5] )
     {
         printf("ConfigIO error : read buffer has bad checksum16(MSB)\n");
