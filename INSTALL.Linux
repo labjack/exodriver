@@ -88,6 +88,14 @@ For example:
     $ cd libjabjack/
     $ make
     $ make install PREFIX=myprefix LINK_SO=1 RUN_LDCONFIG=0
+    
+Note: when installing without root and setting up LabJackPython, the
+LabJackPython.py source file will need to be modified to properly load the
+liblabjackusb library. Change the line in the _loadLinuxSo() function
+From:
+    l = ctypes.CDLL("liblabjackusb.so", use_errno=True)
+To:
+    l = ctypes.CDLL("new absolute path for liblabjackusb.so", use_errno=True)
 
 
 Compiling and Running the Example Programs
