@@ -19,10 +19,10 @@ int main(int argc, char **argv)
     if( (hDevice = openUSBConnection(-1)) == NULL )
         goto done;
 
-	if( configIO_example(hDevice) != 0 )
+    if( configIO_example(hDevice) != 0 )
         goto close;
 
-	//Getting calibration information from LJTDAC
+    //Getting calibration information from LJTDAC
     if( getTdacCalibrationInfo(hDevice, &caliInfo, 2) < 0 )
         goto close;
 
