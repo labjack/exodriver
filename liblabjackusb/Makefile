@@ -7,9 +7,9 @@ UNAME = $(shell uname -s)
 
 VERSION = 2.6.0
 PREFIX ?= /usr/local
-DESTINATION = $(PREFIX)/lib
+DESTINATION = $(DESTDIR)$(PREFIX)/lib
 HEADER = labjackusb.h
-HEADER_DESTINATION = $(PREFIX)/include
+HEADER_DESTINATION = $(DESTDIR)$(PREFIX)/include
 LIBFLAGS = -lusb-1.0 -lc
 ADD_LDCONFIG_PATH = ./add_ldconfig_path.sh
 
