@@ -547,6 +547,7 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
 
                     // Check the return value
                     if ( r != 0 ) {
+                        libusb_close(devh);
                         fprintf(stderr, "failed to detach from kernel driver. Error Number: %i", r);
                         return NULL;
                     }
