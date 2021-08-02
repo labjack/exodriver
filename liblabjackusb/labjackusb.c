@@ -467,6 +467,20 @@ static bool LJUSB_isMinFirmware(HANDLE hDevice, unsigned long ProductID)
     }
 }
 
+static bool LJUSB_libusb_initialize(void)
+{
+    if (!gIsLibUSBInitialized) {
+        int r = libusb_init(&gLJContext);
+        if (r < 0) {
+            fprintf(stderr, "failed to initialize libusb\n");
+            LJUSB_libusbError(r);
+            return false;
+        }
+        gIsLibUSBInitialized = true;
+    }
+    
+    return true;
+}
 
 static void LJUSB_libusb_exit(void)
 {
@@ -496,14 +510,8 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
     unsigned int ljFoundCount = 0;
     HANDLE handle = NULL;
 
-    if (!gIsLibUSBInitialized) {
-        r = libusb_init(&gLJContext);
-        if (r < 0) {
-            fprintf(stderr, "failed to initialize libusb\n");
-            LJUSB_libusbError(r);
-            return NULL;
-        }
-        gIsLibUSBInitialized = true;
+    if (!LJUSB_libusb_initialize()) {
+        return NULL;
     }
 
     cnt = libusb_get_device_list(gLJContext, &devs);
@@ -593,14 +601,8 @@ int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
     unsigned int i = 0, ljFoundCount = 0;
     HANDLE handle = NULL;
 
-    if (!gIsLibUSBInitialized) {
-        r = libusb_init(&gLJContext);
-        if (r < 0) {
-            fprintf(stderr, "failed to initialize libusb\n");
-            LJUSB_libusbError(r);
-            return -1;
-        }
-        gIsLibUSBInitialized = true;
+    if (!LJUSB_libusb_initialize()) {
+        return -1;
     }
 
     cnt = libusb_get_device_list(gLJContext, &devs);
@@ -1046,14 +1048,8 @@ unsigned int LJUSB_GetDevCount(unsigned long ProductID)
     unsigned int i = 0;
     unsigned int ljFoundCount = 0;
 
-    if (!gIsLibUSBInitialized) {
-        r = libusb_init(&gLJContext);
-        if (r < 0) {
-            fprintf(stderr, "failed to initialize libusb\n");
-            LJUSB_libusbError(r);
-            return 0;
-        }
-        gIsLibUSBInitialized = true;
+    if (!LJUSB_libusb_initialize()) {
+        return 0;
     }
 
     cnt = libusb_get_device_list(gLJContext, &devs);
@@ -1099,14 +1095,8 @@ unsigned int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n)
     unsigned int digitProductCount = 0, t4ProductCount = 0;
     unsigned int t5ProductCount = 0, allProductCount = 0;
 
-    if (!gIsLibUSBInitialized) {
-        r = libusb_init(&gLJContext);
-        if (r < 0) {
-            fprintf(stderr, "failed to initialize libusb\n");
-            LJUSB_libusbError(r);
-            return 0;
-        }
-        gIsLibUSBInitialized = true;
+    if (!LJUSB_libusb_initialize()) {
+        return 0;
     }
 
     cnt = libusb_get_device_list(gLJContext, &devs);
