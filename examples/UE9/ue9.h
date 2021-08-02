@@ -123,7 +123,7 @@ HANDLE openUSBConnection( int localID);
 void closeUSBConnection( HANDLE hDevice);
 //Closes a HANDLE to a UE9 device.
 
-long getTickCount();
+long getTickCount( void);
 //Returns the number of milliseconds that has elasped since the system was
 //started.
 
