@@ -711,7 +711,7 @@ long eAIN(HANDLE Handle, u6CalibrationInfo *CalibrationInfo, long ChannelP, long
         return -1;
     }
 
-    if( Settling < 0 && Settling > 4 )
+    if( Settling < 0 || Settling > 4 )
     {
         printf("eAIN error: Invalid Settling value\n");
         return -1;
