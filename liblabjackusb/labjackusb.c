@@ -497,12 +497,49 @@ float LJUSB_GetLibraryVersion(void)
     return LJUSB_LIBRARY_VERSION;
 }
 
+static HANDLE LJUSB_OpenSpecificDevice(libusb_device *dev, const struct libusb_device_descriptor *desc)
+{
+    int r = 1;
+    struct libusb_device_handle *devh = NULL;
+
+    // Open the device to get handle.
+    r = libusb_open(dev, &devh);
+    if (r < 0) {
+        LJUSB_libusbError(r);
+        return NULL;
+    }
+
+    // Test if the kernel driver has the U12.
+    if (desc->idProduct == U12_PRODUCT_ID && libusb_kernel_driver_active(devh, 0)) {
+#if LJ_DEBUG
+        fprintf(stderr, "Kernel Driver was active, detaching...\n");
+#endif
+
+        // Detach the U12 from kernel driver.
+        r = libusb_detach_kernel_driver(devh, 0);
+
+        // Check the return value
+        if ( r != 0 ) {
+            libusb_close(devh);
+            fprintf(stderr, "failed to detach from kernel driver. Error Number: %i", r);
+            return NULL;
+        }
+    }
+
+    r = libusb_claim_interface(devh, 0);
+    if (r < 0) {
+        LJUSB_libusbError(r);
+        libusb_close(devh);
+        return NULL;
+    }
+
+    return (HANDLE) devh;
+}
 
 HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long ProductID)
 {
     (void)dwReserved;
     libusb_device **devs = NULL, *dev = NULL;
-    struct libusb_device_handle *devh = NULL;
     struct libusb_device_descriptor desc;
     ssize_t cnt = 0;
     int r = 1;
@@ -537,39 +574,12 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
         if (LJ_VENDOR_ID == desc.idVendor && ProductID == desc.idProduct) {
             ljFoundCount++;
             if (ljFoundCount == DevNum) {
-                // Found the one requested
-                r = libusb_open(dev, &devh);
-                if (r < 0) {
-                    LJUSB_libusbError(r);
-                    return NULL;
-                }
+                handle = LJUSB_OpenSpecificDevice(dev, &desc);
 
-                // Test if the kernel driver has the U12.
-                if (desc.idProduct == U12_PRODUCT_ID && libusb_kernel_driver_active(devh, 0)) {
 #if LJ_DEBUG
-                    fprintf(stderr, "Kernel Driver was active, detaching...\n");
-#endif
-
-                    // Detach the U12 from kernel driver.
-                    r = libusb_detach_kernel_driver(devh, 0);
-
-                    // Check the return value
-                    if ( r != 0 ) {
-                        libusb_close(devh);
-                        fprintf(stderr, "failed to detach from kernel driver. Error Number: %i", r);
-                        return NULL;
-                    }
+                if (handle) {
+                    fprintf(stderr, "LJUSB_OpenDevice: Found handle for product ID %ld\n", ProductID);
                 }
-
-                r = libusb_claim_interface(devh, 0);
-                if (r < 0) {
-                    LJUSB_libusbError(r);
-                    libusb_close(devh);
-                    return NULL;
-                }
-                handle = (HANDLE) devh;
-#if LJ_DEBUG
-                fprintf(stderr, "LJUSB_OpenDevice: Found handle for product ID %ld\n", ProductID);
 #endif
                 break;
             }
@@ -627,39 +637,7 @@ int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
         }
 
         if (LJ_VENDOR_ID == desc.idVendor) {
-            // Found a LabJack device
-            r = libusb_open(dev, &devh);
-            if (r < 0) {
-                LJUSB_libusbError(r);
-                continue;
-            }
-
-            // Test if the kernel driver has the U12.
-            if (desc.idProduct == U12_PRODUCT_ID && libusb_kernel_driver_active(devh, 0) ) {
-#if LJ_DEBUG
-                fprintf(stderr, "Kernel Driver was active, detaching...\n");
-#endif
-
-                // Detach the U12 from kernel driver.
-                r = libusb_detach_kernel_driver(devh, 0);
-
-                // Check the return value
-                if ( r != 0 ) {
-                    fprintf(stderr, "failed to detach from kernel driver. Error Number: %i", r);
-                    libusb_close(devh);
-                    continue;
-                }
-            }
-
-            r = libusb_claim_interface(devh, 0);
-            if (r < 0) {
-                //LJUSB_libusbError(r);
-                libusb_close(devh);
-                continue;
-            }
-
-            handle = (HANDLE) devh;
-
+            handle = LJUSB_OpenSpecificDevice(dev, &desc);
             if (handle == NULL) {
                 // Not a valid handle
                 continue;
