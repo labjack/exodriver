@@ -380,7 +380,7 @@ static bool LJUSB_isRecentKernel(void)
     unsigned long kernelMajor = 0, kernelMinor = 0, kernelRev = 0;
 
     if (uname(&u) != 0) {
-        fprintf(stderr, "Error calling uname(2).");
+        fprintf(stderr, "Error calling uname(2).\n");
         return false;
     }
 
@@ -521,7 +521,7 @@ static HANDLE LJUSB_OpenSpecificDevice(libusb_device *dev, const struct libusb_d
         // Check the return value
         if ( r != 0 ) {
             libusb_close(devh);
-            fprintf(stderr, "failed to detach from kernel driver. Error Number: %i", r);
+            fprintf(stderr, "failed to detach from kernel driver. Error Number: %i\n", r);
             return NULL;
         }
     }
@@ -565,7 +565,7 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
 #endif
         r = libusb_get_device_descriptor(dev, &desc);
         if (r < 0) {
-            fprintf(stderr, "failed to get device descriptor");
+            fprintf(stderr, "failed to get device descriptor\n");
             LJUSB_libusbError(r);
             LJUSB_libusb_exit();
             return NULL;
@@ -630,7 +630,7 @@ int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
 #endif
         r = libusb_get_device_descriptor(dev, &desc);
         if (r < 0) {
-            fprintf(stderr, "failed to get device descriptor");
+            fprintf(stderr, "failed to get device descriptor\n");
             LJUSB_libusbError(r);
             LJUSB_libusb_exit();
             return -1;
