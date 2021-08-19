@@ -1009,7 +1009,10 @@ void LJUSB_CloseDevice(HANDLE hDevice)
     }
 
     //Release
-    libusb_release_interface(hDevice, 0);
+    int r = libusb_release_interface(hDevice, 0);
+    if (r < 0) {
+        fprintf(stderr, "LJUSB_CloseDevice: failed to release interface\n");
+    }
 
     //Close
     libusb_close(hDevice);
