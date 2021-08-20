@@ -688,7 +688,7 @@ bool LJUSB_ResetConnection(HANDLE hDevice)
 }
 
 
-static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BYTE *pBuff, unsigned long count, unsigned int timeout, bool isBulk)
+static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, const BYTE *pBuff, unsigned long count, unsigned int timeout, bool isBulk)
 {
     int r = 0;
     int transferred = 0;
@@ -716,12 +716,12 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
     }
 
     if (isBulk) {
-        r = libusb_bulk_transfer(hDevice, endpoint, pBuff, (int)count, &transferred, timeout);
+        r = libusb_bulk_transfer(hDevice, endpoint, (unsigned char *)pBuff, (int)count, &transferred, timeout);
     }
     else {
         if (endpoint == 0) {
             //HID feature request.
-            r = libusb_control_transfer(hDevice, 0xa1, 0x01, 0x0300, 0x0000, pBuff, (uint16_t)count, timeout);
+            r = libusb_control_transfer(hDevice, 0xa1, 0x01, 0x0300, 0x0000, (unsigned char *)pBuff, (uint16_t)count, timeout);
             if (r < 0) {
                 LJUSB_libusbError(r);
                 return 0;
@@ -734,7 +734,7 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
             return r;
         }
         else {
-            r = libusb_interrupt_transfer(hDevice, endpoint, pBuff, (int)count, &transferred, timeout);
+            r = libusb_interrupt_transfer(hDevice, endpoint, (unsigned char *)pBuff, (int)count, &transferred, timeout);
         }
     }
 
@@ -761,7 +761,7 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
 
 
 // Automatically uses the correct endpoint and transfer method (bulk or interrupt)
-static unsigned long LJUSB_SetupTransfer(HANDLE hDevice, BYTE *pBuff, unsigned long count, unsigned int timeout, enum LJUSB_TRANSFER_OPERATION operation)
+static unsigned long LJUSB_SetupTransfer(HANDLE hDevice, const BYTE *pBuff, unsigned long count, unsigned int timeout, enum LJUSB_TRANSFER_OPERATION operation)
 {
     libusb_device *dev = NULL;
     struct libusb_device_descriptor desc;
@@ -972,7 +972,7 @@ unsigned long LJUSB_BulkWrite(HANDLE hDevice, unsigned char endpoint, BYTE *pBuf
 
 unsigned long LJUSB_Write(HANDLE hDevice, const BYTE *pBuff, unsigned long count)
 {
-    return LJUSB_SetupTransfer(hDevice, (BYTE *)pBuff, count, LJ_LIBUSB_TIMEOUT_DEFAULT, LJUSB_WRITE);
+    return LJUSB_SetupTransfer(hDevice, pBuff, count, LJ_LIBUSB_TIMEOUT_DEFAULT, LJUSB_WRITE);
 }
 
 
@@ -990,7 +990,7 @@ unsigned long LJUSB_Stream(HANDLE hDevice, BYTE *pBuff, unsigned long count)
 
 unsigned long LJUSB_WriteTO(HANDLE hDevice, const BYTE *pBuff, unsigned long count, unsigned int timeout)
 {
-    return LJUSB_SetupTransfer(hDevice, (BYTE *)pBuff, count, timeout, LJUSB_WRITE);
+    return LJUSB_SetupTransfer(hDevice, pBuff, count, timeout, LJUSB_WRITE);
 }
 
 
