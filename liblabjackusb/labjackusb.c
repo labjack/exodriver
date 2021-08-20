@@ -554,7 +554,7 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
     cnt = libusb_get_device_list(gLJContext, &devs);
     if (cnt < 0) {
         fprintf(stderr, "failed to get device list\n");
-        LJUSB_libusbError(cnt);
+        LJUSB_libusbError((int)cnt);
         LJUSB_libusb_exit();
         return NULL;
     }
@@ -619,7 +619,7 @@ int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
     cnt = libusb_get_device_list(gLJContext, &devs);
     if (cnt < 0) {
         fprintf(stderr, "failed to get device list\n");
-        LJUSB_libusbError(cnt);
+        LJUSB_libusbError((int)cnt);
         LJUSB_libusb_exit();
         return -1;
     }
@@ -1044,7 +1044,7 @@ unsigned int LJUSB_GetDevCount(unsigned long ProductID)
     cnt = libusb_get_device_list(gLJContext, &devs);
     if (cnt < 0) {
         fprintf(stderr, "failed to get device list\n");
-        LJUSB_libusbError(cnt);
+        LJUSB_libusbError((int)cnt);
         LJUSB_libusb_exit();
         return 0;
     }
@@ -1091,7 +1091,7 @@ unsigned int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n)
     cnt = libusb_get_device_list(gLJContext, &devs);
     if (cnt < 0) {
         fprintf(stderr, "failed to get device list\n");
-        LJUSB_libusbError(cnt);
+        LJUSB_libusbError((int)cnt);
         LJUSB_libusb_exit();
         return 0;
     }
