@@ -216,7 +216,7 @@ static bool LJUSB_isNullHandle(HANDLE hDevice)
 }
 
 
-static int LJUSB_libusbError(int r)
+static int LJUSB_libusbError(ssize_t r)
 {
     switch (r) {
     case LIBUSB_SUCCESS:
