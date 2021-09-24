@@ -560,6 +560,7 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
         r = libusb_get_device_descriptor(dev, &desc);
         if (r < 0) {
             fprintf(stderr, "failed to get device descriptor\n");
+            libusb_free_device_list(devs, 1);
             LJUSB_libusbError(r);
             LJUSB_libusb_exit();
             return NULL;
@@ -625,6 +626,7 @@ int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
         r = libusb_get_device_descriptor(dev, &desc);
         if (r < 0) {
             fprintf(stderr, "failed to get device descriptor\n");
+            libusb_free_device_list(devs, 1);
             LJUSB_libusbError(r);
             LJUSB_libusb_exit();
             return -1;
@@ -1052,6 +1054,7 @@ unsigned int LJUSB_GetDevCount(unsigned long ProductID)
         r = libusb_get_device_descriptor(dev, &desc);
         if (r < 0) {
             fprintf(stderr, "failed to get device descriptor\n");
+            libusb_free_device_list(devs, 1);
             LJUSB_libusbError(r);
             LJUSB_libusb_exit();
             return 0;
@@ -1097,6 +1100,7 @@ unsigned int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n)
         r = libusb_get_device_descriptor(dev, &desc);
         if (r < 0) {
             fprintf(stderr, "failed to get device descriptor\n");
+            libusb_free_device_list(devs, 1);
             LJUSB_libusbError(r);
             LJUSB_libusb_exit();
             return 0;
