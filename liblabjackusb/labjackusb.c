@@ -324,12 +324,12 @@ static bool LJUSB_U3_isMinFirmware(const struct LJUSB_FirmwareHardwareVersion * 
             return true;
         }
         else {
-            fprintf(stderr, "Minimum U3 firmware not met is not met for this kernel.  Please update from firmware %d.%02d to firmware %d.%d or upgrade to kernel %d.%d.%d.\n", fhv->firmwareMajor, fhv->firmwareMinor, MIN_U3C_FIRMWARE_MAJOR, MIN_U3C_FIRMWARE_MINOR, LJ_RECENT_KERNEL_MAJOR, LJ_RECENT_KERNEL_MINOR, LJ_RECENT_KERNEL_REV);
+            fprintf(stderr, "Minimum U3 firmware is not met for this kernel.  Please update from firmware %d.%02d to firmware %d.%d or upgrade to kernel %d.%d.%d.\n", fhv->firmwareMajor, fhv->firmwareMinor, MIN_U3C_FIRMWARE_MAJOR, MIN_U3C_FIRMWARE_MINOR, LJ_RECENT_KERNEL_MAJOR, LJ_RECENT_KERNEL_MINOR, LJ_RECENT_KERNEL_REV);
             return false;
         }
     }
     else {
-        fprintf(stderr, "Minimum U3 hardware version not met for this kernel.  This driver supports only hardware %d.%d and above.  Your hardware version is %d.%d.\n", U3C_HARDWARE_MAJOR, U3C_HARDWARE_MINOR, fhv->hardwareMajor, fhv->hardwareMinor);
+        fprintf(stderr, "Minimum U3 hardware version is not met for this kernel.  This driver supports only hardware %d.%d and above.  Your hardware version is %d.%d.\n", U3C_HARDWARE_MAJOR, U3C_HARDWARE_MINOR, fhv->hardwareMajor, fhv->hardwareMinor);
         fprintf(stderr, "This hardware version is supported under kernel %d.%d.%d.\n", LJ_RECENT_KERNEL_MAJOR, LJ_RECENT_KERNEL_MINOR, LJ_RECENT_KERNEL_REV);
         return false;
     }
@@ -344,7 +344,7 @@ static bool LJUSB_U6_isMinFirmware(const struct LJUSB_FirmwareHardwareVersion * 
         return true;
     }
     else {
-        fprintf(stderr, "Minimum U6 firmware not met is not met for this kernel.  Please update from firmware %d.%d to firmware %d.%d or upgrade to kernel %d.%d.%d.\n", fhv->firmwareMajor, fhv->firmwareMinor, MIN_U6_FIRMWARE_MAJOR, MIN_U6_FIRMWARE_MINOR, LJ_RECENT_KERNEL_MAJOR, LJ_RECENT_KERNEL_MINOR, LJ_RECENT_KERNEL_REV);
+        fprintf(stderr, "Minimum U6 firmware is not met for this kernel.  Please update from firmware %d.%d to firmware %d.%d or upgrade to kernel %d.%d.%d.\n", fhv->firmwareMajor, fhv->firmwareMinor, MIN_U6_FIRMWARE_MAJOR, MIN_U6_FIRMWARE_MINOR, LJ_RECENT_KERNEL_MAJOR, LJ_RECENT_KERNEL_MINOR, LJ_RECENT_KERNEL_REV);
         return false;
     }
 
@@ -365,7 +365,7 @@ static bool LJUSB_UE9_isMinFirmware(const struct LJUSB_FirmwareHardwareVersion *
         return true;
     }
     else {
-        fprintf(stderr, "Minimum UE9 firmware not met is not met for this kernel.  Please update from firmware %d.%d to firmware %d.%d or upgrade to kernel %d.%d.%d.\n", fhv->firmwareMajor, fhv->firmwareMinor, MIN_UE9_FIRMWARE_MAJOR, MIN_UE9_FIRMWARE_MINOR, LJ_RECENT_KERNEL_MAJOR, LJ_RECENT_KERNEL_MINOR, LJ_RECENT_KERNEL_REV);
+        fprintf(stderr, "Minimum UE9 firmware is not met for this kernel.  Please update from firmware %d.%d to firmware %d.%d or upgrade to kernel %d.%d.%d.\n", fhv->firmwareMajor, fhv->firmwareMinor, MIN_UE9_FIRMWARE_MAJOR, MIN_UE9_FIRMWARE_MINOR, LJ_RECENT_KERNEL_MAJOR, LJ_RECENT_KERNEL_MINOR, LJ_RECENT_KERNEL_REV);
         return false;
     }
 
@@ -375,6 +375,7 @@ static bool LJUSB_UE9_isMinFirmware(const struct LJUSB_FirmwareHardwareVersion *
 
 static bool LJUSB_isRecentKernel(void)
 {
+#if defined(__linux__)
     struct utsname u;
     char *tok = NULL;
     unsigned long kernelMajor = 0, kernelMinor = 0, kernelRev = 0;
@@ -384,19 +385,8 @@ static bool LJUSB_isRecentKernel(void)
         return false;
     }
 
-    // There are no known kernel-compatibility problems with Mac OS X.
 #if LJ_DEBUG
     fprintf(stderr, "LJUSB_recentKernel: sysname: %s.\n", u.sysname);
-#endif
-
-    if (strncmp("Darwin", u.sysname, strlen("Darwin")) == 0) {
-#if LJ_DEBUG
-        fprintf(stderr, "LJUSB_recentKernel: returning true on Darwin.\n");
-#endif
-        return true;
-    }
-
-#if LJ_DEBUG
     fprintf(stderr, "LJUSB_recentKernel: Kernel release: %s.\n", u.release);
 #endif
     tok = strtok(u.release, ".-");
@@ -421,6 +411,10 @@ static bool LJUSB_isRecentKernel(void)
     return (kernelMajor == LJ_RECENT_KERNEL_MAJOR && kernelMinor == LJ_RECENT_KERNEL_MINOR && kernelRev >= LJ_RECENT_KERNEL_REV) ||
            (kernelMajor == LJ_RECENT_KERNEL_MAJOR && kernelMinor > LJ_RECENT_KERNEL_MINOR) ||
            (kernelMajor > LJ_RECENT_KERNEL_MAJOR);
+#else
+    // There are no known kernel-compatibility problems with other OSes.
+    return true;
+#endif
 }
 
 
@@ -428,7 +422,7 @@ static bool LJUSB_isMinFirmware(HANDLE hDevice, unsigned long ProductID)
 {
     struct LJUSB_FirmwareHardwareVersion fhv = {0, 0, 0, 0};
 
-    // If we are running on a recent kernel, no firmware check is necessary.
+    // If we are running on a recent linux kernel (or other OS), no firmware check is necessary.
     if (LJUSB_isRecentKernel()) {
 #if LJ_DEBUG
         fprintf(stderr, "LJUSB_isMinFirmware: LJUSB_isRecentKernel: true\n");
