@@ -600,7 +600,6 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
 int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
 {
     libusb_device **devs = NULL, *dev = NULL;
-    struct libusb_device_handle *devh = NULL;
     struct libusb_device_descriptor desc;
     ssize_t cnt = 0;
     int r = 1;
@@ -645,12 +644,11 @@ int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
                     ljFoundCount++;
                 } else {
                     // Not high enough firmware, keep moving.
-                    libusb_close(devh);
-                    ljFoundCount--;
+                    libusb_close(handle);
                 }
             } else {
                 // Too many devices have been found.
-                libusb_close(devh);
+                libusb_close(handle);
                 break;
             }
         }
