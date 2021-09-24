@@ -1091,7 +1091,7 @@ unsigned int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n)
     }
 
     // Loop over all USB devices and count the ones with the LabJack
-    // vendor ID and the passed in product ID.
+    // vendor ID.
     while ((dev = devs[i++]) != NULL) {
         struct libusb_device_descriptor desc;
         r = libusb_get_device_descriptor(dev, &desc);

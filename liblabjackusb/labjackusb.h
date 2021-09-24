@@ -197,8 +197,7 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
 //          example, if there is one device connected, set DevNum = 1.  If you
 //          have two devices connected, then set DevNum = 1, or DevNum = 2.
 // dwReserved = Not used, set to 0.
-// ProductID = The product ID of the LabJack USB device.  Currently the U3, U6,
-//             and UE9 are supported.
+// ProductID = The product ID of the LabJack USB device.
 
 bool LJUSB_ResetConnection(HANDLE hDevice);
 // Performs a USB port reset to reinitialize a device.
