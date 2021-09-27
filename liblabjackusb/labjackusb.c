@@ -658,6 +658,64 @@ int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
     return ljFoundCount;
 }
 
+int LJUSB_OpenAllDevicesOfProductId(UINT productId, HANDLE **devHandles)
+{
+    // Always pre-clear result to NULL since there are early returns below.
+    *devHandles = NULL;
+
+    if (!LJUSB_libusb_initialize()) {
+        return -1;
+    }
+
+    libusb_device **devs = NULL;
+    ssize_t cnt = libusb_get_device_list(gLJContext, &devs);
+    if (cnt < 0) {
+        fprintf(stderr, "LJUSB_OpenAllDevicesOfProductId: failed to get device list\n");
+        LJUSB_libusbError((int)cnt);
+        LJUSB_libusb_exit();
+        return -1;
+    } else if (cnt == 0) {
+        // No devices founds, that's fine, we're done.
+        return 0;
+    }
+
+    *devHandles = calloc(cnt, sizeof(HANDLE));
+    if (*devHandles == NULL) {
+        fprintf(stderr, "LJUSB_OpenAllDevicesOfProductId: calloc failed\n");
+        libusb_free_device_list(devs, 1);
+        return -1;
+    }
+
+    ssize_t i = 0, successCount = 0;
+    libusb_device *dev = NULL;
+    while ((dev = devs[i++]) != NULL) {
+#if LJ_DEBUG
+        fprintf(stderr, "LJUSB_OpenAllDevicesOfProductId: calling libusb_get_device_descriptor\n");
+#endif
+        struct libusb_device_descriptor desc;
+        int r = libusb_get_device_descriptor(dev, &desc);
+        if (r < 0) {
+            fprintf(stderr, "LJUSB_OpenAllDevicesOfProductId: failed to get a device descriptor, so skipping it\n");
+        } else if (LJ_VENDOR_ID == desc.idVendor &&
+                   (productId == desc.idProduct || 0 == productId)) {
+            HANDLE handle = LJUSB_OpenSpecificDevice(dev, &desc);
+            if (handle == NULL) {
+                fprintf(stderr, "LJUSB_OpenAllDevicesOfProductId: failed to open a device, so skipping it\n");
+            } else {
+                if (LJUSB_isMinFirmware(handle, desc.idProduct)) {
+                    (*devHandles)[successCount] = handle;
+                    successCount++;
+                } else {
+                    // Not high enough firmware, keep moving.
+                    libusb_close(handle);
+                }
+            }
+        }
+    }
+    libusb_free_device_list(devs, 1);
+
+    return successCount;
+}
 
 bool LJUSB_ResetConnection(HANDLE hDevice)
 {
