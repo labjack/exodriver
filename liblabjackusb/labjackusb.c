@@ -554,7 +554,7 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
     cnt = libusb_get_device_list(gLJContext, &devs);
     if (cnt < 0) {
         fprintf(stderr, "failed to get device list\n");
-        LJUSB_libusbError(cnt);
+        LJUSB_libusbError((int)cnt);
         LJUSB_libusb_exit();
         return NULL;
     }
@@ -619,7 +619,7 @@ int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
     cnt = libusb_get_device_list(gLJContext, &devs);
     if (cnt < 0) {
         fprintf(stderr, "failed to get device list\n");
-        LJUSB_libusbError(cnt);
+        LJUSB_libusbError((int)cnt);
         LJUSB_libusb_exit();
         return -1;
     }
@@ -696,6 +696,13 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
     fprintf(stderr, "Calling LJUSB_DoTransfer with endpoint = 0x%x, count = %lu, and isBulk = %d.\n", endpoint, count, isBulk);
 #endif
 
+    if (count > 65535 /*UINT16_MAX*/) {
+#if LJ_DEBUG
+        fprintf(stderr, "LJUSB_DoTransfer: returning 0. count is too large.\n");
+#endif
+        return 0;
+    }
+
     if (LJUSB_isNullHandle(hDevice)) {
 #if LJ_DEBUG
         fprintf(stderr, "LJUSB_DoTransfer: returning 0. hDevice is NULL.\n");
@@ -713,7 +720,7 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
     else {
         if (endpoint == 0) {
             //HID feature request.
-            r = libusb_control_transfer(hDevice, 0xa1 , 0x01, 0x0300, 0x0000, pBuff, count, timeout);
+            r = libusb_control_transfer(hDevice, 0xa1, 0x01, 0x0300, 0x0000, pBuff, (uint16_t)count, timeout);
             if (r < 0) {
                 LJUSB_libusbError(r);
                 return 0;
@@ -726,7 +733,7 @@ static unsigned long LJUSB_DoTransfer(HANDLE hDevice, unsigned char endpoint, BY
             return r;
         }
         else {
-            r = libusb_interrupt_transfer(hDevice, endpoint, pBuff, count, &transferred, timeout);
+            r = libusb_interrupt_transfer(hDevice, endpoint, pBuff, (int)count, &transferred, timeout);
         }
     }
 
@@ -1037,7 +1044,7 @@ unsigned int LJUSB_GetDevCount(unsigned long ProductID)
     cnt = libusb_get_device_list(gLJContext, &devs);
     if (cnt < 0) {
         fprintf(stderr, "failed to get device list\n");
-        LJUSB_libusbError(cnt);
+        LJUSB_libusbError((int)cnt);
         LJUSB_libusb_exit();
         return 0;
     }
@@ -1084,7 +1091,7 @@ unsigned int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n)
     cnt = libusb_get_device_list(gLJContext, &devs);
     if (cnt < 0) {
         fprintf(stderr, "failed to get device list\n");
-        LJUSB_libusbError(cnt);
+        LJUSB_libusbError((int)cnt);
         LJUSB_libusb_exit();
         return 0;
     }
@@ -1254,6 +1261,13 @@ unsigned long LJUSB_GetHIDReportDescriptor(HANDLE hDevice, BYTE *pBuff, unsigned
     struct libusb_device_descriptor desc;
     int r = 0;
 
+    if (count > UINT16_MAX) {
+#if LJ_DEBUG
+        fprintf(stderr, "LJUSB_GetHIDReportDescriptor: returning 0. count is too large.\n");
+#endif
+        return 0;
+    }
+
     if (LJUSB_isNullHandle(hDevice)) {
 #if LJ_DEBUG
         fprintf(stderr, "LJUSB_GetHIDReportDescriptor: returning 0. hDevice is NULL.\n");
@@ -1276,7 +1290,7 @@ unsigned long LJUSB_GetHIDReportDescriptor(HANDLE hDevice, BYTE *pBuff, unsigned
         return 0;
     }
 
-    r = libusb_control_transfer(hDevice, 0x81, 0x06, 0x2200, 0x0000, pBuff, count, LJ_LIBUSB_TIMEOUT_DEFAULT);
+    r = libusb_control_transfer(hDevice, 0x81, 0x06, 0x2200, 0x0000, pBuff, (uint16_t)count, LJ_LIBUSB_TIMEOUT_DEFAULT);
     if (r < 0) {
         LJUSB_libusbError(r);
         return 0;
