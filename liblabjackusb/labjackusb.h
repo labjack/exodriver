@@ -114,7 +114,7 @@ typedef unsigned char BYTE;
 //U12 pipes to read/write through
 #define U12_PIPE_EP1_IN        0x81
 #define U12_PIPE_EP2_OUT       2
-#define U12_PIPE_EP0           0    //Control endpoint
+#define U12_PIPE_EP0           0     //Control endpoint
 
 //Wireless bridge pipes to read/write through
 #define BRIDGE_PIPE_EP1_OUT    1
@@ -137,8 +137,8 @@ typedef unsigned char BYTE;
 #define T7_PIPE_EP3_IN         0x83  //Stream Endpoint
 
 //Digit pipes to read/write through
-#define DIGIT_PIPE_EP1_OUT        1
-#define DIGIT_PIPE_EP2_IN         0x82
+#define DIGIT_PIPE_EP1_OUT     1
+#define DIGIT_PIPE_EP2_IN      0x82
 
 
 #ifdef __cplusplus
