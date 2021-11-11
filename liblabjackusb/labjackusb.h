@@ -114,7 +114,7 @@ typedef unsigned char BYTE;
 //U12 pipes to read/write through
 #define U12_PIPE_EP1_IN        0x81
 #define U12_PIPE_EP2_OUT       2
-#define U12_PIPE_EP0           0    //Control endpoint
+#define U12_PIPE_EP0           0     //Control endpoint
 
 //Wireless bridge pipes to read/write through
 #define BRIDGE_PIPE_EP1_OUT    1
@@ -137,8 +137,8 @@ typedef unsigned char BYTE;
 #define T7_PIPE_EP3_IN         0x83  //Stream Endpoint
 
 //Digit pipes to read/write through
-#define DIGIT_PIPE_EP1_OUT        1
-#define DIGIT_PIPE_EP2_IN         0x82
+#define DIGIT_PIPE_EP1_OUT     1
+#define DIGIT_PIPE_EP2_IN      0x82
 
 
 #ifdef __cplusplus
@@ -189,6 +189,17 @@ int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices);
 // where the return value is 2. 2341234 is the handle for a U3, and 55343 is the
 // handle for a SkyMote Bridge.
 
+int LJUSB_OpenAllDevicesOfProductId(UINT productId, HANDLE **devHandles);
+// Attempts to find and open all LabJack devices of the given productId.
+// Use the special value 0 to allow all LabJack productIds.
+// Returns the number of devices actually opened, or -1 if a tragically bad
+// error occurs. Returns by reference an array of HANDLEs for each successfully
+// opened device. You must call free() on this list when you are done with it.
+// Example usage:
+// HANDLE *handles = NULL;
+// int count = LJUSB_OpenAllDevicesOfProductId(U3_PRODUCT_ID, &handles);
+// free(handles);
+
 HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long ProductID);
 // Obtains a handle for a LabJack USB device.  Returns NULL if there is an
 // error.
@@ -197,8 +208,7 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
 //          example, if there is one device connected, set DevNum = 1.  If you
 //          have two devices connected, then set DevNum = 1, or DevNum = 2.
 // dwReserved = Not used, set to 0.
-// ProductID = The product ID of the LabJack USB device.  Currently the U3, U6,
-//             and UE9 are supported.
+// ProductID = The product ID of the LabJack USB device.
 
 bool LJUSB_ResetConnection(HANDLE hDevice);
 // Performs a USB port reset to reinitialize a device.

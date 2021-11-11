@@ -324,12 +324,12 @@ static bool LJUSB_U3_isMinFirmware(const struct LJUSB_FirmwareHardwareVersion * 
             return true;
         }
         else {
-            fprintf(stderr, "Minimum U3 firmware not met is not met for this kernel.  Please update from firmware %d.%02d to firmware %d.%d or upgrade to kernel %d.%d.%d.\n", fhv->firmwareMajor, fhv->firmwareMinor, MIN_U3C_FIRMWARE_MAJOR, MIN_U3C_FIRMWARE_MINOR, LJ_RECENT_KERNEL_MAJOR, LJ_RECENT_KERNEL_MINOR, LJ_RECENT_KERNEL_REV);
+            fprintf(stderr, "Minimum U3 firmware is not met for this kernel.  Please update from firmware %d.%02d to firmware %d.%d or upgrade to kernel %d.%d.%d.\n", fhv->firmwareMajor, fhv->firmwareMinor, MIN_U3C_FIRMWARE_MAJOR, MIN_U3C_FIRMWARE_MINOR, LJ_RECENT_KERNEL_MAJOR, LJ_RECENT_KERNEL_MINOR, LJ_RECENT_KERNEL_REV);
             return false;
         }
     }
     else {
-        fprintf(stderr, "Minimum U3 hardware version not met for this kernel.  This driver supports only hardware %d.%d and above.  Your hardware version is %d.%d.\n", U3C_HARDWARE_MAJOR, U3C_HARDWARE_MINOR, fhv->hardwareMajor, fhv->hardwareMinor);
+        fprintf(stderr, "Minimum U3 hardware version is not met for this kernel.  This driver supports only hardware %d.%d and above.  Your hardware version is %d.%d.\n", U3C_HARDWARE_MAJOR, U3C_HARDWARE_MINOR, fhv->hardwareMajor, fhv->hardwareMinor);
         fprintf(stderr, "This hardware version is supported under kernel %d.%d.%d.\n", LJ_RECENT_KERNEL_MAJOR, LJ_RECENT_KERNEL_MINOR, LJ_RECENT_KERNEL_REV);
         return false;
     }
@@ -344,7 +344,7 @@ static bool LJUSB_U6_isMinFirmware(const struct LJUSB_FirmwareHardwareVersion * 
         return true;
     }
     else {
-        fprintf(stderr, "Minimum U6 firmware not met is not met for this kernel.  Please update from firmware %d.%d to firmware %d.%d or upgrade to kernel %d.%d.%d.\n", fhv->firmwareMajor, fhv->firmwareMinor, MIN_U6_FIRMWARE_MAJOR, MIN_U6_FIRMWARE_MINOR, LJ_RECENT_KERNEL_MAJOR, LJ_RECENT_KERNEL_MINOR, LJ_RECENT_KERNEL_REV);
+        fprintf(stderr, "Minimum U6 firmware is not met for this kernel.  Please update from firmware %d.%d to firmware %d.%d or upgrade to kernel %d.%d.%d.\n", fhv->firmwareMajor, fhv->firmwareMinor, MIN_U6_FIRMWARE_MAJOR, MIN_U6_FIRMWARE_MINOR, LJ_RECENT_KERNEL_MAJOR, LJ_RECENT_KERNEL_MINOR, LJ_RECENT_KERNEL_REV);
         return false;
     }
 
@@ -365,7 +365,7 @@ static bool LJUSB_UE9_isMinFirmware(const struct LJUSB_FirmwareHardwareVersion *
         return true;
     }
     else {
-        fprintf(stderr, "Minimum UE9 firmware not met is not met for this kernel.  Please update from firmware %d.%d to firmware %d.%d or upgrade to kernel %d.%d.%d.\n", fhv->firmwareMajor, fhv->firmwareMinor, MIN_UE9_FIRMWARE_MAJOR, MIN_UE9_FIRMWARE_MINOR, LJ_RECENT_KERNEL_MAJOR, LJ_RECENT_KERNEL_MINOR, LJ_RECENT_KERNEL_REV);
+        fprintf(stderr, "Minimum UE9 firmware is not met for this kernel.  Please update from firmware %d.%d to firmware %d.%d or upgrade to kernel %d.%d.%d.\n", fhv->firmwareMajor, fhv->firmwareMinor, MIN_UE9_FIRMWARE_MAJOR, MIN_UE9_FIRMWARE_MINOR, LJ_RECENT_KERNEL_MAJOR, LJ_RECENT_KERNEL_MINOR, LJ_RECENT_KERNEL_REV);
         return false;
     }
 
@@ -375,6 +375,7 @@ static bool LJUSB_UE9_isMinFirmware(const struct LJUSB_FirmwareHardwareVersion *
 
 static bool LJUSB_isRecentKernel(void)
 {
+#if defined(__linux__)
     struct utsname u;
     char *tok = NULL;
     unsigned long kernelMajor = 0, kernelMinor = 0, kernelRev = 0;
@@ -384,19 +385,8 @@ static bool LJUSB_isRecentKernel(void)
         return false;
     }
 
-    // There are no known kernel-compatibility problems with Mac OS X.
 #if LJ_DEBUG
     fprintf(stderr, "LJUSB_recentKernel: sysname: %s.\n", u.sysname);
-#endif
-
-    if (strncmp("Darwin", u.sysname, strlen("Darwin")) == 0) {
-#if LJ_DEBUG
-        fprintf(stderr, "LJUSB_recentKernel: returning true on Darwin.\n");
-#endif
-        return true;
-    }
-
-#if LJ_DEBUG
     fprintf(stderr, "LJUSB_recentKernel: Kernel release: %s.\n", u.release);
 #endif
     tok = strtok(u.release, ".-");
@@ -421,6 +411,10 @@ static bool LJUSB_isRecentKernel(void)
     return (kernelMajor == LJ_RECENT_KERNEL_MAJOR && kernelMinor == LJ_RECENT_KERNEL_MINOR && kernelRev >= LJ_RECENT_KERNEL_REV) ||
            (kernelMajor == LJ_RECENT_KERNEL_MAJOR && kernelMinor > LJ_RECENT_KERNEL_MINOR) ||
            (kernelMajor > LJ_RECENT_KERNEL_MAJOR);
+#else
+    // There are no known kernel-compatibility problems with other OSes.
+    return true;
+#endif
 }
 
 
@@ -428,7 +422,7 @@ static bool LJUSB_isMinFirmware(HANDLE hDevice, unsigned long ProductID)
 {
     struct LJUSB_FirmwareHardwareVersion fhv = {0, 0, 0, 0};
 
-    // If we are running on a recent kernel, no firmware check is necessary.
+    // If we are running on a recent linux kernel (or other OS), no firmware check is necessary.
     if (LJUSB_isRecentKernel()) {
 #if LJ_DEBUG
         fprintf(stderr, "LJUSB_isMinFirmware: LJUSB_isRecentKernel: true\n");
@@ -566,6 +560,7 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
         r = libusb_get_device_descriptor(dev, &desc);
         if (r < 0) {
             fprintf(stderr, "failed to get device descriptor\n");
+            libusb_free_device_list(devs, 1);
             LJUSB_libusbError(r);
             LJUSB_libusb_exit();
             return NULL;
@@ -605,7 +600,6 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
 int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
 {
     libusb_device **devs = NULL, *dev = NULL;
-    struct libusb_device_handle *devh = NULL;
     struct libusb_device_descriptor desc;
     ssize_t cnt = 0;
     int r = 1;
@@ -631,6 +625,7 @@ int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
         r = libusb_get_device_descriptor(dev, &desc);
         if (r < 0) {
             fprintf(stderr, "failed to get device descriptor\n");
+            libusb_free_device_list(devs, 1);
             LJUSB_libusbError(r);
             LJUSB_libusb_exit();
             return -1;
@@ -649,12 +644,11 @@ int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
                     ljFoundCount++;
                 } else {
                     // Not high enough firmware, keep moving.
-                    libusb_close(devh);
-                    ljFoundCount--;
+                    libusb_close(handle);
                 }
             } else {
                 // Too many devices have been found.
-                libusb_close(devh);
+                libusb_close(handle);
                 break;
             }
         }
@@ -664,6 +658,64 @@ int LJUSB_OpenAllDevices(HANDLE* devHandles, UINT* productIds, UINT maxDevices)
     return ljFoundCount;
 }
 
+int LJUSB_OpenAllDevicesOfProductId(UINT productId, HANDLE **devHandles)
+{
+    // Always pre-clear result to NULL since there are early returns below.
+    *devHandles = NULL;
+
+    if (!LJUSB_libusb_initialize()) {
+        return -1;
+    }
+
+    libusb_device **devs = NULL;
+    ssize_t cnt = libusb_get_device_list(gLJContext, &devs);
+    if (cnt < 0) {
+        fprintf(stderr, "LJUSB_OpenAllDevicesOfProductId: failed to get device list\n");
+        LJUSB_libusbError((int)cnt);
+        LJUSB_libusb_exit();
+        return -1;
+    } else if (cnt == 0) {
+        // No devices founds, that's fine, we're done.
+        return 0;
+    }
+
+    *devHandles = calloc(cnt, sizeof(HANDLE));
+    if (*devHandles == NULL) {
+        fprintf(stderr, "LJUSB_OpenAllDevicesOfProductId: calloc failed\n");
+        libusb_free_device_list(devs, 1);
+        return -1;
+    }
+
+    ssize_t i = 0, successCount = 0;
+    libusb_device *dev = NULL;
+    while ((dev = devs[i++]) != NULL) {
+#if LJ_DEBUG
+        fprintf(stderr, "LJUSB_OpenAllDevicesOfProductId: calling libusb_get_device_descriptor\n");
+#endif
+        struct libusb_device_descriptor desc;
+        int r = libusb_get_device_descriptor(dev, &desc);
+        if (r < 0) {
+            fprintf(stderr, "LJUSB_OpenAllDevicesOfProductId: failed to get a device descriptor, so skipping it\n");
+        } else if (LJ_VENDOR_ID == desc.idVendor &&
+                   (productId == desc.idProduct || 0 == productId)) {
+            HANDLE handle = LJUSB_OpenSpecificDevice(dev, &desc);
+            if (handle == NULL) {
+                fprintf(stderr, "LJUSB_OpenAllDevicesOfProductId: failed to open a device, so skipping it\n");
+            } else {
+                if (LJUSB_isMinFirmware(handle, desc.idProduct)) {
+                    (*devHandles)[successCount] = handle;
+                    successCount++;
+                } else {
+                    // Not high enough firmware, keep moving.
+                    libusb_close(handle);
+                }
+            }
+        }
+    }
+    libusb_free_device_list(devs, 1);
+
+    return successCount;
+}
 
 bool LJUSB_ResetConnection(HANDLE hDevice)
 {
@@ -1058,6 +1110,7 @@ unsigned int LJUSB_GetDevCount(unsigned long ProductID)
         r = libusb_get_device_descriptor(dev, &desc);
         if (r < 0) {
             fprintf(stderr, "failed to get device descriptor\n");
+            libusb_free_device_list(devs, 1);
             LJUSB_libusbError(r);
             LJUSB_libusb_exit();
             return 0;
@@ -1097,12 +1150,13 @@ unsigned int LJUSB_GetDevCounts(UINT *productCounts, UINT * productIds, UINT n)
     }
 
     // Loop over all USB devices and count the ones with the LabJack
-    // vendor ID and the passed in product ID.
+    // vendor ID.
     while ((dev = devs[i++]) != NULL) {
         struct libusb_device_descriptor desc;
         r = libusb_get_device_descriptor(dev, &desc);
         if (r < 0) {
             fprintf(stderr, "failed to get device descriptor\n");
+            libusb_free_device_list(devs, 1);
             LJUSB_libusbError(r);
             LJUSB_libusb_exit();
             return 0;
