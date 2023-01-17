@@ -1,9 +1,9 @@
 Exodriver: Linux (kernel 2.6+) and Mac OS X low-level LabJack U12, U3, U6, UE9,
-Digit, T4, and T7 USB library 2.06 and C examples
-09/02/2020
+Digit, T4, and T7 USB library 2.07 and C examples
+01/17/2022
 support@labjack.com
 
-This package contains the liblabjackusb 2.06 USB library for low-level U3, U6,
+This package contains the liblabjackusb 2.07 USB library for low-level U3, U6,
 UE9, Digit, T4, and T7 USB communications and C examples for select LabJack
 devices.
 

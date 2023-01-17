@@ -67,13 +67,15 @@
 //         - Added revision number to library version number. The float version
 //           number 2.0503 is equivalent to 2.5.3 (major.minor.revision).
 //  2.0600 - Initial T4 and T5 support
+//  2.0700 - Added new function LJUSB_OpenAllDevicesOfProductId
+//         - Bug fixes, spelling corrections and code cleanup
 //-----------------------------------------------------------------------------
 //
 
 #ifndef LABJACKUSB_H_
 #define LABJACKUSB_H_
 
-#define LJUSB_LIBRARY_VERSION 2.0600f
+#define LJUSB_LIBRARY_VERSION 2.0700f
 
 #include <stdbool.h>
 

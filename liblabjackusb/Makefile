@@ -5,7 +5,7 @@
 
 UNAME = $(shell uname -s)
 
-VERSION = 2.6.0
+VERSION = 2.7.0
 PREFIX ?= /usr/local
 DESTINATION = $(DESTDIR)$(PREFIX)/lib
 HEADER = labjackusb.h
