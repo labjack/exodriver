@@ -21,6 +21,7 @@
 #include <sys/utsname.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <assert.h>
 
 #include <libusb-1.0/libusb.h>
 
@@ -48,6 +49,10 @@
 
 static bool gIsLibUSBInitialized = false;
 static struct libusb_context *gLJContext = NULL;
+static libusb_hotplug_callback_handle gHotPlugCallbackHandle = 0;
+static LJUSB_HotPlugConnectedCallback gHotPlugConnectedCallback = NULL;
+static LJUSB_HotPlugDisconnectedCallback gHotPlugDisconnectedCallback = NULL;
+static void *gHotPlugUserContext = NULL;
 
 enum LJUSB_TRANSFER_OPERATION { LJUSB_WRITE, LJUSB_READ, LJUSB_STREAM };
 
@@ -715,6 +720,151 @@ int LJUSB_OpenAllDevicesOfProductId(UINT productId, HANDLE **devHandles)
     libusb_free_device_list(devs, 1);
 
     return successCount;
+}
+
+static int LJUSB_HotPlugCallback(libusb_context *ctx,
+                                 libusb_device *dev,
+                                 libusb_hotplug_event event,
+                                 void *user_data)
+{
+    assert(ctx == gLJContext);
+    (void)ctx;
+    assert(dev);
+    (void)user_data;
+
+    // NB: this callback may, or may not, be called from a private libusb thread!
+
+    if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED) {
+        fprintf(stderr, "LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED occurred\n");
+
+        HANDLE handle = NULL;
+
+        struct libusb_device_descriptor desc;
+        int r = libusb_get_device_descriptor(dev, &desc);
+        if (r < 0) {
+            fprintf(stderr, "LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED failed to get device descriptor due to:\n");
+            LJUSB_libusbError(r);
+        }
+        else {
+	        handle = LJUSB_OpenSpecificDevice(dev, &desc);
+	        if (!handle) {
+                fprintf(stderr, "LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED failed to open device, errno: %i\n", errno);
+	        }
+	    }
+        gHotPlugConnectedCallback(dev, handle, gHotPlugUserContext);
+    }
+    else if (event == LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT) {
+        fprintf(stderr, "LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT occurred\n");
+
+        gHotPlugDisconnectedCallback(dev, gHotPlugUserContext);
+    }
+    else {
+        fprintf(stderr, "unknown hotplug event type received\n");
+    }
+
+    // Always return 0 to indicate we want additional events.
+    return 0;
+}
+
+bool LJUSB_RegisterHotPlug(unsigned long productID,
+                           LJUSB_HotPlugConnectedCallback connectedCallback,
+                           LJUSB_HotPlugDisconnectedCallback disconnectedCallback,
+                           void *context)
+{
+	assert(connectedCallback);
+	assert(disconnectedCallback);
+
+    int r = 1;
+
+    if (!LJUSB_libusb_initialize()) {
+        return false;
+    }
+
+    if (!libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG)) {
+        fprintf(stderr, "libusb hotplug not supported on this platform\n");
+        LJUSB_libusbError(LIBUSB_ERROR_NOT_SUPPORTED);
+        return false;
+    }
+
+    int actualProductID = (productID == 0) ? LIBUSB_HOTPLUG_MATCH_ANY : (int)productID;
+
+    // Store the callbacks now, since LIBUSB_HOTPLUG_ENUMERATE below could result in them being call before libusb_hotplug_register_callback() even returns.
+    gHotPlugConnectedCallback = connectedCallback;
+    gHotPlugDisconnectedCallback = disconnectedCallback;
+    gHotPlugUserContext = context;
+
+    r = libusb_hotplug_register_callback(gLJContext,
+                                         LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED | LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT,
+                                         LIBUSB_HOTPLUG_ENUMERATE,
+                                         LJ_VENDOR_ID,
+                                         actualProductID,
+                                         LIBUSB_HOTPLUG_MATCH_ANY,
+                                         &LJUSB_HotPlugCallback,
+                                         NULL,
+                                         &gHotPlugCallbackHandle);
+
+    if (r < 0) {
+        gHotPlugConnectedCallback = NULL;
+        gHotPlugDisconnectedCallback = NULL;
+        gHotPlugUserContext = NULL;
+        gHotPlugCallbackHandle = 0;
+
+        fprintf(stderr, "failed to register hot plug callback due to:\n");
+        LJUSB_libusbError(r);
+        return false;
+    }
+
+    return true;
+}
+
+
+void LJUSB_DeregisterHotPlug(void)
+{
+    assert(gIsLibUSBInitialized);
+
+    if (gLJContext && gHotPlugCallbackHandle) {
+        libusb_hotplug_deregister_callback(gLJContext, gHotPlugCallbackHandle);
+
+        gHotPlugConnectedCallback = NULL;
+        gHotPlugDisconnectedCallback = NULL;
+        gHotPlugUserContext = NULL;
+        gHotPlugCallbackHandle = 0;
+    }
+    else {
+        fprintf(stderr, "LJUSB_DeregisterHotPlug: nothing to do\n");
+    }
+}
+
+
+int LJUSB_HandleEventsTimeoutCompleted(struct timeval *tv, int *completed)
+{
+    if (!LJUSB_libusb_initialize()) {
+        return false;
+    }
+
+    return libusb_handle_events_timeout_completed(gLJContext, tv, completed);
+}
+
+DEVICE LJUSB_DeviceFromHandle(HANDLE hDevice)
+{
+    if (!hDevice) {
+        return NULL;
+    }
+    
+    libusb_device *device = libusb_get_device(hDevice);
+    return device;
+}
+
+void LJUSB_RefCountIncrement(DEVICE device)
+{
+    assert(device);
+    libusb_ref_device(device);
+}
+
+void LJUSB_RefCountDecrement(DEVICE device)
+{
+    assert(device);
+    libusb_unref_device(device);
 }
 
 bool LJUSB_ResetConnection(HANDLE hDevice)
