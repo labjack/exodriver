@@ -21,6 +21,9 @@ ifeq ($(UNAME),Darwin)
 	# Build for only the host architecture
 	#ARCHFLAGS =
 
+	# Build for 64 bit Intel and Arm architectures
+	#ARCHFLAGS = -arch x86_64 -arch arm64
+
 	# Build for 32- and 64-bit Intel architectures
 	#ARCHFLAGS = -arch i386 -arch x86_64
 
