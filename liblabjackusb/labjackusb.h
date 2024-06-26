@@ -78,8 +78,10 @@
 #define LJUSB_LIBRARY_VERSION 2.0700f
 
 #include <stdbool.h>
+#include <sys/time.h>
 
-typedef void * HANDLE;
+typedef void * HANDLE; // Really libusb_device_handle*.
+typedef void * DEVICE; // Really libusb_device*.
 typedef unsigned int UINT;
 typedef unsigned char BYTE;
 
@@ -212,6 +214,51 @@ HANDLE LJUSB_OpenDevice(UINT DevNum, unsigned int dwReserved, unsigned long Prod
 // dwReserved = Not used, set to 0.
 // ProductID = The product ID of the LabJack USB device.
 
+
+typedef void (*LJUSB_HotPlugConnectedCallback)(DEVICE hDevice, HANDLE hHandle, void *context);
+// The function signature for a hot plug connection callback.
+// The provided hDevice will never be NULL.
+// hHandle may be NULL if the internal call to LJUSB_OpenDevice() failed.
+
+typedef void (*LJUSB_HotPlugDisconnectedCallback)(DEVICE hDevice, void *context);
+// The function signature for a hot plug disconnection callback.
+// The provided hDevice will never be NULL.
+
+bool LJUSB_RegisterHotPlug(unsigned long productID,
+                           LJUSB_HotPlugConnectedCallback connectedCallback,
+                           LJUSB_HotPlugDisconnectedCallback disconnectedCallback,
+                           void *context);
+// Registers for notification of Labjack devices being connected or disconnected.
+// Returns true if successfully setup, or false if some error occurs.
+// If true is returned, must eventually be balanced with a call to LJUSB_DeregisterHotPlug().
+// Do not invoke this more than once without first calling LJUSB_DeregisterHotPlug().
+// If you want notifications for all Labjack models, pass the special value 0 as productID.
+// The callbacks will be called when a device is connected or disconnected.
+// Both callback functions must be provided, neither may be NULL.
+// Note: device enumeration is performed immediately, so be prepared for the callback to occur even before this function returns.
+// Also, the callback may be invoked from a private libsub thread (or not).
+// For connected devices, LJUSB_OpenDevice() is called for you.
+// For disconnected devices, you need to call LJUSB_CloseDevice() yourself.
+// The context pointer can be anything, including NULL; it is not used, it is merely passed back to your callbacks.
+
+void LJUSB_DeregisterHotPlug(void);
+// Deregisters for notification of Labjack devices being connected or disconnected.
+// Must eventually be called for every successful call to LJUSB_RegisterHotPlug().
+
+int LJUSB_HandleEventsTimeoutCompleted(struct timeval *tv, int *completed);
+// In order for the hot plug callbacks to ever be called, you must call this function, for example, in your application's event loop.
+
+DEVICE LJUSB_DeviceFromHandle(HANDLE hDevice);
+// Returns the DEVICE that owns the given HANDLE. Returns NULL if NULL is given.
+// This can be useful within your hot plug connection callbacks.
+
+void LJUSB_RefCountIncrement(DEVICE device);
+// Increments the reference count of the given device. Do not pass NULL.
+// If your hot plug bookkeeping holds onto DEVICES, you should increment the reference count to make sure the object does not get deallocated while you are still holding on to it.
+
+void LJUSB_RefCountDecrement(DEVICE device);
+// Decrements the reference count of the given device. Do not pass NULL.
+
 bool LJUSB_ResetConnection(HANDLE hDevice);
 // Performs a USB port reset to reinitialize a device.
 // Returns true on success, or false on error and errno is set.
@@ -286,7 +333,7 @@ void LJUSB_CloseDevice(HANDLE hDevice);
 // Closes the handle of a LabJack USB device.
 
 bool LJUSB_IsHandleValid(HANDLE hDevice);
-// Returns true if the handle is valid; this is, it is still connected to a
+// Returns true if the handle is valid; that is, it is still connected to a
 // device on the system.
 
 unsigned short LJUSB_GetDeviceDescriptorReleaseNumber(HANDLE hDevice);
