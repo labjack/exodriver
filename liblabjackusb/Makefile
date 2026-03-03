@@ -1,6 +1,8 @@
 #
 # Makefile for liblabjackusb
 #
+# SPDX-FileCopyrightText: Copyright (c) 2009 LabJack Corporation
+# SPDX-License-Identifier: X11
 #
 
 UNAME = $(shell uname -s)
