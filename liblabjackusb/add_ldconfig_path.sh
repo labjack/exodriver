@@ -3,6 +3,9 @@
 # add_ldconfig_path.sh
 #
 # Idempotently add a path to /etc/ld.so.conf
+#
+# SPDX-FileCopyrightText: Copyright (c) 2009 LabJack Corporation
+# SPDX-License-Identifier: X11
 
 set -e
 set -u

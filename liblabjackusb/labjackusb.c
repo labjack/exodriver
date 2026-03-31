@@ -7,6 +7,9 @@
 //
 //  support@labjack.com
 //
+//  SPDX-FileCopyrightText: Copyright (c) 2009 LabJack Corporation
+//  SPDX-License-Identifier: X11
+//
 //---------------------------------------------------------------------------
 //
 
